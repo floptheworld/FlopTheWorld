@@ -2,7 +2,7 @@
 
 ### Getting Started
 
-First Set is to fork the [FlopTheWorld][floptheworld] and add the upstream remote. You can place the forked repository anywhere on your system.
+First Set is to fork the FlopTheWorld Repository and add the upstream remote. You can place the forked repository anywhere on your system.
 
 ```bash
 $ git clone git@github.com:YOUR_GIT_USERNAME/FlopTheWorld.git
@@ -33,6 +33,27 @@ During development, you will need to run the development script to maintain a de
 $ nvm use
 $ npm run develop
 ```
+
+To run the Node JS Express Server:
+
+```bash
+$ nvm use
+$ npm start
+```
+
+To make sure your code has no errors in Syntax/Sematics, you can run TSLint:
+
+```bash
+$ nvm use
+$ npm run lint
+```
+
+> It is recommended that you use VSCode as your Text Editor and install the following packages: 
+
+- Prettier - Code Formatter
+- TSLint
+- ESLint
+- lit-html
 
 ## Creating pull requests
 

@@ -1,0 +1,10 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint-plugin-prettier",
+    "tslint:recommended",
+    "tslint-config-prettier",
+    "tslint-eslint-rules"
+  ],
+  "rules": { "prettier": true, "interface-name": false }
+}

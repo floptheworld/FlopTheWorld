@@ -7,7 +7,7 @@ First Set is to fork the FlopTheWorld Repository and add the upstream remote. Yo
 ```bash
 $ git clone git@github.com:YOUR_GIT_USERNAME/FlopTheWorld.git
 $ cd FlopTheWorld
-$ git remote add upstream https://github.com/zsarnett/FlopTheWorld.git
+$ git remote add upstream https://github.com/floptheworld/FlopTheWorld.git
 ```
 
 ### Installing Node.js

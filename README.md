@@ -5,7 +5,7 @@
 First Set is to fork the FlopTheWorld Repository and add the upstream remote. You can place the forked repository anywhere on your system.
 
 ```bash
-$ git clone git@github.com:YOUR_GIT_USERNAME/FlopTheWorld.git
+$ git clone https://github.com/YOUR_GIT_USERNAME/FlopTheWorld.git
 $ cd FlopTheWorld
 $ git remote add upstream https://github.com/floptheworld/FlopTheWorld.git
 ```
@@ -48,7 +48,7 @@ $ nvm use
 $ npm run lint
 ```
 
-> It is recommended that you use VSCode as your Text Editor and install the following packages: 
+> It is recommended that you use VSCode as your Text Editor and install the following packages:
 
 - Prettier - Code Formatter
 - TSLint

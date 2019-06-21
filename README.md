@@ -1,5 +1,7 @@
 # FlopTheWorld
 
+A poker site for homegames
+
 ### Getting Started
 
 First Set is to fork the FlopTheWorld Repository and add the upstream remote. You can place the forked repository anywhere on your system.

@@ -15,6 +15,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
+const connection_1 = require("../data/connection");
 const deck_1 = require("../data/deck");
 require("./card");
 let Table = class Table extends lit_element_1.LitElement {
@@ -40,6 +41,10 @@ let Table = class Table extends lit_element_1.LitElement {
     connectedCallback() {
         super.connectedCallback();
         this._getDeck();
+        const socket = connection_1.createConnection();
+        socket.on("message", (message) => {
+            console.log(message);
+        });
     }
     render() {
         return lit_element_1.html `
@@ -47,7 +52,6 @@ let Table = class Table extends lit_element_1.LitElement {
         ${this.players.map(player => {
             player.cards.push(this.deck.pop());
             player.cards.push(this.deck.pop());
-            console.log(this.deck);
             return player.cards.map(card => lit_element_1.html `
               <card-element .card=${card} .show=${true}></card-element>
             `);
@@ -57,9 +61,7 @@ let Table = class Table extends lit_element_1.LitElement {
     }
     _getDeck() {
         return __awaiter(this, void 0, void 0, function* () {
-            // tslint:disable-next-line:no-console
             this.deck = yield deck_1.fetchDeck();
-            console.log(this.deck);
         });
     }
 };
@@ -73,3 +75,4 @@ Table = __decorate([
     lit_element_1.customElement("table-element")
 ], Table);
 exports.Table = Table;
+//# sourceMappingURL=table.js.map

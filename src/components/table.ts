@@ -5,9 +5,9 @@ import {
   html,
   LitElement,
   property,
-  PropertyValues,
   TemplateResult
 } from "lit-element";
+import { createConnection } from "../data/connection";
 import { fetchDeck } from "../data/deck";
 import "./card";
 
@@ -40,6 +40,10 @@ export class Table extends LitElement {
   public connectedCallback(): void {
     super.connectedCallback();
     this._getDeck();
+    const socket = createConnection();
+    socket.on("message", (message: string) => {
+      console.log(message);
+    });
   }
 
   protected render(): TemplateResult {
@@ -48,7 +52,6 @@ export class Table extends LitElement {
         ${this.players.map(player => {
           player.cards.push(this.deck!.pop()!);
           player.cards.push(this.deck!.pop()!);
-          console.log(this.deck);
           return player.cards.map(
             card => html`
               <card-element .card=${card} .show=${true}></card-element>
@@ -60,8 +63,6 @@ export class Table extends LitElement {
   }
 
   private async _getDeck(): Promise<void> {
-    // tslint:disable-next-line:no-console
     this.deck = await fetchDeck();
-    console.log(this.deck);
   }
 }

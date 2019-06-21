@@ -7,3 +7,4 @@ router.get("/", (req, res) => {
     res.send(public_api_1.shuffleDeck(public_api_1.createDeck()));
 });
 exports.DeckController = router;
+//# sourceMappingURL=deck.controller.js.map

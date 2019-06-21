@@ -1,9 +1,8 @@
 import bodyParser from "body-parser";
 import express from "express";
 import { createServer } from "http";
-import path from "path";
 import { listen } from "socket.io";
-import { DeckController, IndexController } from "./controllers";
+import { DeckController } from "./controllers";
 
 const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 3000;
@@ -14,7 +13,7 @@ const io = listen(server);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(express.static("static"));
+app.use(express.static("./build"));
 app.use("/deck", DeckController);
 app.use(express.static(__dirname, { extensions: ["html"] }));
 

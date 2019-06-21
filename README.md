@@ -1,4 +1,4 @@
-# FlopTheWorld: Dev Test
+# FlopTheWorld
 
 A poker site for homegames
 

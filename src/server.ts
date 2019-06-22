@@ -33,7 +33,7 @@ server.listen(port, () => {
 
 io.on("connection", socket => {
   // tslint:disable-next-line:no-console
-  console.log("Client connected..", socket);
+  console.log("Client connected..");
 
   socket.on("subscribeToGame", interval => {
     // tslint:disable-next-line:no-console

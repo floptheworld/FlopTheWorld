@@ -1,3 +1,5 @@
+import { Game } from "./types";
+
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
   "A",
@@ -39,4 +41,26 @@ export function shuffleDeck(deck: string[]): string[] {
   }
 
   return shuffledDeck;
+}
+
+export function redeal(game: Game) {
+  const players = game.players;
+  players.map(player => {
+    while (player.cards.length > 0) {
+      player.cards.pop();
+    }
+  });
+
+  game.deck = shuffleDeck(createDeck());
+
+  dealCards(game);
+}
+
+export function dealCards(game: Game) {
+  const players = game.players;
+
+  players.map(player => {
+    player.cards.push(game.deck!.pop()!);
+    player.cards.push(game.deck!.pop()!);
+  });
 }

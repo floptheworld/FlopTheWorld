@@ -7,24 +7,51 @@ import {
   property,
   TemplateResult
 } from "lit-element";
+import { Game } from "../common/types";
 import { createConnection } from "../data/connection";
-import { fetchDeck } from "../data/deck";
 import "./card";
-
-interface Player {
-  name: string;
-  cards: string[];
-}
 
 @customElement("table-element")
 export class Table extends LitElement {
-  @property() public deck?: string[];
-  @property() private players: Player[] = [
-    { name: "zack", cards: [] },
-    { name: "zack", cards: [] },
-    { name: "zack", cards: [] },
-    { name: "zack", cards: [] }
-  ];
+  @property() public game?: Game;
+  @property() private socket?: SocketIOClient.Socket;
+
+  public constructor() {
+    super();
+    this._initialize();
+  }
+
+  protected render(): TemplateResult {
+    console.log(this.game);
+
+    return html`
+      ${!this.game
+        ? ""
+        : html`
+            <p class="App-intro">
+              This is the timer value: ${this.game.time}
+            </p>
+            <div id="Table">
+              ${this.game.players.map(
+                player =>
+                  html`
+                    <div class="cards">
+                      ${player.cards.map(
+                        card => html`
+                          <card-element
+                            .card=${card}
+                            .show=${true}
+                          ></card-element>
+                        `
+                      )}
+                    </div>
+                  `
+              )}
+            </div>
+            <button type="button" @click=${this._reDeal}>Click Me!</button>
+          `}
+    `;
+  }
 
   static get styles(): CSSResult {
     return css`
@@ -37,32 +64,11 @@ export class Table extends LitElement {
     `;
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._getDeck();
-    const socket = createConnection();
-    socket.on("message", (message: string) => {
-      console.log(message);
-    });
+  private async _initialize() {
+    this.socket = await createConnection((game: Game) => (this.game = game));
   }
 
-  protected render(): TemplateResult {
-    return html`
-      <div id="Table">
-        ${this.players.map(player => {
-          player.cards.push(this.deck!.pop()!);
-          player.cards.push(this.deck!.pop()!);
-          return player.cards.map(
-            card => html`
-              <card-element .card=${card} .show=${true}></card-element>
-            `
-          );
-        })}
-      </div>
-    `;
-  }
-
-  private async _getDeck(): Promise<void> {
-    this.deck = await fetchDeck();
+  private _reDeal(): void {
+    this.socket!.emit("redeal", this.game);
   }
 }

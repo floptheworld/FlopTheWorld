@@ -16,17 +16,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
 const connection_1 = require("../data/connection");
-const deck_1 = require("../data/deck");
 require("./card");
 let Table = class Table extends lit_element_1.LitElement {
     constructor() {
-        super(...arguments);
-        this.players = [
-            { name: "zack", cards: [] },
-            { name: "zack", cards: [] },
-            { name: "zack", cards: [] },
-            { name: "zack", cards: [] }
-        ];
+        super();
+        this._initialize();
+    }
+    render() {
+        console.log(this.game);
+        return lit_element_1.html `
+      ${!this.game
+            ? ""
+            : lit_element_1.html `
+            <p class="App-intro">
+              This is the timer value: ${this.game.time}
+            </p>
+            <div id="Table">
+              ${this.game.players.map(player => lit_element_1.html `
+                    <div class="cards">
+                      ${player.cards.map(card => lit_element_1.html `
+                          <card-element
+                            .card=${card}
+                            .show=${true}
+                          ></card-element>
+                        `)}
+                    </div>
+                  `)}
+            </div>
+            <button type="button" @click=${this._reDeal}>Click Me!</button>
+          `}
+    `;
     }
     static get styles() {
         return lit_element_1.css `
@@ -38,39 +57,21 @@ let Table = class Table extends lit_element_1.LitElement {
       }
     `;
     }
-    connectedCallback() {
-        super.connectedCallback();
-        this._getDeck();
-        const socket = connection_1.createConnection();
-        socket.on("message", (message) => {
-            console.log(message);
-        });
-    }
-    render() {
-        return lit_element_1.html `
-      <div id="Table">
-        ${this.players.map(player => {
-            player.cards.push(this.deck.pop());
-            player.cards.push(this.deck.pop());
-            return player.cards.map(card => lit_element_1.html `
-              <card-element .card=${card} .show=${true}></card-element>
-            `);
-        })}
-      </div>
-    `;
-    }
-    _getDeck() {
+    _initialize() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.deck = yield deck_1.fetchDeck();
+            this.socket = yield connection_1.createConnection((game) => (this.game = game));
         });
+    }
+    _reDeal() {
+        this.socket.emit("redeal", this.game);
     }
 };
 __decorate([
     lit_element_1.property()
-], Table.prototype, "deck", void 0);
+], Table.prototype, "game", void 0);
 __decorate([
     lit_element_1.property()
-], Table.prototype, "players", void 0);
+], Table.prototype, "socket", void 0);
 Table = __decorate([
     lit_element_1.customElement("table-element")
 ], Table);

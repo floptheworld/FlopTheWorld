@@ -81,13 +81,15 @@ export function createGame(): Game {
     deck: [],
     gameID: "asdf1234",
     // gameID: uuid(),
-    players: []
+    players: [],
+    board: []
   };
 }
 
 export function getGameState(currentGame: Game): GameState {
   return {
     ...{
+      board: currentGame.board,
       gameID: currentGame.gameID,
       players: currentGame.players
     }

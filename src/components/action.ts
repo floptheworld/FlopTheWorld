@@ -8,6 +8,10 @@ import {
   TemplateResult
 } from "lit-element";
 
+interface BetTarget extends EventTarget {
+  multiplier: number;
+}
+
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public pot: number = 1;
@@ -29,28 +33,28 @@ export class Action extends LitElement {
         <div class="bet-actions">
           <button
             .multiplier=${0.25}
-            @click=${this.setBet}
+            @click=${this._setBet}
             class="button-small button-gray"
           >
             1/4
           </button>
           <button
             .multiplier=${0.5}
-            @click=${this.setBet}
+            @click=${this._setBet}
             class="button-small button-gray"
           >
             1/2
           </button>
           <button
             .multiplier=${0.75}
-            @click=${this.setBet}
+            @click=${this._setBet}
             class="button-small button-gray"
           >
             3/4
           </button>
           <button
             .multiplier=${1}
-            @click=${this.setBet}
+            @click=${this._setBet}
             class="button-small button-gray"
           >
             Full
@@ -116,13 +120,14 @@ export class Action extends LitElement {
     `;
   }
 
-  private setBet(e): void {
-    this.bet = this.round_to_precision(
-      e.target.multiplier * this.pot,
+  private _setBet(e: MouseEvent): void {
+    this.bet = this._roundToPrecision(
+      (e.target! as BetTarget).multiplier * this.pot,
       0.01
     ).toString();
   }
-  private round_to_precision(x, precision) {
+
+  private _roundToPrecision(x: number, precision: number) {
     const y = +x + (precision === undefined ? 0.5 : precision / 2);
     return y - (y % (precision === undefined ? 1 : +precision));
   }

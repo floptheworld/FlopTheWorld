@@ -6,7 +6,10 @@ import {
   getGame,
   getGameState,
   nextRound,
-  startGame
+  startGame,
+  playerAction,
+  nextPlayerTurn,
+  isPlayerAction
 } from "./common/public-api";
 import { Game } from "./common/types";
 
@@ -47,10 +50,14 @@ export function createSocket(server: Server) {
       updateGameState(io, currentGame);
     });
 
-    socket.on("tet", (gameID: string) => {
+    socket.on("playerAction", (gameID: string) => {
       const currentGame = getGame(games, gameID);
+      if (!isPlayerAction(currentGame, socket.id)) {
+        return;
+      }
 
-      nextRound(currentGame);
+      playerAction(currentGame, socket.id);
+      nextPlayerTurn(currentGame);
       updateGameState(io, currentGame);
     });
   });

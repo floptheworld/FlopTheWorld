@@ -3,6 +3,10 @@ export interface Player {
   cards: string[];
   playerID: string;
   stackAmount: number;
+  isTurn: boolean;
+  blind: string;
+  status: string;
+  bet: string;
 }
 
 export interface GameState {

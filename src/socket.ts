@@ -47,7 +47,7 @@ export function createSocket(server: Server) {
       updateGameState(io, currentGame);
     });
 
-    socket.on("placeBet", (gameID: string) => {
+    socket.on("tet", (gameID: string) => {
       const currentGame = getGame(games, gameID);
 
       nextRound(currentGame);

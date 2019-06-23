@@ -121,6 +121,7 @@ export function startGame(game: Game): void {
 
 export function nextRound(game: Game) {
   game.round++;
+  updatePot(game);
   switch (game.round) {
     case 1:
       game.deck!.pop();
@@ -187,4 +188,10 @@ export function nextPlayerTurn(game: Game): void {
     return;
   }
   game.players[playerIndex + 1].isTurn = true;
+}
+
+export function updatePot(game: Game): void {
+  game.players
+    .filter(player => player.bet !== "")
+    .map(player => (game.pot += parseFloat(player.bet)));
 }

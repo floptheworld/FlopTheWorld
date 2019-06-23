@@ -129,6 +129,6 @@ export class Table extends LitElement {
   }
 
   private _playerAction(): void {
-    this.socket!.emit("playerAction", this.game!.gameID);
+    this.socket!.emit("playerAction", this.game!.gameID, "call", "20");
   }
 }

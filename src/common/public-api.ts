@@ -52,6 +52,8 @@ export function clearTable(game: Game): void {
   });
 
   game.deck = [];
+
+  game.round = 0;
 }
 
 export function dealCards(game: Game): void {
@@ -69,7 +71,11 @@ export function addPlayer(game: Game, id: string): void {
     cards: [],
     name: "New Player",
     playerID: id,
-    stackAmount: 5.0
+    stackAmount: 5.0,
+    isTurn: false,
+    blind: "",
+    status: "",
+    bet: ""
   };
 
   game.players.push(newPlayer);
@@ -107,6 +113,8 @@ export function startGame(game: Game): void {
   clearTable(game);
   game.deck = shuffleDeck(createDeck());
   dealCards(game);
+  game.players[0].isTurn = true;
+  game.players[0].blind = "dealer";
 }
 
 export function nextRound(game: Game) {
@@ -128,5 +136,31 @@ export function nextRound(game: Game) {
       game.deck!.pop();
       game.board.push(game.deck!.pop()!);
       break;
+    default:
+      startGame(game);
   }
+}
+
+export function isPlayerAction(game: Game, id: string): boolean {
+  return !!game.players.filter(
+    player => player.playerID === id && player.isTurn === true
+  ).length;
+}
+
+export function playerAction(game: Game, id: string): void {
+  game.players
+    .filter(player => player.playerID === id)
+    .map(player => (player.status = "check"));
+}
+
+export function nextPlayerTurn(game: Game): void {
+  const playerIndex = game.players.findIndex(player => player.isTurn === true);
+  game.players[playerIndex].isTurn = false;
+
+  if (!game.players[playerIndex + 1]) {
+    game.players[0].isTurn = true; // TODO: Dealer + 1
+    nextRound(game);
+    return;
+  }
+  game.players[playerIndex + 1].isTurn = true;
 }

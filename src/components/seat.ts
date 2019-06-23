@@ -7,16 +7,32 @@ import {
   property,
   TemplateResult
 } from "lit-element";
+import { styleMap } from "lit-html/directives/style-map.js";
 import { Player } from "../common/types";
 import "./card";
+
+const seatArray = [
+  { top: "-40px", right: "-40px" },
+  { top: "-40px", right: "-40px" },
+  { bottom: "-40px", right: "-40px" },
+  { bottom: "-40px", right: "-40px" },
+  { bottom: "-40px", left: "-40px" },
+  { bottom: "-40px", left: "-40px" },
+  { top: "-40px", left: "-40px" },
+  { top: "-40px", left: "-40px" }
+];
 
 @customElement("seat-element")
 export class Seat extends LitElement {
   @property() public player!: Player;
+  @property() public seatnumber!: number;
 
   protected render(): TemplateResult {
     return html`
       <div class="seat">
+        <div style="${styleMap(seatArray[this.seatnumber])}" class="player-bet">
+          <p>$1.00</p>
+        </div>
         <div class="card-box">
           ${this.player.cards.map(
             card => html`
@@ -24,9 +40,14 @@ export class Seat extends LitElement {
             `
           )}
         </div>
-        <div class="player-box">
+        <div
+          ?data-dealer=${false}
+          ?data-player-turn=${false}
+          class="player-box"
+        >
+          <span class="dealer-button">D</span>
           <p class="player-name">${this.player.name}</p>
-          <p class="player-currency">$${this.player.stackAmount}</p>
+          <p class="player-stack">$${this.player.stackAmount}</p>
         </div>
       </div>
     `;
@@ -45,6 +66,37 @@ export class Seat extends LitElement {
         width: 150px;
         z-index: 3;
       }
+      .player-box[data-dealer] .dealer-button {
+        display: block !important;
+      }
+      .player-bet {
+        position: absolute;
+        background-color: #333;
+        border: 2px solid #000;
+        color: #fcbd07;
+        text-align: center;
+        font-weight: bold;
+      }
+      .player-bet p {
+        margin: 0px;
+        padding: 5px;
+      }
+      .dealer-button {
+        position: absolute;
+        background-color: #ded50c;
+        border-radius: 100%;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        top: -12.5px;
+        left: -12.5px;
+        border: 1px solid #777200;
+        font-size: 18px;
+        display: none;
+      }
+      .player-box[data-player-turn] {
+        background-color: #152642;
+      }
       .card-box {
         text-align: center;
         height: 94px;
@@ -57,8 +109,9 @@ export class Seat extends LitElement {
       }
       .seat {
         width: 150px;
+        position: relative;
       }
-      .player-currency {
+      .player-stack {
         text-align: center;
         font-weight: bold;
         padding: 0px 0px 5px 0px;

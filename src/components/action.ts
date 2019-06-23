@@ -7,6 +7,7 @@ import {
   property,
   TemplateResult
 } from "lit-element";
+import { GameState } from "../common/types";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -14,7 +15,7 @@ interface BetTarget extends EventTarget {
 
 @customElement("action-element")
 export class Action extends LitElement {
-  @property() public pot: number = 1;
+  @property() public game!: GameState;
   @property() private bet: string = "0";
 
   protected render(): TemplateResult {
@@ -122,7 +123,7 @@ export class Action extends LitElement {
 
   private _setBet(e: MouseEvent): void {
     this.bet = this._roundToPrecision(
-      (e.target! as BetTarget).multiplier * this.pot,
+      (e.target! as BetTarget).multiplier * this.game.pot,
       0.01
     ).toString();
   }

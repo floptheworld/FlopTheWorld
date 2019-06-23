@@ -34,9 +34,12 @@ export class Table extends LitElement {
         : html`
             <div id="Table">
               ${this.game.players.map(
-                player =>
+                (player, index) =>
                   html`
-                    <seat-element .player=${player}></seat-element>
+                    <seat-element
+                      .seatnumber=${index}
+                      .player=${player}
+                    ></seat-element>
                   `
               )}
               <div id="Board">

@@ -9,7 +9,9 @@ import {
 } from "lit-element";
 import { Game } from "../common/types";
 import { createConnection } from "../data/connection";
+import "./action";
 import "./card";
+import "./seat";
 
 @customElement("table-element")
 export class Table extends LitElement {
@@ -22,6 +24,7 @@ export class Table extends LitElement {
   }
 
   protected render(): TemplateResult {
+    // tslint:disable-next-line: no-console
     console.log(this.game);
 
     return html`
@@ -35,19 +38,11 @@ export class Table extends LitElement {
               ${this.game.players.map(
                 player =>
                   html`
-                    <div class="cards">
-                      ${player.cards.map(
-                        card => html`
-                          <card-element
-                            .card=${card}
-                            .show=${true}
-                          ></card-element>
-                        `
-                      )}
-                    </div>
+                    <seat-element .player=${player}></seat-element>
                   `
               )}
             </div>
+            <action-element></action-element>
             <button type="button" @click=${this._reDeal}>Click Me!</button>
           `}
     `;
@@ -56,10 +51,57 @@ export class Table extends LitElement {
   static get styles(): CSSResult {
     return css`
       #Table {
-        background-image: url("../static/images/table.jpg");
         width: 1000px;
         height: 500px;
         margin: auto;
+        background-color: #8a0000;
+        border-radius: 50%;
+        border: 5px solid #000;
+        position: relative;
+      }
+      .App-intro {
+        color: #fff;
+        font-weight: bold;
+      }
+      #Table seat-element:nth-child(1) {
+        position: absolute;
+        bottom: 0px;
+        left: 200px;
+      }
+      #Table seat-element:nth-child(2) {
+        position: absolute;
+        bottom: 100px;
+        left: 0px;
+      }
+      #Table seat-element:nth-child(3) {
+        position: absolute;
+        top: 100px;
+        left: 0px;
+      }
+      #Table seat-element:nth-child(4) {
+        position: absolute;
+        top: 0px;
+        left: 200px;
+      }
+      #Table seat-element:nth-child(5) {
+        position: absolute;
+        top: 0px;
+        right: 200px;
+      }
+      #Table seat-element:nth-child(6) {
+        position: absolute;
+        top: 100px;
+        right: 0px;
+      }
+      #Table seat-element:nth-child(7) {
+        position: absolute;
+        bottom: 100px;
+        right: 0px;
+      }
+      #Table seat-element:nth-child(8) {
+        position: absolute;
+        bottom: 0px;
+        right: 200px;
       }
     `;
   }

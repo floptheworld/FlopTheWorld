@@ -78,11 +78,11 @@ export function addPlayer(game: Game, id: string): void {
 
 export function createGame(): Game {
   return {
+    board: [],
     deck: [],
     gameID: "asdf1234",
     // gameID: uuid(),
-    players: [],
-    board: []
+    players: []
   };
 }
 

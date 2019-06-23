@@ -7,4 +7,4 @@ router.get("/", (req: Request, res: Response) => {
   res.send(shuffleDeck(createDeck()));
 });
 
-export const DeckController: Router = router;
+export const deckController: Router = router;

@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import express from "express";
 import { createServer } from "http";
-import { DeckController } from "./controllers";
+import { deckController } from "./controllers";
 import { createSocket } from "./socket";
 
 const app: express.Application = express();
@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static("./build"));
-app.use("/deck", DeckController);
+app.use("/deck", deckController);
 app.use(express.static(__dirname, { extensions: ["html"] }));
 
 server.listen(port, () => {

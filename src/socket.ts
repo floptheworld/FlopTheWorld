@@ -9,7 +9,7 @@ import {
   startGame,
   playerAction,
   nextPlayerTurn,
-  isPlayerAction
+  isPlayerAction,
 } from "./common/public-api";
 import { Game, Player } from "./common/types";
 
@@ -18,7 +18,7 @@ games.push(createGame());
 
 export function createSocket(server: Server) {
   const io = listen(server);
-  io.on("connection", socket => {
+  io.on("connection", (socket) => {
     // tslint:disable-next-line:no-console
     console.log("Client connected..");
 
@@ -29,7 +29,9 @@ export function createSocket(server: Server) {
 
       const currentGame = getGame(games, gameID);
 
-      if (!currentGame.players.find(player => player.playerID === socket.id)) {
+      if (
+        !currentGame.players.find((player) => player.playerID === socket.id)
+      ) {
         addPlayer(currentGame, socket.id);
       }
 

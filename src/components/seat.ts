@@ -5,7 +5,7 @@ import {
   html,
   LitElement,
   property,
-  TemplateResult
+  TemplateResult,
 } from "lit-element";
 import { styleMap, StyleInfo } from "lit-html/directives/style-map.js";
 import { Player } from "../common/types";
@@ -19,7 +19,7 @@ const seatBetStyles: StyleInfo[] = [
   { bottom: "-40px", left: "-40px" },
   { bottom: "-40px", left: "-40px" },
   { top: "-40px", left: "-40px" },
-  { top: "-40px", left: "-40px" }
+  { top: "-40px", left: "-40px" },
 ];
 
 @customElement("seat-element")
@@ -38,7 +38,7 @@ export class Seat extends LitElement {
         </div>
         <div class="card-box">
           ${this.player.cards.map(
-            card => html`
+            (card) => html`
               <card-element .card=${card} .show=${true}></card-element>
             `
           )}

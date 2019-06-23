@@ -8,6 +8,6 @@ router.get("/", (req: Request, res: Response) => {
   // res.send("Hello World");
 });
 
-export const IndexController: Router = router;
+export const indexController: Router = router;
 
 export * from "./deck.controller";

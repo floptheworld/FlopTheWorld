@@ -3,7 +3,7 @@ import {
   html,
   LitElement,
   property,
-  TemplateResult
+  TemplateResult,
 } from "lit-element";
 
 @customElement("card-element")

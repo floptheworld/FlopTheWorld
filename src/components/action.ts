@@ -5,7 +5,7 @@ import {
   html,
   LitElement,
   property,
-  TemplateResult
+  TemplateResult,
 } from "lit-element";
 import { GameState } from "../common/types";
 

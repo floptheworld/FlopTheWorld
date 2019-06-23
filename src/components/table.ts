@@ -7,13 +7,13 @@ import {
   property,
   TemplateResult
 } from "lit-element";
-import { Game } from "../common/types";
+import { GameState } from "../common/types";
 import { createConnection } from "../data/connection";
 import "./card";
 
 @customElement("table-element")
 export class Table extends LitElement {
-  @property() public game?: Game;
+  @property() public game?: GameState;
   @property() private socket?: SocketIOClient.Socket;
 
   public constructor() {
@@ -28,9 +28,6 @@ export class Table extends LitElement {
       ${!this.game
         ? ""
         : html`
-            <p class="App-intro">
-              This is the timer value: ${this.game.time}
-            </p>
             <div id="Table">
               ${this.game.players.map(
                 player =>
@@ -48,7 +45,7 @@ export class Table extends LitElement {
                   `
               )}
             </div>
-            <button type="button" @click=${this._reDeal}>Click Me!</button>
+            <button type="button" @click=${this._startGame}>Start Game!</button>
           `}
     `;
   }
@@ -64,11 +61,13 @@ export class Table extends LitElement {
     `;
   }
 
-  private async _initialize() {
-    this.socket = await createConnection((game: Game) => (this.game = game));
+  private async _initialize(): Promise<void> {
+    this.socket = await createConnection(
+      (game: GameState) => (this.game = game)
+    );
   }
 
-  private _reDeal(): void {
-    this.socket!.emit("redeal", this.game);
+  private _startGame(): void {
+    this.socket!.emit("startGame", this.game!.gameID);
   }
 }

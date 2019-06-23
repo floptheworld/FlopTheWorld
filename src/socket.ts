@@ -70,26 +70,19 @@ export function createSocket(server: Server) {
       updateGameState(io, currentGame);
     });
 
-    socket.on(
-      "playerAction",
-      (gameID: string, userID: string, action: string, data: string) => {
-        const currentGame = getGame(games, gameID);
-        const player: Player = isPlayerAction(currentGame, userID);
-        if (!player) {
-          return;
-        }
+    socket.on("placeBet", (gameID: string) => {
+      const currentGame = getGame(games, gameID);
 
-        playerAction(currentGame, player, action, data);
-        nextPlayerTurn(currentGame);
-        updateGameState(io, currentGame);
-        if (currentGame.winDesc !== "") {
-          setTimeout(() => {
-            startGame(currentGame);
-            updateGameState(io, currentGame);
-          }, 5000);
-        }
+      playerAction(currentGame, player, action, data);
+      nextPlayerTurn(currentGame);
+      updateGameState(io, currentGame);
+      if (currentGame.winDesc !== "") {
+        setTimeout(() => {
+          startGame(currentGame);
+          updateGameState(io, currentGame);
+        }, 5000);
       }
-    );
+    });
   });
 }
 

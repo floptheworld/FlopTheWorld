@@ -9,6 +9,8 @@ export interface GameState {
   gameID: string;
   players: Player[];
   board: string[];
+  round: number;
+  pot: number;
 }
 
 export interface Game extends GameState {

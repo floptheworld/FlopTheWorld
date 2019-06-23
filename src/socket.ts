@@ -5,9 +5,10 @@ import {
   createGame,
   getGame,
   getGameState,
+  nextRound,
   startGame
 } from "./common/public-api";
-import { Game, GameState } from "./common/types";
+import { Game } from "./common/types";
 
 const games: Game[] = [];
 games.push(createGame());
@@ -36,7 +37,20 @@ export function createSocket(server: Server) {
       const currentGame = getGame(games, gameID);
 
       startGame(currentGame);
+      updateGameState(io, currentGame);
+    });
 
+    socket.on("nextRound", (gameID: string) => {
+      const currentGame = getGame(games, gameID);
+
+      nextRound(currentGame);
+      updateGameState(io, currentGame);
+    });
+
+    socket.on("placeBet", (gameID: string) => {
+      const currentGame = getGame(games, gameID);
+
+      nextRound(currentGame);
       updateGameState(io, currentGame);
     });
   });

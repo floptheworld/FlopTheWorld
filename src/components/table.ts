@@ -38,9 +38,16 @@ export class Table extends LitElement {
                     <seat-element .player=${player}></seat-element>
                   `
               )}
+              ${this.game.board.map(
+                card =>
+                  html`
+                    <card-element .card=${card} .show=${true}></card-element>
+                  `
+              )}
             </div>
             <action-element></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
+            <button type="button" @click=${this._nextRound}>Next Round!</button>
           `}
     `;
   }
@@ -111,5 +118,9 @@ export class Table extends LitElement {
 
   private _startGame(): void {
     this.socket!.emit("startGame", this.game!.gameID);
+  }
+
+  private _nextRound(): void {
+    this.socket!.emit("nextRound", this.game!.gameID);
   }
 }

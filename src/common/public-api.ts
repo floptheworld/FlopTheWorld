@@ -44,15 +44,14 @@ export function shuffleDeck(deck: string[]): string[] {
   return shuffledDeck;
 }
 
-export function clearPlayerCards(game: Game): void {
-  const players = game.players;
-  players.map(player => {
-    while (player.cards.length > 0) {
-      player.cards.pop();
-    }
+export function clearTable(game: Game): void {
+  game.board = [];
+
+  game.players.map(player => {
+    player.cards = [];
   });
 
-  game.deck = shuffleDeck(createDeck());
+  game.deck = [];
 }
 
 export function dealCards(game: Game): void {
@@ -70,7 +69,7 @@ export function addPlayer(game: Game, id: string): void {
     cards: [],
     name: "New Player",
     playerID: id,
-    stackAmount: 500
+    stackAmount: 5.0
   };
 
   game.players.push(newPlayer);
@@ -82,7 +81,9 @@ export function createGame(): Game {
     deck: [],
     gameID: "asdf1234",
     // gameID: uuid(),
-    players: []
+    players: [],
+    pot: 0,
+    round: 0
   };
 }
 
@@ -91,7 +92,9 @@ export function getGameState(currentGame: Game): GameState {
     ...{
       board: currentGame.board,
       gameID: currentGame.gameID,
-      players: currentGame.players
+      players: currentGame.players,
+      pot: currentGame.pot,
+      round: currentGame.round
     }
   };
 }
@@ -101,7 +104,29 @@ export function getGame(games: Game[], gameID: string): Game {
 }
 
 export function startGame(game: Game): void {
+  clearTable(game);
   game.deck = shuffleDeck(createDeck());
-  clearPlayerCards(game);
   dealCards(game);
+}
+
+export function nextRound(game: Game) {
+  game.round++;
+  switch (game.round) {
+    case 1:
+      game.deck!.pop();
+      game.board.push(game.deck!.pop()!);
+      game.deck!.pop();
+      game.board.push(game.deck!.pop()!);
+      game.deck!.pop();
+      game.board.push(game.deck!.pop()!);
+      break;
+    case 2:
+      game.deck!.pop();
+      game.board.push(game.deck!.pop()!);
+      break;
+    case 3:
+      game.deck!.pop();
+      game.board.push(game.deck!.pop()!);
+      break;
+  }
 }

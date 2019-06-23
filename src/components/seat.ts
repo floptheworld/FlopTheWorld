@@ -7,11 +7,11 @@ import {
   property,
   TemplateResult
 } from "lit-element";
-import { styleMap } from "lit-html/directives/style-map.js";
+import { styleMap, StyleInfo } from "lit-html/directives/style-map.js";
 import { Player } from "../common/types";
 import "./card";
 
-const seatArray = [
+const seatBetStyles: StyleInfo[] = [
   { top: "-40px", right: "-40px" },
   { top: "-40px", right: "-40px" },
   { bottom: "-40px", right: "-40px" },
@@ -25,12 +25,15 @@ const seatArray = [
 @customElement("seat-element")
 export class Seat extends LitElement {
   @property() public player!: Player;
-  @property() public seatnumber!: number;
+  @property() public seatNumber!: number;
 
   protected render(): TemplateResult {
     return html`
       <div class="seat">
-        <div style="${styleMap(seatArray[this.seatnumber])}" class="player-bet">
+        <div
+          style=${styleMap(seatBetStyles[this.seatNumber])}
+          class="player-bet"
+        >
           <p>$1.00</p>
         </div>
         <div class="card-box">

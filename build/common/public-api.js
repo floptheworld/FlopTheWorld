@@ -38,4 +38,23 @@ function shuffleDeck(deck) {
     return shuffledDeck;
 }
 exports.shuffleDeck = shuffleDeck;
+function redeal(game) {
+    const players = game.players;
+    players.map(player => {
+        while (player.cards.length > 0) {
+            player.cards.pop();
+        }
+    });
+    game.deck = shuffleDeck(createDeck());
+    dealCards(game);
+}
+exports.redeal = redeal;
+function dealCards(game) {
+    const players = game.players;
+    players.map(player => {
+        player.cards.push(game.deck.pop());
+        player.cards.push(game.deck.pop());
+    });
+}
+exports.dealCards = dealCards;
 //# sourceMappingURL=public-api.js.map

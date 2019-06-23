@@ -1,4 +1,5 @@
-import { Game } from "./types";
+import uuid from "uuid";
+import { Game, GameState, Player } from "./types";
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -43,7 +44,7 @@ export function shuffleDeck(deck: string[]): string[] {
   return shuffledDeck;
 }
 
-export function redeal(game: Game) {
+export function clearPlayerCards(game: Game): void {
   const players = game.players;
   players.map(player => {
     while (player.cards.length > 0) {
@@ -52,15 +53,55 @@ export function redeal(game: Game) {
   });
 
   game.deck = shuffleDeck(createDeck());
-
-  dealCards(game);
 }
 
-export function dealCards(game: Game) {
+export function dealCards(game: Game): void {
   const players = game.players;
 
   players.map(player => {
-    player.cards.push(game.deck!.pop()!);
-    player.cards.push(game.deck!.pop()!);
+    while (player.cards.length < 2) {
+      player.cards.push(game.deck!.pop()!);
+    }
   });
+}
+
+export function addPlayer(game: Game, id: string): void {
+  const newPlayer: Player = {
+    cards: [],
+    name: "New Player",
+    playerID: id,
+    stackAmount: 500
+  };
+
+  game.players.push(newPlayer);
+}
+
+export function createGame(): Game {
+  return {
+    board: [],
+    deck: [],
+    gameID: "asdf1234",
+    // gameID: uuid(),
+    players: []
+  };
+}
+
+export function getGameState(currentGame: Game): GameState {
+  return {
+    ...{
+      board: currentGame.board,
+      gameID: currentGame.gameID,
+      players: currentGame.players
+    }
+  };
+}
+
+export function getGame(games: Game[], gameID: string): Game {
+  return games[games.findIndex(game => game.gameID === gameID)!];
+}
+
+export function startGame(game: Game): void {
+  game.deck = shuffleDeck(createDeck());
+  clearPlayerCards(game);
+  dealCards(game);
 }

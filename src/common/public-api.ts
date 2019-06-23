@@ -89,7 +89,8 @@ export function createGame(): Game {
     // gameID: uuid(),
     players: [],
     pot: 0,
-    round: 0
+    round: 0,
+    currentBet: 0
   };
 }
 
@@ -100,7 +101,8 @@ export function getGameState(currentGame: Game): GameState {
       gameID: currentGame.gameID,
       players: currentGame.players,
       pot: currentGame.pot,
-      round: currentGame.round
+      round: currentGame.round,
+      currentBet: currentGame.currentBet
     }
   };
 }
@@ -141,16 +143,38 @@ export function nextRound(game: Game) {
   }
 }
 
-export function isPlayerAction(game: Game, id: string): boolean {
-  return !!game.players.filter(
+export function isPlayerAction(game: Game, id: string): Player {
+  return game.players.filter(
     player => player.playerID === id && player.isTurn === true
-  ).length;
+  )[0];
 }
 
-export function playerAction(game: Game, id: string): void {
-  game.players
-    .filter(player => player.playerID === id)
-    .map(player => (player.status = "check"));
+export function playerAction(
+  game: Game,
+  player: Player,
+  action: string,
+  data: string
+): void {
+  const dataNum = parseFloat(data);
+
+  if (data !== "" && isNaN(dataNum)) {
+    return;
+  }
+
+  switch (action) {
+    case "check":
+      break;
+    case "call":
+    case "bet":
+    case "raise":
+      game.currentBet = dataNum;
+      player.bet = data;
+      break;
+    default:
+      break;
+  }
+
+  player.status = action;
 }
 
 export function nextPlayerTurn(game: Game): void {

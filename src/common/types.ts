@@ -15,6 +15,7 @@ export interface GameState {
   board: string[];
   round: number;
   pot: number;
+  currentBet: number;
 }
 
 export interface Game extends GameState {

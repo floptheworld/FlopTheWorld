@@ -11,7 +11,7 @@ import {
   nextPlayerTurn,
   isPlayerAction
 } from "./common/public-api";
-import { Game } from "./common/types";
+import { Game, Player } from "./common/types";
 
 const games: Game[] = [];
 games.push(createGame());
@@ -50,16 +50,20 @@ export function createSocket(server: Server) {
       updateGameState(io, currentGame);
     });
 
-    socket.on("playerAction", (gameID: string) => {
-      const currentGame = getGame(games, gameID);
-      if (!isPlayerAction(currentGame, socket.id)) {
-        return;
-      }
+    socket.on(
+      "playerAction",
+      (gameID: string, action: string, data: string) => {
+        const currentGame = getGame(games, gameID);
+        const player: Player = isPlayerAction(currentGame, socket.id);
+        if (!player) {
+          return;
+        }
 
-      playerAction(currentGame, socket.id);
-      nextPlayerTurn(currentGame);
-      updateGameState(io, currentGame);
-    });
+        playerAction(currentGame, player, action, data);
+        nextPlayerTurn(currentGame);
+        updateGameState(io, currentGame);
+      }
+    );
   });
 }
 

@@ -10,6 +10,7 @@ import {
 import { GameState } from "../common/types";
 import { createConnection } from "../data/connection";
 import "./action";
+import "./board";
 import "./card";
 import "./seat";
 
@@ -38,6 +39,9 @@ export class Table extends LitElement {
                     <seat-element .player=${player}></seat-element>
                   `
               )}
+              <div id="Board">
+                <board-element .cards=${this.game.board}></board-element>
+              </div>
             </div>
             <action-element></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
@@ -55,6 +59,11 @@ export class Table extends LitElement {
         border-radius: 50%;
         border: 5px solid #000;
         position: relative;
+      }
+      #Board {
+        position: absolute;
+        left: 342px;
+        top: 205px;
       }
       .App-intro {
         color: #fff;

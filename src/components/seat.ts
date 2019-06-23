@@ -26,7 +26,7 @@ export class Seat extends LitElement {
         </div>
         <div class="player-box">
           <p class="player-name">${this.player.name}</p>
-          <p class="player-currency">$5.27</p>
+          <p class="player-currency">$${this.player.stackAmount}</p>
         </div>
       </div>
     `;
@@ -47,6 +47,7 @@ export class Seat extends LitElement {
       }
       .card-box {
         text-align: center;
+        height: 94px;
       }
       .player-name {
         color: #fff;

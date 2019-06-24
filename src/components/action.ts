@@ -7,29 +7,57 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { GameState } from "../common/types";
+import { GameState, Player } from "../common/types";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
 }
 
+interface ActionTarget extends EventTarget {
+  action: string;
+}
+
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public game!: GameState;
-  @property() private bet: string = "0";
+  @property() public player!: Player;
 
   protected render(): TemplateResult {
     return html`
       <div class="action-box">
         <div class="main-actions">
           <button class="button red-button">Fold</button>
-          <button class="button green-button">Call</button>
-          <button class="button green-button">Check</button>
-          <button class="button blue-button">Raise</button>
-          <button class="button blue-button">Bet</button>
+          <button
+            .action=${"call"}
+            @click=${this._callPlayerAction}
+            class="button green-button"
+          >
+            Call
+          </button>
+          <button
+            .action=${"check"}
+            @click=${this._callPlayerAction}
+            class="button green-button"
+          >
+            Check
+          </button>
+          <button
+            .action=${"raise"}
+            @click=${this._callPlayerAction}
+            class="button blue-button"
+          >
+            Raise
+          </button>
+          <button
+            .action=${"bet"}
+            @click=${this._callPlayerAction}
+            class="button blue-button"
+          >
+            Bet
+          </button>
         </div>
         <div>
-          <input .value=${this.bet} class="bet-text" type="text" />
+          <input .value=${this.player.bet} class="bet-text" type="text" />
         </div>
         <div class="bet-actions">
           <button
@@ -122,14 +150,24 @@ export class Action extends LitElement {
   }
 
   private _setBet(e: MouseEvent): void {
-    this.bet = this._roundToPrecision(
+    this.player.bet = this._roundToPrecision(
       (e.target! as BetTarget).multiplier * this.game.pot,
       0.01
     ).toString();
+    this.requestUpdate();
   }
 
   private _roundToPrecision(x: number, precision: number) {
     const y = +x + (precision === undefined ? 0.5 : precision / 2);
     return y - (y % (precision === undefined ? 1 : +precision));
+  }
+
+  private _callPlayerAction(e: MouseEvent): void {
+    this.player.status = (e.target! as ActionTarget).action;
+    this.dispatchEvent(
+      new CustomEvent("playerAction", {
+        detail: { bet: this.player.bet, action: this.player.status },
+      })
+    );
   }
 }

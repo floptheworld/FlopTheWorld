@@ -45,8 +45,17 @@ export class Table extends LitElement {
               <div id="Board">
                 <board-element .cards=${this.game.board}></board-element>
               </div>
+              <div class="table-pot">
+                <p>$${this.game.pot}</p>
+              </div>
             </div>
-            <action-element></action-element>
+            <action-element
+              @playerAction=${this._playerAction}
+              .game=${this.game}
+              .player=${this.game.players.find(
+                (player) => player.playerID === this.socket!.id
+              )!}
+            ></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
             <button type="button" @click=${this._playerAction}>
               Player Action
@@ -65,6 +74,20 @@ export class Table extends LitElement {
         border-radius: 50%;
         border: 5px solid #000;
         position: relative;
+      }
+      .table-pot {
+        position: absolute;
+        background-color: #333;
+        border: 2px solid #000;
+        color: #fcbd07;
+        text-align: center;
+        font-weight: bold;
+        left: 479px;
+        top: 160px;
+      }
+      .table-pot p {
+        margin: 0px;
+        padding: 5px;
       }
       #Board {
         position: absolute;
@@ -128,7 +151,12 @@ export class Table extends LitElement {
     this.socket!.emit("startGame", this.game!.gameID);
   }
 
-  private _playerAction(): void {
-    this.socket!.emit("playerAction", this.game!.gameID, "call", "20");
+  private _playerAction(e: CustomEvent): void {
+    this.socket!.emit(
+      "playerAction",
+      this.game!.gameID,
+      e.detail.action,
+      e.detail.bet
+    );
   }
 }

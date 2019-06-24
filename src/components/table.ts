@@ -45,7 +45,7 @@ export class Table extends LitElement {
               <div id="Board">
                 <board-element .cards=${this.game.board}></board-element>
               </div>
-              <div class="table-pot">
+              <div ?data-display=${this.game.pot !== 0} class="table-pot">
                 <p>$${this.game.pot}</p>
               </div>
             </div>
@@ -84,6 +84,10 @@ export class Table extends LitElement {
         font-weight: bold;
         left: 479px;
         top: 160px;
+        display: none;
+      }
+      .table-pot[data-display] {
+        display: block !important;
       }
       .table-pot p {
         margin: 0px;

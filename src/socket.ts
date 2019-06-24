@@ -10,6 +10,7 @@ import {
   playerAction,
   nextPlayerTurn,
   isPlayerAction,
+  removeBet,
 } from "./common/public-api";
 import { Game, Player } from "./common/types";
 

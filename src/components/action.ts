@@ -13,6 +13,10 @@ interface BetTarget extends EventTarget {
   multiplier: number;
 }
 
+interface TextBetTarget extends EventTarget {
+  value: number;
+}
+
 interface ActionTarget extends EventTarget {
   action: string;
 }
@@ -24,72 +28,97 @@ export class Action extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <div class="action-box">
-        <div class="main-actions">
-          <button class="button red-button">Fold</button>
-          <button
-            .action=${"call"}
-            @click=${this._callPlayerAction}
-            class="button green-button"
-          >
-            Call
-          </button>
-          <button
-            .action=${"check"}
-            @click=${this._callPlayerAction}
-            class="button green-button"
-          >
-            Check
-          </button>
-          <button
-            .action=${"raise"}
-            @click=${this._callPlayerAction}
-            class="button blue-button"
-          >
-            Raise
-          </button>
-          <button
-            .action=${"bet"}
-            @click=${this._callPlayerAction}
-            class="button blue-button"
-          >
-            Bet
-          </button>
-        </div>
-        <div>
-          <input .value=${this.player.bet} class="bet-text" type="text" />
-        </div>
-        <div class="bet-actions">
-          <button
-            .multiplier=${0.25}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            1/4
-          </button>
-          <button
-            .multiplier=${0.5}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            1/2
-          </button>
-          <button
-            .multiplier=${0.75}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            3/4
-          </button>
-          <button
-            .multiplier=${1}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            Full
-          </button>
-        </div>
-      </div>
+      ${!this.player.isTurn
+        ? ""
+        : html`
+            <div class="action-box">
+              <div class="main-actions">
+                <button
+                  .action=${"fold"}
+                  @click=${this._callPlayerAction}
+                  class="button red-button action-button"
+                  id="fold-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Fold
+                </button>
+                <button
+                  .action=${"call"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="call-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Call
+                </button>
+                <button
+                  .action=${"check"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="check-button"
+                  ?data-display=${this.game.currentBet === 0}
+                >
+                  Check
+                </button>
+                <button
+                  .action=${"raise"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="raise-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Raise
+                </button>
+                <button
+                  .action=${"bet"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="bet-button"
+                  ?data-display=${this.game.currentBet === 0}
+                >
+                  Bet
+                </button>
+              </div>
+              <div>
+                <input
+                  @change=${this._setBetFromText}
+                  .value=${this.player.bet}
+                  class="bet-text"
+                  type="text"
+                />
+              </div>
+              <div class="bet-actions">
+                <button
+                  .multiplier=${0.25}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  1/4
+                </button>
+                <button
+                  .multiplier=${0.5}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  1/2
+                </button>
+                <button
+                  .multiplier=${0.75}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  3/4
+                </button>
+                <button
+                  .multiplier=${1}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  Full
+                </button>
+              </div>
+            </div>
+          `}
     `;
   }
 
@@ -102,6 +131,12 @@ export class Action extends LitElement {
         margin: auto;
         padding: 10px;
         margin-top: 20px;
+      }
+      .action-button {
+        display: none;
+      }
+      .action-button[data-display] {
+        display: inline-block !important;
       }
       .button:hover,
       .button-small:hover {
@@ -150,11 +185,21 @@ export class Action extends LitElement {
   }
 
   private _setBet(e: MouseEvent): void {
+    let playersPot: number = 0;
+    this.game.players
+      .filter((player) => player.bet !== "" && player !== this.player)
+      .map((player) => {
+        playersPot += parseFloat(player.bet);
+      });
     this.player.bet = this._roundToPrecision(
-      (e.target! as BetTarget).multiplier * this.game.pot,
+      (e.target! as BetTarget).multiplier * (this.game.pot + playersPot),
       0.01
     ).toString();
     this.requestUpdate();
+  }
+
+  private _setBetFromText(e: KeyboardEvent) {
+    this.player.bet = (e.target! as TextBetTarget).value.toString();
   }
 
   private _roundToPrecision(x: number, precision: number) {

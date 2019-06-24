@@ -91,7 +91,7 @@ export function createGame(): Game {
     gameID: "asdf1234",
     // gameID: uuid(),
     players: [],
-    pot: 0,
+    pot: 100,
     round: 0,
     currentBet: 0,
   };

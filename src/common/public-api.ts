@@ -308,10 +308,7 @@ export function updateBlinds(game: Game): void {
 export function updatePot(game: Game): void {
   game.players
     .filter((player) => player.bet !== "")
-    .map((player) => {
-      player.stackAmount -= parseFloat(player.bet);
-      game.pot += parseFloat(player.bet);
-    });
+    .map((player) => (game.pot += parseFloat(player.bet)));
 }
 
 export function clearPlayers(game: Game): void {

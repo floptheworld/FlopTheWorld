@@ -33,8 +33,9 @@ export class Seat extends LitElement {
         <div
           style=${styleMap(seatBetStyles[this.seatNumber])}
           class="player-bet"
+          ?data-player-bet=${this.player.bet === ""}
         >
-          <p>$1.00</p>
+          <p>$${this.player.bet}</p>
         </div>
         <div class="card-box">
           ${this.player.cards.map(
@@ -44,8 +45,8 @@ export class Seat extends LitElement {
           )}
         </div>
         <div
-          ?data-dealer=${false}
-          ?data-player-turn=${false}
+          ?data-dealer=${this.player.blind === "dealer"}
+          ?data-player-turn=${this.player.isTurn}
           class="player-box"
         >
           <span class="dealer-button">D</span>
@@ -68,6 +69,9 @@ export class Seat extends LitElement {
         position: absolute;
         width: 150px;
         z-index: 3;
+      }
+      .player-bet[data-player-bet] {
+        display: none !important;
       }
       .player-box[data-dealer] .dealer-button {
         display: block !important;

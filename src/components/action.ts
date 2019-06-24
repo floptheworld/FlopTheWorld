@@ -24,13 +24,23 @@ export class Action extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <div class="action-box">
+      <div ?data-display=${this.player.isTurn} class="action-box">
         <div class="main-actions">
-          <button class="button red-button">Fold</button>
+          <button
+            .action=${"fold"}
+            @click=${this._callPlayerAction}
+            class="button red-button"
+            id="fold-button"
+            ?data-display=${this.game.currentBet > 0}
+          >
+            Fold
+          </button>
           <button
             .action=${"call"}
             @click=${this._callPlayerAction}
             class="button green-button"
+            id="call-button"
+            ?data-display=${this.game.currentBet > 0}
           >
             Call
           </button>
@@ -38,6 +48,8 @@ export class Action extends LitElement {
             .action=${"check"}
             @click=${this._callPlayerAction}
             class="button green-button"
+            id="check-button"
+            ?data-display=${this.game.currentBet === 0}
           >
             Check
           </button>
@@ -45,6 +57,8 @@ export class Action extends LitElement {
             .action=${"raise"}
             @click=${this._callPlayerAction}
             class="button blue-button"
+            id="raise-button"
+            ?data-display=${this.game.currentBet > 0}
           >
             Raise
           </button>
@@ -52,6 +66,8 @@ export class Action extends LitElement {
             .action=${"bet"}
             @click=${this._callPlayerAction}
             class="button blue-button"
+            id="bet-button"
+            ?data-display=${this.game.currentBet === 0}
           >
             Bet
           </button>
@@ -103,6 +119,24 @@ export class Action extends LitElement {
         padding: 10px;
         margin-top: 20px;
       }
+      #raise-button,
+      #bet-button,
+      #call-button,
+      #check-button,
+      #fold-button,
+      .action-box {
+        display: none;
+      }
+      #raise-button[data-display],
+      #bet-button[data-display],
+      #call-button[data-display],
+      #check-button[data-display],
+      #fold-button[data-display] {
+        display: inline-block !important;
+      }
+      .action-box[data-display] {
+        display: block !important;
+      }
       .button:hover,
       .button-small:hover {
         opacity: 0.8;
@@ -150,8 +184,14 @@ export class Action extends LitElement {
   }
 
   private _setBet(e: MouseEvent): void {
+    let playersPot: number = 0;
+    this.game.players
+      .filter((player) => player.bet !== "" && player !== this.player)
+      .map((player) => {
+        playersPot += parseFloat(player.bet);
+      });
     this.player.bet = this._roundToPrecision(
-      (e.target! as BetTarget).multiplier * this.game.pot,
+      (e.target! as BetTarget).multiplier * (this.game.pot + playersPot),
       0.01
     ).toString();
     this.requestUpdate();

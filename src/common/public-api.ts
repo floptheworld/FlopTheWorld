@@ -88,7 +88,7 @@ export function createGame(): Game {
     gameID: "asdf1234",
     // gameID: uuid(),
     players: [],
-    pot: 100,
+    pot: 1,
     round: 0,
     currentBet: 0,
   };
@@ -121,7 +121,9 @@ export function startGame(game: Game): void {
 
 export function nextRound(game: Game) {
   game.round++;
+  game.currentBet = 0;
   updatePot(game);
+  clearPlayerBets(game);
   switch (game.round) {
     case 1:
       game.deck!.pop();
@@ -163,12 +165,22 @@ export function playerAction(
   }
 
   switch (action) {
+    case "fold":
+      break;
     case "check":
       break;
     case "call":
+      removeBet(game, player);
+      player.bet = game.currentBet.toString();
+      break;
     case "bet":
+      game.currentBet = dataNum;
+      removeBet(game, player);
+      player.bet = data;
+      break;
     case "raise":
       game.currentBet = dataNum;
+      removeBet(game, player);
       player.bet = data;
       break;
     default:
@@ -182,13 +194,24 @@ export function nextPlayerTurn(game: Game): void {
   const playerIndex = game.players.findIndex(
     (player) => player.isTurn === true
   );
+
   game.players[playerIndex].isTurn = false;
 
   if (!game.players[playerIndex + 1]) {
     game.players[0].isTurn = true; // TODO: Dealer + 1
-    nextRound(game);
+    if (game.players[0].bet === game.currentBet.toString()) {
+      nextRound(game);
+    }
     return;
   }
+
+  if (
+    game.players[playerIndex + 1].status === "raise" &&
+    game.players[playerIndex + 1].bet === game.currentBet.toString()
+  ) {
+    nextRound(game);
+  }
+
   game.players[playerIndex + 1].isTurn = true;
 }
 
@@ -196,4 +219,16 @@ export function updatePot(game: Game): void {
   game.players
     .filter((player) => player.bet !== "")
     .map((player) => (game.pot += parseFloat(player.bet)));
+}
+
+export function clearPlayerBets(game: Game): void {
+  game.players.map((player) => (player.bet = ""));
+}
+
+export function removeBet(game: Game, player: Player): void {
+  if (player.bet === "") {
+    player.stackAmount -= game.currentBet;
+  } else {
+    player.stackAmount -= game.currentBet - parseFloat(player.bet);
+  }
 }

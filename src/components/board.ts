@@ -3,7 +3,7 @@ import {
   html,
   LitElement,
   property,
-  TemplateResult
+  TemplateResult,
 } from "lit-element";
 import "./card";
 
@@ -14,7 +14,7 @@ export class Board extends LitElement {
   protected render(): TemplateResult {
     return html`
       ${this.cards.map(
-        card => html`
+        (card) => html`
           <card-element .card=${card} .show=${true}></card-element>
         `
       )}

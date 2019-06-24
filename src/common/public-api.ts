@@ -15,14 +15,14 @@ const numbers: Set<string> = new Set([
   "10",
   "J",
   "Q",
-  "K"
+  "K",
 ]);
 
 export function createDeck(): string[] {
   const cards: string[] = new Array();
 
-  suits.forEach(suit => {
-    numbers.forEach(num => {
+  suits.forEach((suit) => {
+    numbers.forEach((num) => {
       cards.push(num + suit);
     });
   });
@@ -47,7 +47,7 @@ export function shuffleDeck(deck: string[]): string[] {
 export function clearTable(game: Game): void {
   game.board = [];
 
-  game.players.map(player => {
+  game.players.map((player) => {
     player.cards = [];
   });
 
@@ -59,7 +59,7 @@ export function clearTable(game: Game): void {
 export function dealCards(game: Game): void {
   const players = game.players;
 
-  players.map(player => {
+  players.map((player) => {
     while (player.cards.length < 2) {
       player.cards.push(game.deck!.pop()!);
     }
@@ -75,7 +75,7 @@ export function addPlayer(game: Game, id: string): void {
     isTurn: false,
     blind: "",
     status: "",
-    bet: ""
+    bet: "",
   };
 
   game.players.push(newPlayer);
@@ -90,7 +90,7 @@ export function createGame(): Game {
     players: [],
     pot: 0,
     round: 0,
-    currentBet: 0
+    currentBet: 0,
   };
 }
 
@@ -102,13 +102,13 @@ export function getGameState(currentGame: Game): GameState {
       players: currentGame.players,
       pot: currentGame.pot,
       round: currentGame.round,
-      currentBet: currentGame.currentBet
-    }
+      currentBet: currentGame.currentBet,
+    },
   };
 }
 
 export function getGame(games: Game[], gameID: string): Game {
-  return games[games.findIndex(game => game.gameID === gameID)!];
+  return games[games.findIndex((game) => game.gameID === gameID)!];
 }
 
 export function startGame(game: Game): void {
@@ -146,7 +146,7 @@ export function nextRound(game: Game) {
 
 export function isPlayerAction(game: Game, id: string): Player {
   return game.players.filter(
-    player => player.playerID === id && player.isTurn === true
+    (player) => player.playerID === id && player.isTurn === true
   )[0];
 }
 
@@ -179,7 +179,9 @@ export function playerAction(
 }
 
 export function nextPlayerTurn(game: Game): void {
-  const playerIndex = game.players.findIndex(player => player.isTurn === true);
+  const playerIndex = game.players.findIndex(
+    (player) => player.isTurn === true
+  );
   game.players[playerIndex].isTurn = false;
 
   if (!game.players[playerIndex + 1]) {
@@ -192,6 +194,6 @@ export function nextPlayerTurn(game: Game): void {
 
 export function updatePot(game: Game): void {
   game.players
-    .filter(player => player.bet !== "")
-    .map(player => (game.pot += parseFloat(player.bet)));
+    .filter((player) => player.bet !== "")
+    .map((player) => (game.pot += parseFloat(player.bet)));
 }

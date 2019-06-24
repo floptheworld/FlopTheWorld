@@ -21,9 +21,17 @@ interface ActionTarget extends EventTarget {
   action: string;
 }
 
+function roundToPrecision(x: number, precision: number) {
+  const y = +x + (precision === undefined ? 0.5 : precision / 2);
+  return y - (y % (precision === undefined ? 1 : +precision));
+}
+
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public game!: GameState;
+  @property() public pot!: number;
+  @property() public currentBet!: number;
+  @property() public currentPot!: number;
   @property() public player!: Player;
 
   protected render(): TemplateResult {
@@ -33,51 +41,57 @@ export class Action extends LitElement {
         : html`
             <div class="action-box">
               <div class="main-actions">
-                <button
-                  .action=${"fold"}
-                  @click=${this._callPlayerAction}
-                  class="button red-button action-button"
-                  id="fold-button"
-                  ?data-display=${this.game.currentBet > 0}
-                >
-                  Fold
-                </button>
-                <button
-                  .action=${"call"}
-                  @click=${this._callPlayerAction}
-                  class="button green-button action-button"
-                  id="call-button"
-                  ?data-display=${this.game.currentBet > 0}
-                >
-                  Call
-                </button>
-                <button
-                  .action=${"check"}
-                  @click=${this._callPlayerAction}
-                  class="button green-button action-button"
-                  id="check-button"
-                  ?data-display=${this.game.currentBet === 0}
-                >
-                  Check
-                </button>
-                <button
-                  .action=${"raise"}
-                  @click=${this._callPlayerAction}
-                  class="button blue-button action-button"
-                  id="raise-button"
-                  ?data-display=${this.game.currentBet > 0}
-                >
-                  Raise
-                </button>
-                <button
-                  .action=${"bet"}
-                  @click=${this._callPlayerAction}
-                  class="button blue-button action-button"
-                  id="bet-button"
-                  ?data-display=${this.game.currentBet === 0}
-                >
-                  Bet
-                </button>
+                ${this.currentBet <= 0
+                  ? ""
+                  : html`
+                      <button
+                        .action=${"fold"}
+                        @click=${this._callPlayerAction}
+                        class="button red-button action-button"
+                        id="fold-button"
+                      >
+                        Fold
+                      </button>
+                      <button
+                        .action=${"call"}
+                        @click=${this._callPlayerAction}
+                        class="button green-button action-button"
+                        id="call-button"
+                      >
+                        Call
+                      </button>
+                      <button
+                        .action=${"raise"}
+                        @click=${this._callPlayerAction}
+                        class="button blue-button action-button"
+                        id="raise-button"
+                        ?data-display=${this.currentBet > 0}
+                      >
+                        Raise
+                      </button>
+                    `}
+                ${this.currentBet !== 0
+                  ? ""
+                  : html`
+                      <button
+                        .action=${"check"}
+                        @click=${this._callPlayerAction}
+                        class="button green-button action-button"
+                        id="check-button"
+                        ?data-display=${this.currentBet === 0}
+                      >
+                        Check
+                      </button>
+                      <button
+                        .action=${"bet"}
+                        @click=${this._callPlayerAction}
+                        class="button blue-button action-button"
+                        id="bet-button"
+                        ?data-display=${this.currentBet === 0}
+                      >
+                        Bet
+                      </button>
+                    `}
               </div>
               <div>
                 <input
@@ -132,12 +146,6 @@ export class Action extends LitElement {
         padding: 10px;
         margin-top: 20px;
       }
-      .action-button {
-        display: none;
-      }
-      .action-button[data-display] {
-        display: inline-block !important;
-      }
       .button:hover,
       .button-small:hover {
         opacity: 0.8;
@@ -185,14 +193,8 @@ export class Action extends LitElement {
   }
 
   private _setBet(e: MouseEvent): void {
-    let playersPot: number = 0;
-    this.game.players
-      .filter((player) => player.bet !== "" && player !== this.player)
-      .map((player) => {
-        playersPot += parseFloat(player.bet);
-      });
-    this.player.bet = this._roundToPrecision(
-      (e.target! as BetTarget).multiplier * (this.game.pot + playersPot),
+    this.player.bet = roundToPrecision(
+      (e.target! as BetTarget).multiplier * (this.pot + this.currentPot),
       0.01
     ).toString();
     this.requestUpdate();
@@ -200,11 +202,6 @@ export class Action extends LitElement {
 
   private _setBetFromText(e: KeyboardEvent) {
     this.player.bet = (e.target! as TextBetTarget).value.toString();
-  }
-
-  private _roundToPrecision(x: number, precision: number) {
-    const y = +x + (precision === undefined ? 0.5 : precision / 2);
-    return y - (y % (precision === undefined ? 1 : +precision));
   }
 
   private _callPlayerAction(e: MouseEvent): void {

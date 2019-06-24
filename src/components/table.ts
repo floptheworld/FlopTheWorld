@@ -45,21 +45,22 @@ export class Table extends LitElement {
               <div id="Board">
                 <board-element .cards=${this.game.board}></board-element>
               </div>
-              <div ?data-display=${this.game.pot !== 0} class="table-pot">
-                <p>$${this.game.pot}</p>
-              </div>
+              ${this.game.pot === 0
+                ? ""
+                : html`
+                    <div class="table-pot">
+                      <p>$${this.game.pot}</p>
+                    </div>
+                  `}
             </div>
             <action-element
+              .player=${this.game.player}
+              .currentBet=${this.game.currentBet}
+              .currentPot=${this.game.currentPot}
+              .pot=${this.game.pot}
               @playerAction=${this._playerAction}
-              .game=${this.game}
-              .player=${this.game.players.find(
-                (player) => player.playerID === this.socket!.id
-              )!}
             ></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
-            <button type="button" @click=${this._playerAction}>
-              Player Action
-            </button>
           `}
     `;
   }
@@ -84,10 +85,6 @@ export class Table extends LitElement {
         font-weight: bold;
         left: 479px;
         top: 160px;
-        display: none;
-      }
-      .table-pot[data-display] {
-        display: block !important;
       }
       .table-pot p {
         margin: 0px;

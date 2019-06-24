@@ -4,7 +4,7 @@ import { GameState } from "../common/types";
 export async function createConnection(
   setState: (state: GameState) => void
 ): Promise<SocketIOClient.Socket> {
-  const socket = io("http://localhost:3000");
+  const socket = io("/");
 
   socket.emit("subscribeToGame", "asdf1234");
   socket.emit("gameStart", "asdf1234");

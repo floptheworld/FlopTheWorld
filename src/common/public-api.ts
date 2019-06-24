@@ -1,5 +1,6 @@
 import uuid from "uuid";
 import { Game, GameState, Player } from "./types";
+import { createSecureContext } from "tls";
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -54,6 +55,8 @@ export function clearTable(game: Game): void {
   game.deck = [];
 
   game.round = 0;
+
+  game.pot = 0;
 }
 
 export function dealCards(game: Game): void {
@@ -88,7 +91,7 @@ export function createGame(): Game {
     gameID: "asdf1234",
     // gameID: uuid(),
     players: [],
-    pot: 1,
+    pot: 0,
     round: 0,
     currentBet: 0,
   };
@@ -199,14 +202,18 @@ export function nextPlayerTurn(game: Game): void {
 
   if (!game.players[playerIndex + 1]) {
     game.players[0].isTurn = true; // TODO: Dealer + 1
-    if (game.players[0].bet === game.currentBet.toString()) {
+    if (
+      game.players[0].bet === game.currentBet.toString() ||
+      game.currentBet === 0
+    ) {
       nextRound(game);
     }
     return;
   }
 
   if (
-    game.players[playerIndex + 1].status === "raise" &&
+    (game.players[playerIndex + 1].status === "raise" ||
+      game.players[playerIndex + 1].status === "bet") &&
     game.players[playerIndex + 1].bet === game.currentBet.toString()
   ) {
     nextRound(game);

@@ -13,6 +13,10 @@ interface BetTarget extends EventTarget {
   multiplier: number;
 }
 
+interface TextBetTarget extends EventTarget {
+  value: number;
+}
+
 interface ActionTarget extends EventTarget {
   action: string;
 }
@@ -24,88 +28,97 @@ export class Action extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <div ?data-display=${this.player.isTurn} class="action-box">
-        <div class="main-actions">
-          <button
-            .action=${"fold"}
-            @click=${this._callPlayerAction}
-            class="button red-button"
-            id="fold-button"
-            ?data-display=${this.game.currentBet > 0}
-          >
-            Fold
-          </button>
-          <button
-            .action=${"call"}
-            @click=${this._callPlayerAction}
-            class="button green-button"
-            id="call-button"
-            ?data-display=${this.game.currentBet > 0}
-          >
-            Call
-          </button>
-          <button
-            .action=${"check"}
-            @click=${this._callPlayerAction}
-            class="button green-button"
-            id="check-button"
-            ?data-display=${this.game.currentBet === 0}
-          >
-            Check
-          </button>
-          <button
-            .action=${"raise"}
-            @click=${this._callPlayerAction}
-            class="button blue-button"
-            id="raise-button"
-            ?data-display=${this.game.currentBet > 0}
-          >
-            Raise
-          </button>
-          <button
-            .action=${"bet"}
-            @click=${this._callPlayerAction}
-            class="button blue-button"
-            id="bet-button"
-            ?data-display=${this.game.currentBet === 0}
-          >
-            Bet
-          </button>
-        </div>
-        <div>
-          <input .value=${this.player.bet} class="bet-text" type="text" />
-        </div>
-        <div class="bet-actions">
-          <button
-            .multiplier=${0.25}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            1/4
-          </button>
-          <button
-            .multiplier=${0.5}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            1/2
-          </button>
-          <button
-            .multiplier=${0.75}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            3/4
-          </button>
-          <button
-            .multiplier=${1}
-            @click=${this._setBet}
-            class="button-small button-gray"
-          >
-            Full
-          </button>
-        </div>
-      </div>
+      ${!this.player.isTurn
+        ? ""
+        : html`
+            <div class="action-box">
+              <div class="main-actions">
+                <button
+                  .action=${"fold"}
+                  @click=${this._callPlayerAction}
+                  class="button red-button action-button"
+                  id="fold-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Fold
+                </button>
+                <button
+                  .action=${"call"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="call-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Call
+                </button>
+                <button
+                  .action=${"check"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="check-button"
+                  ?data-display=${this.game.currentBet === 0}
+                >
+                  Check
+                </button>
+                <button
+                  .action=${"raise"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="raise-button"
+                  ?data-display=${this.game.currentBet > 0}
+                >
+                  Raise
+                </button>
+                <button
+                  .action=${"bet"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="bet-button"
+                  ?data-display=${this.game.currentBet === 0}
+                >
+                  Bet
+                </button>
+              </div>
+              <div>
+                <input
+                  @change=${this._setBetFromText}
+                  .value=${this.player.bet}
+                  class="bet-text"
+                  type="text"
+                />
+              </div>
+              <div class="bet-actions">
+                <button
+                  .multiplier=${0.25}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  1/4
+                </button>
+                <button
+                  .multiplier=${0.5}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  1/2
+                </button>
+                <button
+                  .multiplier=${0.75}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  3/4
+                </button>
+                <button
+                  .multiplier=${1}
+                  @click=${this._setBet}
+                  class="button-small button-gray"
+                >
+                  Full
+                </button>
+              </div>
+            </div>
+          `}
     `;
   }
 
@@ -119,23 +132,11 @@ export class Action extends LitElement {
         padding: 10px;
         margin-top: 20px;
       }
-      #raise-button,
-      #bet-button,
-      #call-button,
-      #check-button,
-      #fold-button,
-      .action-box {
+      .action-button {
         display: none;
       }
-      #raise-button[data-display],
-      #bet-button[data-display],
-      #call-button[data-display],
-      #check-button[data-display],
-      #fold-button[data-display] {
+      .action-button[data-display] {
         display: inline-block !important;
-      }
-      .action-box[data-display] {
-        display: block !important;
       }
       .button:hover,
       .button-small:hover {
@@ -195,6 +196,10 @@ export class Action extends LitElement {
       0.01
     ).toString();
     this.requestUpdate();
+  }
+
+  private _setBetFromText(e: KeyboardEvent) {
+    this.player.bet = (e.target! as TextBetTarget).value.toString();
   }
 
   private _roundToPrecision(x: number, precision: number) {

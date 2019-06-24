@@ -1,6 +1,5 @@
 import uuid from "uuid";
 import { Game, GameState, Player } from "./types";
-import { createSecureContext } from "tls";
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -46,16 +45,12 @@ export function shuffleDeck(deck: string[]): string[] {
 }
 
 export function clearTable(game: Game): void {
-  game.board = [];
-
   game.players.map((player) => {
     player.cards = [];
   });
-
+  game.board = [];
   game.deck = [];
-
   game.round = 0;
-
   game.pot = 0;
 }
 
@@ -91,13 +86,24 @@ export function createGame(): Game {
     gameID: "asdf1234",
     // gameID: uuid(),
     players: [],
-    pot: 100,
+    pot: 0,
     round: 0,
     currentBet: 0,
+    currentPot: 0,
+    player: {
+      cards: [],
+      name: "",
+      playerID: "",
+      stackAmount: 5.0,
+      isTurn: false,
+      blind: "",
+      status: "",
+      bet: "",
+    },
   };
 }
 
-export function getGameState(currentGame: Game): GameState {
+export function getGameState(currentGame: Game, playerID: string): GameState {
   return {
     ...{
       board: currentGame.board,
@@ -106,6 +112,10 @@ export function getGameState(currentGame: Game): GameState {
       pot: currentGame.pot,
       round: currentGame.round,
       currentBet: currentGame.currentBet,
+      currentPot: currentGame.currentPot,
+      player: currentGame.players.find(
+        (player) => player.playerID === playerID
+      )!,
     },
   };
 }
@@ -173,18 +183,21 @@ export function playerAction(
     case "check":
       break;
     case "call":
-      removeBet(game, player);
       player.bet = game.currentBet.toString();
+      game.currentPot += dataNum;
+      subtractBetFromPlayerStack(game, player);
       break;
     case "bet":
-      game.currentBet = dataNum;
-      removeBet(game, player);
       player.bet = data;
+      game.currentBet = dataNum;
+      game.currentPot += dataNum;
+      subtractBetFromPlayerStack(game, player);
       break;
     case "raise":
-      game.currentBet = dataNum;
-      removeBet(game, player);
       player.bet = data;
+      game.currentBet = dataNum;
+      game.currentPot += dataNum;
+      subtractBetFromPlayerStack(game, player);
       break;
     default:
       break;
@@ -232,10 +245,6 @@ export function clearPlayerBets(game: Game): void {
   game.players.map((player) => (player.bet = ""));
 }
 
-export function removeBet(game: Game, player: Player): void {
-  if (player.bet === "") {
-    player.stackAmount -= game.currentBet;
-  } else {
-    player.stackAmount -= game.currentBet - parseFloat(player.bet);
-  }
+export function subtractBetFromPlayerStack(game: Game, player: Player): void {
+  player.stackAmount -= game.currentBet;
 }

@@ -1,5 +1,5 @@
 import { Server } from "http";
-import { listen } from "socket.io";
+import { listen, Client } from "socket.io";
 import {
   addPlayer,
   createGame,
@@ -10,7 +10,6 @@ import {
   playerAction,
   nextPlayerTurn,
   isPlayerAction,
-  removeBet,
 } from "./common/public-api";
 import { Game, Player } from "./common/types";
 
@@ -71,5 +70,9 @@ export function createSocket(server: Server) {
 }
 
 function updateGameState(io: SocketIO.Server, game: Game): void {
-  io.sockets.in(game.gameID).emit("gameUpdate", getGameState(game));
+  io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
+    clients.map((client: string) => {
+      io.to(client).emit("gameUpdate", getGameState(game, client));
+    });
+  });
 }

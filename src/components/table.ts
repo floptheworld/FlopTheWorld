@@ -37,7 +37,7 @@ export class Table extends LitElement {
                 (player, index) =>
                   html`
                     <seat-element
-                      .seatnumber=${index}
+                      .seatNumber=${index}
                       .player=${player}
                     ></seat-element>
                   `

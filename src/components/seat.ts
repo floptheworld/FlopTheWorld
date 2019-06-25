@@ -45,7 +45,7 @@ export class Seat extends LitElement {
           )}
         </div>
         <div
-          ?data-dealer=${this.player.blind === "dealer"}
+          ?data-dealer=${this.player.dealer}
           ?data-player-turn=${this.player.isTurn}
           class="player-box"
         >

@@ -9,6 +9,7 @@ import {
 } from "lit-element";
 import { styleMap, StyleInfo } from "lit-html/directives/style-map.js";
 import { Player } from "../common/types";
+import { roundToPrecision } from "../common/functions";
 import "./card";
 
 const seatBetStyles: StyleInfo[] = [
@@ -51,7 +52,9 @@ export class Seat extends LitElement {
         >
           <span class="dealer-button">D</span>
           <p class="player-name">${this.player.name}</p>
-          <p class="player-stack">$${this.player.stackAmount}</p>
+          <p class="player-stack">
+            $${this.player.stackAmount.toFixed(2)}
+          </p>
         </div>
       </div>
     `;

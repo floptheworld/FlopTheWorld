@@ -8,6 +8,7 @@ import {
   TemplateResult,
 } from "lit-element";
 import { GameState, Player } from "../common/types";
+import { roundToPrecision } from "../common/functions";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -19,11 +20,6 @@ interface TextBetTarget extends EventTarget {
 
 interface ActionTarget extends EventTarget {
   action: string;
-}
-
-function roundToPrecision(x: number, precision: number) {
-  const y = +x + (precision === undefined ? 0.5 : precision / 2);
-  return y - (y % (precision === undefined ? 1 : +precision));
 }
 
 @customElement("action-element")

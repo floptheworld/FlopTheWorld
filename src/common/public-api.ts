@@ -259,6 +259,7 @@ export function updateNextDealer(game: Game): void {
   const dealerIndex = game.players.findIndex(
     (player) => player.dealer === true
   );
+
   if (dealerIndex === -1) {
     game.players[0].dealer = true;
     return;

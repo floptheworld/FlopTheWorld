@@ -5,7 +5,7 @@ import { deckController } from "./controllers";
 import { createSocket } from "./socket";
 
 const app: express.Application = express();
-const port: number = ((process.env.PORT as any) as number) || 8080;
+const port: number = ((process.env.PORT as any) as number) || 80;
 
 const server = createServer(app);
 createSocket(server);
@@ -17,7 +17,7 @@ app.use(express.static("./build"));
 app.use("/deck", deckController);
 app.use(express.static(__dirname, { extensions: ["html"] }));
 
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, () => {
   // tslint:disable-next-line:no-console
   console.log(`Listening at http://localhost:${port}/`);
 });

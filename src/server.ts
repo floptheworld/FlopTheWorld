@@ -17,7 +17,7 @@ app.use(express.static("./build"));
 app.use("/deck", deckController);
 app.use(express.static(__dirname, { extensions: ["html"] }));
 
-server.listen(port, () => {
+server.listen(port, "127.0.0.1", () => {
   // tslint:disable-next-line:no-console
   console.log(`Listening at http://localhost:${port}/`);
 });

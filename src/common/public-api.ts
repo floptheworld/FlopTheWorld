@@ -156,7 +156,7 @@ export function nextRound(game: Game) {
   game.round++;
   game.currentBet = 0;
   updatePot(game);
-  clearPlayerBets(game);
+  clearPlayers(game);
   switch (game.round) {
     case 1:
       game.deck!.pop();
@@ -199,25 +199,20 @@ export function playerAction(
 
   switch (action) {
     case "fold":
+      player.cards = [];
       break;
     case "check":
       break;
     case "call":
-      player.bet = game.currentBet.toString();
-      game.currentPot += dataNum;
       subtractBetFromPlayerStack(game, player);
+      player.bet = game.currentBet.toString();
       break;
     case "bet":
-      player.bet = data;
-      game.currentBet = dataNum;
-      game.currentPot += dataNum;
-      subtractBetFromPlayerStack(game, player);
-      break;
     case "raise":
-      player.bet = data;
       game.currentBet = dataNum;
-      game.currentPot += dataNum;
       subtractBetFromPlayerStack(game, player);
+      player.bet = data;
+      game.currentPot += dataNum;
       break;
     default:
       break;
@@ -227,38 +222,44 @@ export function playerAction(
 }
 
 export function nextPlayerTurn(game: Game): void {
-  const playerIndex = game.players.findIndex(
+  const playerIndex: number = game.players.findIndex(
     (player) => player.isTurn === true
   );
+  const firstTurnIndex: number =
+    game.players.findIndex((player) => player.dealer === true) + 1;
+  let nextPlayerIndex: number = playerIndex + 1;
 
   game.players[playerIndex].isTurn = false;
 
-  if (!game.players[playerIndex + 1]) {
-    game.players[0].isTurn = true; // TODO: Dealer + 1
-    if (
-      game.players[0].bet === game.currentBet.toString() ||
-      game.currentBet === 0
-    ) {
-      nextRound(game);
+  while (
+    !game.players[nextPlayerIndex] ||
+    game.players[nextPlayerIndex].cards === []
+  ) {
+    if (!game.players[nextPlayerIndex]) {
+      nextPlayerIndex = 0;
+    } else {
+      nextPlayerIndex++;
     }
-    return;
   }
 
   if (
-    (game.players[playerIndex + 1].status === "raise" ||
-      game.players[playerIndex + 1].status === "bet") &&
-    game.players[playerIndex + 1].bet === game.currentBet.toString()
+    game.players[nextPlayerIndex].status === "check" ||
+    nextPlayerIndex === playerIndex ||
+    game.players[nextPlayerIndex].bet === game.currentBet.toString()
   ) {
+    game.players[firstTurnIndex].isTurn = true;
     nextRound(game);
+    return;
   }
 
-  game.players[playerIndex + 1].isTurn = true;
+  game.players[nextPlayerIndex].isTurn = true;
 }
 
 export function updateNextDealer(game: Game): void {
   const dealerIndex = game.players.findIndex(
     (player) => player.dealer === true
   );
+
   if (dealerIndex === -1) {
     game.players[0].dealer = true;
     return;
@@ -310,10 +311,13 @@ export function updatePot(game: Game): void {
     .map((player) => (game.pot += parseFloat(player.bet)));
 }
 
-export function clearPlayerBets(game: Game): void {
-  game.players.map((player) => (player.bet = ""));
+export function clearPlayers(game: Game): void {
+  game.players.map((player) => {
+    player.bet = "";
+    player.status = "";
+  });
 }
 
 export function subtractBetFromPlayerStack(game: Game, player: Player): void {
-  player.stackAmount -= game.currentBet;
+  player.stackAmount -= game.currentBet - (parseFloat(player.bet) || 0);
 }

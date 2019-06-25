@@ -1,5 +1,5 @@
 import { Server } from "http";
-import { listen, Client } from "socket.io";
+import { listen } from "socket.io";
 import {
   addPlayer,
   createGame,

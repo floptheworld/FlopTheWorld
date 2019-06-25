@@ -47,6 +47,9 @@ export function shuffleDeck(deck: string[]): string[] {
 export function clearTable(game: Game): void {
   game.players.map((player) => {
     player.cards = [];
+    player.isTurn = false;
+    player.isBigBlind = false;
+    player.isLittleBlind = false;
   });
   game.board = [];
   game.deck = [];
@@ -71,7 +74,9 @@ export function addPlayer(game: Game, id: string): void {
     playerID: id,
     stackAmount: 5.0,
     isTurn: false,
-    blind: "",
+    dealer: false,
+    isLittleBlind: false,
+    isBigBlind: false,
     status: "",
     bet: "",
   };
@@ -90,13 +95,17 @@ export function createGame(): Game {
     round: 0,
     currentBet: 0,
     currentPot: 0,
+    bigBlind: 0.1,
+    littleBlind: 0.05,
     player: {
       cards: [],
       name: "",
       playerID: "",
       stackAmount: 5.0,
       isTurn: false,
-      blind: "",
+      isLittleBlind: false,
+      isBigBlind: false,
+      dealer: false,
       status: "",
       bet: "",
     },
@@ -111,6 +120,8 @@ export function getGameState(currentGame: Game, playerID: string): GameState {
       players: currentGame.players,
       pot: currentGame.pot,
       round: currentGame.round,
+      bigBlind: currentGame.bigBlind,
+      littleBlind: currentGame.littleBlind,
       currentBet: currentGame.currentBet,
       currentPot: currentGame.currentPot,
       player: currentGame.players.find(
@@ -128,8 +139,17 @@ export function startGame(game: Game): void {
   clearTable(game);
   game.deck = shuffleDeck(createDeck());
   dealCards(game);
-  game.players[0].isTurn = true;
-  game.players[0].blind = "dealer";
+  updateNextDealer(game);
+  updateBlinds(game);
+  const bigBlindIndex = game.players.findIndex(
+    (player) => player.isBigBlind === true
+  );
+  if (game.players[bigBlindIndex + 1]) {
+    game.players[bigBlindIndex + 1].isTurn = true;
+  } else {
+    game.players[0].isTurn = true;
+  }
+  game.currentBet = game.bigBlind;
 }
 
 export function nextRound(game: Game) {
@@ -233,6 +253,55 @@ export function nextPlayerTurn(game: Game): void {
   }
 
   game.players[playerIndex + 1].isTurn = true;
+}
+
+export function updateNextDealer(game: Game): void {
+  const dealerIndex = game.players.findIndex(
+    (player) => player.dealer === true
+  );
+  if (dealerIndex === -1) {
+    game.players[0].dealer = true;
+    return;
+  }
+
+  if (game.players[dealerIndex + 1]) {
+    game.players[dealerIndex].dealer = false;
+    game.players[dealerIndex + 1].dealer = true;
+    return;
+  }
+
+  game.players[game.players.length - 1].dealer = false;
+  game.players[0].dealer = true;
+}
+
+export function updateBlinds(game: Game): void {
+  const dealerIndex = game.players.findIndex(
+    (player) => player.dealer === true
+  );
+
+  if (game.players[dealerIndex + 1]) {
+    game.players[dealerIndex + 1].isLittleBlind = true;
+    game.players[dealerIndex + 1].bet = game.littleBlind.toString();
+    game.players[dealerIndex + 1].stackAmount -= game.littleBlind;
+  } else {
+    game.players[0].isLittleBlind = true;
+    game.players[0].bet = game.littleBlind.toString();
+    game.players[0].stackAmount -= game.littleBlind;
+  }
+
+  const littleBlindIndex = game.players.findIndex(
+    (player) => player.isLittleBlind === true
+  );
+
+  if (game.players[littleBlindIndex + 1]) {
+    game.players[littleBlindIndex + 1].isBigBlind = true;
+    game.players[littleBlindIndex + 1].bet = game.bigBlind.toString();
+    game.players[littleBlindIndex + 1].stackAmount -= game.bigBlind;
+  } else {
+    game.players[0].isBigBlind = true;
+    game.players[0].bet = game.bigBlind.toString();
+    game.players[0].stackAmount -= game.bigBlind;
+  }
 }
 
 export function updatePot(game: Game): void {

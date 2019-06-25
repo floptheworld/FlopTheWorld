@@ -4,7 +4,9 @@ export interface Player {
   playerID: string;
   stackAmount: number;
   isTurn: boolean;
-  blind: string;
+  isLittleBlind: boolean;
+  isBigBlind: boolean;
+  dealer: boolean;
   status: string;
   bet: string;
 }
@@ -15,6 +17,8 @@ export interface GameState {
   board: string[];
   round: number;
   pot: number;
+  bigBlind: number;
+  littleBlind: number;
   currentBet: number;
   currentPot: number;
   player: Player;

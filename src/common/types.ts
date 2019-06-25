@@ -27,3 +27,8 @@ export interface GameState {
 export interface Game extends GameState {
   deck: string[];
 }
+
+export interface User {
+  userID: string;
+  clientID: string;
+}

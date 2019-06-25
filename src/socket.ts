@@ -34,8 +34,8 @@ export function createSocket(server: Server) {
           .map((user) => (user.clientID = socket.id));
       }
 
+      // tslint:disable-next-line:no-console
       console.log(`Client user: ${userID}`);
-      console.log(users);
 
       fn(userID);
     });

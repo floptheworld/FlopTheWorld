@@ -9,7 +9,6 @@ import {
 } from "lit-element";
 import { styleMap, StyleInfo } from "lit-html/directives/style-map.js";
 import { Player } from "../common/types";
-import { roundToPrecision } from "../common/functions";
 import "./card";
 
 const seatBetStyles: StyleInfo[] = [

@@ -49,7 +49,7 @@ export class Table extends LitElement {
                 ? ""
                 : html`
                     <div class="table-pot">
-                      <p>$${this.game.pot}</p>
+                      <p>$${this.game.pot.toFixed(2)}</p>
                     </div>
                   `}
             </div>

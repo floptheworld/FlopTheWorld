@@ -1,5 +1,6 @@
 import uuid from "uuid";
 import { Game, GameState, Player } from "./types";
+import { roundToPrecision } from "../common/functions";
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -137,6 +138,7 @@ export function getGame(games: Game[], gameID: string): Game {
 
 export function startGame(game: Game): void {
   clearTable(game);
+  clearPlayers(game);
   game.deck = shuffleDeck(createDeck());
   dealCards(game);
   updateNextDealer(game);
@@ -153,10 +155,21 @@ export function startGame(game: Game): void {
 }
 
 export function nextRound(game: Game) {
+  let numberOfPlayers: number = 0;
   game.round++;
   game.currentBet = 0;
   updatePot(game);
-  clearPlayers(game);
+  game.players
+    .filter((player) => player.status !== "fold")
+    .map((player) => numberOfPlayers++);
+  if (numberOfPlayers === 1) {
+    game.players
+      .filter((player) => player.status !== "fold")
+      .map((player) => (player.stackAmount += game.pot));
+    startGame(game);
+    return;
+  }
+  clearActivePlayers(game);
   switch (game.round) {
     case 1:
       game.deck!.pop();
@@ -233,7 +246,7 @@ export function nextPlayerTurn(game: Game): void {
 
   while (
     !game.players[nextPlayerIndex] ||
-    game.players[nextPlayerIndex].cards === []
+    game.players[nextPlayerIndex].cards.length < 1
   ) {
     if (!game.players[nextPlayerIndex]) {
       nextPlayerIndex = 0;
@@ -243,11 +256,16 @@ export function nextPlayerTurn(game: Game): void {
   }
 
   if (
-    game.players[nextPlayerIndex].status === "check" ||
+    (game.players[nextPlayerIndex].status === "check" &&
+      game.currentBet === 0) ||
     nextPlayerIndex === playerIndex ||
     game.players[nextPlayerIndex].bet === game.currentBet.toString()
   ) {
-    game.players[firstTurnIndex].isTurn = true;
+    if (game.players[firstTurnIndex]) {
+      game.players[firstTurnIndex].isTurn = true;
+    } else {
+      game.players[0].isTurn = true;
+    }
     nextRound(game);
     return;
   }
@@ -308,7 +326,10 @@ export function updateBlinds(game: Game): void {
 export function updatePot(game: Game): void {
   game.players
     .filter((player) => player.bet !== "")
-    .map((player) => (game.pot += parseFloat(player.bet)));
+    .map(
+      (player) =>
+        (game.pot = roundToPrecision(game.pot + parseFloat(player.bet), 0.01))
+    );
 }
 
 export function clearPlayers(game: Game): void {
@@ -318,6 +339,18 @@ export function clearPlayers(game: Game): void {
   });
 }
 
+export function clearActivePlayers(game: Game): void {
+  game.players.map((player) => {
+    player.bet = "";
+    if (player.status !== "fold") {
+      player.status = "";
+    }
+  });
+}
+
 export function subtractBetFromPlayerStack(game: Game, player: Player): void {
-  player.stackAmount -= game.currentBet - (parseFloat(player.bet) || 0);
+  player.stackAmount =
+    roundToPrecision(player.stackAmount, 0.01) -
+    (roundToPrecision(game.currentBet, 0.01) -
+      roundToPrecision(parseFloat(player.bet) || 0, 0.01));
 }

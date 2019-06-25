@@ -51,7 +51,9 @@ export class Seat extends LitElement {
         >
           <span class="dealer-button">D</span>
           <p class="player-name">${this.player.name}</p>
-          <p class="player-stack">$${this.player.stackAmount}</p>
+          <p class="player-stack">
+            $${this.player.stackAmount.toFixed(2)}
+          </p>
         </div>
       </div>
     `;

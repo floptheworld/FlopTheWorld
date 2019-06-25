@@ -226,7 +226,7 @@ export function nextPlayerTurn(game: Game): void {
     (player) => player.isTurn === true
   );
   const firstTurnIndex: number =
-    game.players.findIndex((player) => player.isDealer === true) + 1;
+    game.players.findIndex((player) => player.dealer === true) + 1;
   let nextPlayerIndex: number = playerIndex + 1;
 
   game.players[playerIndex].isTurn = false;

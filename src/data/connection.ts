@@ -4,10 +4,7 @@ import { GameState } from "../common/types";
 export async function createConnection(
   setState: (state: GameState) => void
 ): Promise<SocketIOClient.Socket> {
-  const socket = io("http://localhost:3001", {
-    transports: ["websocket"],
-    upgrade: false,
-  });
+  const socket = io("http://localhost:3002");
 
   socket.emit(
     "findOrCreateUser",

@@ -156,6 +156,7 @@ export class Table extends LitElement {
     this.socket!.emit(
       "playerAction",
       this.game!.gameID,
+      localStorage.userID,
       e.detail.action,
       e.detail.bet
     );

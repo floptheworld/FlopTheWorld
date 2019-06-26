@@ -85,6 +85,12 @@ export function createSocket(server: Server) {
         playerAction(currentGame, player, action, data);
         nextPlayerTurn(currentGame);
         updateGameState(io, currentGame);
+        if (currentGame.winDesc !== "") {
+          setTimeout(() => {
+            startGame(currentGame);
+            updateGameState(io, currentGame);
+          }, 2000);
+        }
       }
     );
   });

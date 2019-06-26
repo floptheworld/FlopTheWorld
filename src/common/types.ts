@@ -23,6 +23,7 @@ export interface GameState {
   currentPot: number;
   currentPlayerID: string;
   cardBack: string;
+  winDesc: string;
 }
 
 export interface Game extends GameState {
@@ -42,4 +43,5 @@ export interface Card {
 
 export interface Hand {
   cards: Card[];
+  descr: string;
 }

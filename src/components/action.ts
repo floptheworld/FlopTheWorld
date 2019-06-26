@@ -29,6 +29,7 @@ export class Action extends LitElement {
   @property() public currentBet!: number;
   @property() public currentPot!: number;
   @property() public player!: Player;
+  @property() public bigBlind!: number;
 
   protected render(): TemplateResult {
     return html`
@@ -61,7 +62,9 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button blue-button action-button"
                         id="raise-button"
-                        ?data-display=${this.currentBet > 0}
+                        ?disabled=${parseFloat(this.player.bet) <
+                          this.currentBet + this.bigBlind ||
+                          parseFloat(this.player.bet) > this.player.stackAmount}
                       >
                         Raise
                       </button>
@@ -74,7 +77,6 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button green-button action-button"
                         id="check-button"
-                        ?data-display=${this.currentBet === 0}
                       >
                         Check
                       </button>
@@ -83,7 +85,6 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button blue-button action-button"
                         id="bet-button"
-                        ?data-display=${this.currentBet === 0}
                       >
                         Bet
                       </button>
@@ -91,7 +92,7 @@ export class Action extends LitElement {
               </div>
               <div>
                 <input
-                  @change=${this._setBetFromText}
+                  @keyup=${this._setBetFromText}
                   .value=${this.player.bet}
                   class="bet-text"
                   type="text"
@@ -101,28 +102,28 @@ export class Action extends LitElement {
                 <button
                   .multiplier=${0.25}
                   @click=${this._setBet}
-                  class="button-small button-gray"
+                  class="button-small dark-blue-button"
                 >
                   1/4
                 </button>
                 <button
                   .multiplier=${0.5}
                   @click=${this._setBet}
-                  class="button-small button-gray"
+                  class="button-small dark-blue-button"
                 >
                   1/2
                 </button>
                 <button
                   .multiplier=${0.75}
                   @click=${this._setBet}
-                  class="button-small button-gray"
+                  class="button-small dark-blue-button"
                 >
                   3/4
                 </button>
                 <button
                   .multiplier=${1}
                   @click=${this._setBet}
-                  class="button-small button-gray"
+                  class="button-small dark-blue-button"
                 >
                   Full
                 </button>
@@ -168,7 +169,12 @@ export class Action extends LitElement {
         border: 1px solid #003f69;
         background-color: #0065a9;
       }
-      .button-gray {
+      .dark-blue-button {
+        border: 1px solid #003f69;
+        background-color: #004c80;
+      }
+      .button-gray,
+      .button[disabled] {
         border: 1px solid #202020;
         background-color: #808080;
       }
@@ -198,9 +204,13 @@ export class Action extends LitElement {
 
   private _setBetFromText(e: KeyboardEvent) {
     this.player.bet = (e.target! as TextBetTarget).value.toString();
+    this.requestUpdate();
   }
 
   private _callPlayerAction(e: MouseEvent): void {
+    if (parseFloat(this.player.bet) > this.player.stackAmount) {
+      return;
+    }
     this.player.status = (e.target! as ActionTarget).action;
     this.dispatchEvent(
       new CustomEvent("playerAction", {

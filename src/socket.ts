@@ -31,11 +31,16 @@ export function createSocket(server: Server) {
       } else {
         users
           .filter((user) => user.userID === userID)
-          .map((user) => (user.clientID = socket.id));
+          .map((user) => {
+            try {
+              io.sockets.sockets[user.clientID].disconnect();
+            } catch (error) {
+              // tslint:disable-next-line:no-console
+              console.log(error);
+            }
+            user.clientID = socket.id;
+          });
       }
-
-      // tslint:disable-next-line:no-console
-      console.log(`Client user: ${userID}`);
 
       fn(userID);
     });

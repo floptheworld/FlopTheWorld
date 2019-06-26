@@ -134,7 +134,7 @@ function getGameStatePlayers(
   currentPlayerID: string,
   cardBack: string
 ): Player[] {
-  const copyPlayers = players.map((player) => ({ ...player }));
+  const copyPlayers = players.concat();
 
   copyPlayers
     .filter(

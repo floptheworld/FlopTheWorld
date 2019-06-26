@@ -1,5 +1,6 @@
 import { Server } from "http";
 import { listen } from "socket.io";
+import uuid = require("uuid");
 import {
   addPlayer,
   createGame,
@@ -12,7 +13,6 @@ import {
   isPlayerAction,
 } from "./common/public-api";
 import { Game, Player, User } from "./common/types";
-import uuid = require("uuid");
 
 const games: Game[] = [];
 const users: User[] = [];

@@ -1,6 +1,7 @@
-import uuid from "uuid";
 import { Game, GameState, Player } from "./types";
 import { roundToPrecision } from "../common/functions";
+// tslint:disable-next-line:no-var-requires
+const Hand = require("pokersolver").Hand;
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -13,7 +14,7 @@ const numbers: Set<string> = new Set([
   "7",
   "8",
   "9",
-  "10",
+  "T",
   "J",
   "Q",
   "K",
@@ -179,6 +180,7 @@ export function nextRound(game: Game) {
       game.board.push(game.deck!.pop()!);
       break;
     default:
+      solveHands(game);
       startGame(game);
   }
 }
@@ -360,4 +362,35 @@ export function subtractBetFromPlayerStack(game: Game, player: Player): void {
     roundToPrecision(player.stackAmount, 0.01) -
     (roundToPrecision(game.currentBet, 0.01) -
       roundToPrecision(parseFloat(player.bet) || 0, 0.01));
+}
+
+export function solveHands(game: Game): void {
+  const solvedHands: object[] = [];
+  let boardWinner: boolean = true;
+
+  game.players.map((player) => {
+    solvedHands.push(Hand.solve(player.cards.concat(game.board)));
+  });
+
+  const winners = Hand.winners(solvedHands);
+
+  winners.map((winner: object) => {
+    let winningHand: string[] = [];
+    winningHand = winner.cards.map((c) => c.wildValue + c.suit.toUpperCase());
+    game.players.map((player: Player) => {
+      if (player.cards.some((card: string) => winningHand.includes(card))) {
+        player.stackAmount += game.pot / winners.length;
+        boardWinner = false;
+      }
+    });
+  });
+
+  if (boardWinner) {
+    const availPlayers: number = game.players.filter(
+      (player) => player.cards.length > 0
+    ).length;
+    game.players
+      .filter((player) => player.cards.length > 0)
+      .map((player) => (player.stackAmount += game.pot / availPlayers));
+  }
 }

@@ -1,5 +1,6 @@
 import uuid from "uuid";
 import { Game, GameState, Player } from "./types";
+import { roundToPrecision } from "../common/functions";
 
 const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 const numbers: Set<string> = new Set([
@@ -155,6 +156,7 @@ export function startGame(game: Game): void {
 }
 
 export function nextRound(game: Game) {
+  let numberOfPlayers: number = 0;
   game.round++;
   game.currentBet = 0;
   game.currentPot = 0;
@@ -355,5 +357,8 @@ export function clearActivePlayers(game: Game): void {
 }
 
 export function subtractBetFromPlayerStack(game: Game, player: Player): void {
-  player.stackAmount -= game.currentBet - (parseFloat(player.bet) || 0);
+  player.stackAmount =
+    roundToPrecision(player.stackAmount, 0.01) -
+    (roundToPrecision(game.currentBet, 0.01) -
+      roundToPrecision(parseFloat(player.bet) || 0, 0.01));
 }

@@ -11,28 +11,44 @@ import {
   nextPlayerTurn,
   isPlayerAction,
 } from "./common/public-api";
-import { Game, Player } from "./common/types";
+import { Game, Player, User } from "./common/types";
+import uuid = require("uuid");
 
 const games: Game[] = [];
+const users: User[] = [];
 games.push(createGame());
 
 export function createSocket(server: Server) {
   const io = listen(server);
   io.on("connection", (socket) => {
     // tslint:disable-next-line:no-console
-    console.log("Client connected..");
+    console.log("Client connected...");
 
-    socket.on("subscribeToGame", (gameID: string) => {
+    socket.on("findOrCreateUser", (userID: string, fn) => {
+      if (!users.find((user) => user.userID === userID)) {
+        userID = uuid();
+        users.push({ userID, clientID: socket.id });
+      } else {
+        users
+          .filter((user) => user.userID === userID)
+          .map((user) => (user.clientID = socket.id));
+      }
+
       // tslint:disable-next-line:no-console
-      console.log(`client is subscribing the game: ${gameID} @ ${socket.id}`);
+      console.log(`Client user: ${userID}`);
+
+      fn(userID);
+    });
+
+    socket.on("subscribeToGame", (gameID: string, userID: string) => {
+      // tslint:disable-next-line:no-console
+      console.log(`client is subscribing the game: ${gameID} @ ${userID}`);
       socket.join(gameID);
 
       const currentGame = getGame(games, gameID);
 
-      if (
-        !currentGame.players.find((player) => player.playerID === socket.id)
-      ) {
-        addPlayer(currentGame, socket.id);
+      if (!currentGame.players.find((player) => player.playerID === userID)) {
+        addPlayer(currentGame, userID);
       }
 
       updateGameState(io, currentGame);
@@ -54,9 +70,9 @@ export function createSocket(server: Server) {
 
     socket.on(
       "playerAction",
-      (gameID: string, action: string, data: string) => {
+      (gameID: string, userID: string, action: string, data: string) => {
         const currentGame = getGame(games, gameID);
-        const player: Player = isPlayerAction(currentGame, socket.id);
+        const player: Player = isPlayerAction(currentGame, userID);
         if (!player) {
           return;
         }
@@ -72,7 +88,13 @@ export function createSocket(server: Server) {
 function updateGameState(io: SocketIO.Server, game: Game): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
-      io.to(client).emit("gameUpdate", getGameState(game, client));
+      io.to(client).emit(
+        "gameUpdate",
+        getGameState(
+          game,
+          users.find((user) => user.clientID === client)!.userID
+        )
+      );
     });
   });
 }

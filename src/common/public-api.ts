@@ -152,23 +152,14 @@ export function startGame(game: Game): void {
     game.players[0].isTurn = true;
   }
   game.currentBet = game.bigBlind;
+  game.currentPot = game.bigBlind + game.littleBlind;
 }
 
 export function nextRound(game: Game) {
-  let numberOfPlayers: number = 0;
   game.round++;
   game.currentBet = 0;
+  game.currentPot = 0;
   updatePot(game);
-  game.players
-    .filter((player) => player.status !== "fold")
-    .map((player) => numberOfPlayers++);
-  if (numberOfPlayers === 1) {
-    game.players
-      .filter((player) => player.status !== "fold")
-      .map((player) => (player.stackAmount += game.pot));
-    startGame(game);
-    return;
-  }
   clearActivePlayers(game);
   switch (game.round) {
     case 1:
@@ -218,14 +209,15 @@ export function playerAction(
       break;
     case "call":
       subtractBetFromPlayerStack(game, player);
+      game.currentPot += game.currentBet - (parseFloat(player.bet) || 0);
       player.bet = game.currentBet.toString();
       break;
     case "bet":
     case "raise":
       game.currentBet = dataNum;
       subtractBetFromPlayerStack(game, player);
+      game.currentPot += game.currentBet - (parseFloat(player.bet) || 0);
       player.bet = data;
-      game.currentPot += dataNum;
       break;
     default:
       break;
@@ -235,18 +227,29 @@ export function playerAction(
 }
 
 export function nextPlayerTurn(game: Game): void {
+  if (game.players.filter((player) => player.status !== "fold").length === 1) {
+    game.players
+      .filter((player) => player.status !== "fold")
+      .map(
+        (player) => (player.stackAmount += game.pot + parseFloat(player.bet))
+      );
+    startGame(game);
+    return;
+  }
   const playerIndex: number = game.players.findIndex(
     (player) => player.isTurn === true
   );
-  const firstTurnIndex: number =
-    game.players.findIndex((player) => player.dealer === true) + 1;
+  let firstTurnIndex: number = game.players.findIndex(
+    (player) => player.isLittleBlind === true
+  );
   let nextPlayerIndex: number = playerIndex + 1;
 
   game.players[playerIndex].isTurn = false;
 
   while (
     !game.players[nextPlayerIndex] ||
-    game.players[nextPlayerIndex].cards.length < 1
+    game.players[nextPlayerIndex].cards.length < 1 ||
+    game.players[nextPlayerIndex].stackAmount === 0
   ) {
     if (!game.players[nextPlayerIndex]) {
       nextPlayerIndex = 0;
@@ -261,11 +264,18 @@ export function nextPlayerTurn(game: Game): void {
     nextPlayerIndex === playerIndex ||
     game.players[nextPlayerIndex].bet === game.currentBet.toString()
   ) {
-    if (game.players[firstTurnIndex]) {
-      game.players[firstTurnIndex].isTurn = true;
-    } else {
-      game.players[0].isTurn = true;
+    while (
+      !game.players[firstTurnIndex] ||
+      game.players[firstTurnIndex].cards.length < 1 ||
+      game.players[firstTurnIndex].stackAmount === 0
+    ) {
+      if (!game.players[firstTurnIndex]) {
+        firstTurnIndex = 0;
+      } else {
+        firstTurnIndex++;
+      }
     }
+    game.players[firstTurnIndex].isTurn = true;
     nextRound(game);
     return;
   }
@@ -326,10 +336,7 @@ export function updateBlinds(game: Game): void {
 export function updatePot(game: Game): void {
   game.players
     .filter((player) => player.bet !== "")
-    .map(
-      (player) =>
-        (game.pot = roundToPrecision(game.pot + parseFloat(player.bet), 0.01))
-    );
+    .map((player) => (game.pot = game.pot + parseFloat(player.bet)));
 }
 
 export function clearPlayers(game: Game): void {

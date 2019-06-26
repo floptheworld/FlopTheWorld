@@ -58,6 +58,7 @@ export class Table extends LitElement {
               .currentBet=${this.game.currentBet}
               .currentPot=${this.game.currentPot}
               .pot=${this.game.pot}
+              .bigBlind=${this.game.bigBlind}
               @playerAction=${this._playerAction}
             ></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>

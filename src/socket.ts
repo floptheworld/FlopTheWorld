@@ -3,7 +3,6 @@ import { listen } from "socket.io";
 import uuid = require("uuid");
 import {
   addPlayer,
-  createGame,
   getGame,
   getGameState,
   nextRound,
@@ -11,6 +10,7 @@ import {
   playerAction,
   nextPlayerTurn,
   isPlayerAction,
+  createGame,
 } from "./common/public-api";
 import { Game, Player, User } from "./common/types";
 
@@ -24,10 +24,10 @@ export function createSocket(server: Server) {
     // tslint:disable-next-line:no-console
     console.log("Client connected...");
 
-    socket.on("findOrCreateUser", (userID: string, fn) => {
+    socket.on("findOrCreatePlayer", (userID: string, userName: string, fn) => {
       if (!users.find((user) => user.userID === userID)) {
         userID = uuid();
-        users.push({ userID, clientID: socket.id });
+        users.push({ userID, clientID: socket.id, userName });
       } else {
         users
           .filter((user) => user.userID === userID)
@@ -42,7 +42,7 @@ export function createSocket(server: Server) {
           });
       }
 
-      fn(userID);
+      fn(users.find((user) => user.userID === userID));
     });
 
     socket.on("subscribeToGame", (gameID: string, userID: string) => {
@@ -53,7 +53,7 @@ export function createSocket(server: Server) {
       const currentGame = getGame(games, gameID);
 
       if (!currentGame.players.find((player) => player.playerID === userID)) {
-        addPlayer(currentGame, userID);
+        addPlayer(currentGame, userID, users);
       }
 
       updateGameState(io, currentGame);

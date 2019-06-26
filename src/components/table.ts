@@ -8,7 +8,7 @@ import {
   TemplateResult,
 } from "lit-element";
 import { GameState } from "../common/types";
-import { createConnection } from "../data/connection";
+import { createConnection, findOrCreatePlayer } from "../data/connection";
 import "./action";
 import "./board";
 import "./card";
@@ -30,7 +30,16 @@ export class Table extends LitElement {
 
     return html`
       ${!this.game
-        ? ""
+        ? html`
+            <input
+              @keydown=${this._enterKeyPress}
+              type="text"
+              class="player-input"
+            />
+            <button type="button" @click=${this._createPlayer}>
+              Join Game!
+            </button>
+          `
         : html`
             <div id="Table">
               ${this.game.players.map(
@@ -39,6 +48,7 @@ export class Table extends LitElement {
                     <seat-element
                       .seatNumber=${index}
                       .player=${player}
+                      .currentPlayerID=${this.game!.currentPlayerID}
                     ></seat-element>
                   `
               )}
@@ -54,11 +64,7 @@ export class Table extends LitElement {
                   `}
             </div>
             <action-element
-              .player=${this.game.player}
-              .currentBet=${this.game.currentBet}
-              .currentPot=${this.game.currentPot}
-              .pot=${this.game.pot}
-              .bigBlind=${this.game.bigBlind}
+              .game=${this.game}
               @playerAction=${this._playerAction}
             ></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
@@ -149,8 +155,22 @@ export class Table extends LitElement {
     );
   }
 
+  private get _playerNameInput(): HTMLInputElement {
+    return this.shadowRoot!.querySelector(".player-input") as HTMLInputElement;
+  }
+
+  private _enterKeyPress(ev: KeyboardEvent): void {
+    if (ev.keyCode === 13) {
+      this._createPlayer();
+    }
+  }
+
   private _startGame(): void {
     this.socket!.emit("startGame", this.game!.gameID);
+  }
+
+  private _createPlayer(): void {
+    findOrCreatePlayer(this.socket!, this._playerNameInput.value);
   }
 
   private _playerAction(e: CustomEvent): void {

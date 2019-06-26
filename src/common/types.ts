@@ -21,7 +21,8 @@ export interface GameState {
   littleBlind: number;
   currentBet: number;
   currentPot: number;
-  player: Player;
+  currentPlayerID: string;
+  cardBack: string;
 }
 
 export interface Game extends GameState {
@@ -30,6 +31,7 @@ export interface Game extends GameState {
 
 export interface User {
   userID: string;
+  userName: string;
   clientID: string;
 }
 

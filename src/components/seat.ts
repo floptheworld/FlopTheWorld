@@ -26,6 +26,7 @@ const seatBetStyles: StyleInfo[] = [
 export class Seat extends LitElement {
   @property() public player!: Player;
   @property() public seatNumber!: number;
+  @property() public currentPlayerID!: string;
 
   protected render(): TemplateResult {
     return html`
@@ -40,7 +41,7 @@ export class Seat extends LitElement {
         <div class="card-box">
           ${this.player.cards.map(
             (card) => html`
-              <card-element .card=${card} .show=${true}></card-element>
+              <card-element .card=${card}></card-element>
             `
           )}
         </div>

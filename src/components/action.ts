@@ -6,6 +6,7 @@ import {
   LitElement,
   property,
   TemplateResult,
+  PropertyValues,
 } from "lit-element";
 import { GameState, Player } from "../common/types";
 import { roundToPrecision } from "../common/functions";
@@ -25,20 +26,16 @@ interface ActionTarget extends EventTarget {
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public game!: GameState;
-  @property() public pot!: number;
-  @property() public currentBet!: number;
-  @property() public currentPot!: number;
-  @property() public player!: Player;
-  @property() public bigBlind!: number;
+  @property() private player?: Player;
 
   protected render(): TemplateResult {
     return html`
-      ${!this.player.isTurn
+      ${!this.player || !this.player.isTurn
         ? ""
         : html`
             <div class="action-box">
               <div class="main-actions">
-                ${this.currentBet <= 0
+                ${this.game.currentBet <= 0
                   ? ""
                   : html`
                       <button
@@ -63,13 +60,13 @@ export class Action extends LitElement {
                         class="button blue-button action-button"
                         id="raise-button"
                         ?disabled=${parseFloat(this.player.bet) <
-                          this.currentBet + this.bigBlind ||
+                          this.game.currentBet + this.game.bigBlind ||
                           parseFloat(this.player.bet) > this.player.stackAmount}
                       >
                         Raise
                       </button>
                     `}
-                ${this.currentBet !== 0
+                ${this.game.currentBet !== 0
                   ? ""
                   : html`
                       <button
@@ -86,7 +83,7 @@ export class Action extends LitElement {
                         class="button blue-button action-button"
                         id="bet-button"
                         ?disabled=${parseFloat(this.player.bet) <
-                          this.bigBlind ||
+                          this.game.bigBlind ||
                           parseFloat(this.player.bet) > this.player.stackAmount}
                       >
                         Bet
@@ -134,6 +131,17 @@ export class Action extends LitElement {
             </div>
           `}
     `;
+  }
+
+  protected updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
+    if (!this.game) {
+      return;
+    }
+
+    this.player = this.game.players.find(
+      (player) => player.playerID === this.game.currentPlayerID
+    );
   }
 
   static get styles(): CSSResult {
@@ -198,23 +206,36 @@ export class Action extends LitElement {
   }
 
   private _setBet(e: MouseEvent): void {
+    if (!this.player) {
+      return;
+    }
+
     this.player.bet = roundToPrecision(
-      (e.target! as BetTarget).multiplier * (this.pot + this.currentPot),
+      (e.target! as BetTarget).multiplier *
+        (this.game.pot + this.game.currentPot),
       0.01
     ).toString();
     this.requestUpdate();
   }
 
   private _setBetFromText(e: KeyboardEvent) {
+    if (!this.player) {
+      return;
+    }
+
     this.player.bet = (e.target! as TextBetTarget).value.toString();
     this.requestUpdate();
   }
 
   private _callPlayerAction(e: MouseEvent): void {
+    if (!this.player) {
+      return;
+    }
     if (parseFloat(this.player.bet) > this.player.stackAmount) {
       return;
     }
     this.player.status = (e.target! as ActionTarget).action;
+
     this.dispatchEvent(
       new CustomEvent("playerAction", {
         detail: { bet: this.player.bet, action: this.player.status },

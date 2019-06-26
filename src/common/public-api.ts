@@ -156,7 +156,6 @@ export function startGame(game: Game): void {
 }
 
 export function nextRound(game: Game) {
-  let numberOfPlayers: number = 0;
   game.round++;
   game.currentBet = 0;
   game.currentPot = 0;

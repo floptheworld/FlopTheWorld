@@ -131,7 +131,7 @@ function getGameStatePlayers(
   currentPlayerID: string,
   cardBack: string
 ): Player[] {
-  const copyPlayers = players.concat();
+  const copyPlayers = players.map((player) => ({ ...player }));
 
   copyPlayers
     .filter(
@@ -248,6 +248,7 @@ export function nextPlayerTurn(game: Game): void {
     startGame(game);
     return;
   }
+
   const playerIndex: number = game.players.findIndex(
     (player) => player.isTurn === true
   );

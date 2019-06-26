@@ -212,14 +212,14 @@ export function playerAction(
     case "call":
       subtractBetFromPlayerStack(game, player);
       game.currentPot += game.currentBet - (parseFloat(player.bet) || 0);
-      player.bet = game.currentBet.toString();
+      player.bet = game.currentBet.toFixed(2);
       break;
     case "bet":
     case "raise":
       game.currentBet = dataNum;
       subtractBetFromPlayerStack(game, player);
       game.currentPot += game.currentBet - (parseFloat(player.bet) || 0);
-      player.bet = data;
+      player.bet = parseFloat(data).toFixed(2);
       break;
     default:
       break;
@@ -232,9 +232,9 @@ export function nextPlayerTurn(game: Game): void {
   if (game.players.filter((player) => player.status !== "fold").length === 1) {
     game.players
       .filter((player) => player.status !== "fold")
-      .map(
-        (player) => (player.stackAmount += game.pot + parseFloat(player.bet))
-      );
+      .map((player) => {
+        player.stackAmount += game.pot + game.currentPot;
+      });
     startGame(game);
     return;
   }
@@ -264,7 +264,8 @@ export function nextPlayerTurn(game: Game): void {
     (game.players[nextPlayerIndex].status === "check" &&
       game.currentBet === 0) ||
     nextPlayerIndex === playerIndex ||
-    game.players[nextPlayerIndex].bet === game.currentBet.toString()
+    parseFloat(game.players[nextPlayerIndex].bet).toFixed(2) ===
+      game.currentBet.toFixed(2)
   ) {
     while (
       !game.players[firstTurnIndex] ||

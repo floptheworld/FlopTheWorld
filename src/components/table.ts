@@ -68,6 +68,7 @@ export class Table extends LitElement {
               @playerAction=${this._playerAction}
             ></action-element>
             <button type="button" @click=${this._startGame}>Start Game!</button>
+            ${this.game.winDesc}
           `}
     `;
   }

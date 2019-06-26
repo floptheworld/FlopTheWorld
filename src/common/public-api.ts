@@ -57,6 +57,7 @@ export function clearTable(game: Game): void {
   game.deck = [];
   game.round = 0;
   game.pot = 0;
+  game.winDesc = "";
 }
 
 export function dealCards(game: Game): void {
@@ -101,6 +102,7 @@ export function createGame(): Game {
     littleBlind: 0.05,
     currentPlayerID: "",
     cardBack: "gray_back",
+    winDesc: "",
   };
 }
 
@@ -122,6 +124,7 @@ export function getGameState(currentGame: Game, playerID: string): GameState {
       currentPot: currentGame.currentPot,
       currentPlayerID: playerID,
       cardBack: currentGame.cardBack,
+      winDesc: currentGame.winDesc,
     },
   };
 }
@@ -191,7 +194,7 @@ export function nextRound(game: Game) {
       break;
     default:
       solveHands(game);
-      startGame(game);
+    // startGame(game);
   }
 }
 
@@ -407,4 +410,5 @@ export function solveHands(game: Game): void {
       .filter((player: Player) => player.cards.length > 0)
       .map((player: Player) => (player.stackAmount += game.pot / availPlayers));
   }
+  game.winDesc = winners[0].descr;
 }

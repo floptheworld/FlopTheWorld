@@ -32,3 +32,12 @@ export interface User {
   userID: string;
   clientID: string;
 }
+
+export interface Card {
+  wildValue: string;
+  suit: string;
+}
+
+export interface Hand {
+  cards: Card[];
+}

@@ -1,4 +1,4 @@
-import { Game, GameState, Player } from "./types";
+import { Game, GameState, Player, Card, Hand } from "./types";
 import { roundToPrecision } from "../common/functions";
 // tslint:disable-next-line:no-var-requires
 const Hand = require("pokersolver").Hand;
@@ -372,11 +372,13 @@ export function solveHands(game: Game): void {
     solvedHands.push(Hand.solve(player.cards.concat(game.board)));
   });
 
-  const winners = Hand.winners(solvedHands);
+  const winners: Hand[] = Hand.winners(solvedHands);
 
-  winners.map((winner: object) => {
+  winners.map((winner: Hand) => {
     let winningHand: string[] = [];
-    winningHand = winner.cards.map((c) => c.wildValue + c.suit.toUpperCase());
+    winningHand = winner.cards.map(
+      (c: Card) => c.wildValue + c.suit.toUpperCase()
+    );
     game.players.map((player: Player) => {
       if (player.cards.some((card: string) => winningHand.includes(card))) {
         player.stackAmount += game.pot / winners.length;
@@ -387,10 +389,10 @@ export function solveHands(game: Game): void {
 
   if (boardWinner) {
     const availPlayers: number = game.players.filter(
-      (player) => player.cards.length > 0
+      (player: Player) => player.cards.length > 0
     ).length;
     game.players
-      .filter((player) => player.cards.length > 0)
-      .map((player) => (player.stackAmount += game.pot / availPlayers));
+      .filter((player: Player) => player.cards.length > 0)
+      .map((player: Player) => (player.stackAmount += game.pot / availPlayers));
   }
 }

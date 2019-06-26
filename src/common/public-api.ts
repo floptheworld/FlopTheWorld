@@ -1,4 +1,4 @@
-import { Game, GameState, Player, Card, Hand } from "./types";
+import { Game, GameState, Player, Card, Hand, User } from "./types";
 import { roundToPrecision } from "../common/functions";
 // tslint:disable-next-line:no-var-requires
 const Hand = require("pokersolver").Hand;
@@ -69,10 +69,10 @@ export function dealCards(game: Game): void {
   });
 }
 
-export function addPlayer(game: Game, id: string): void {
+export function addPlayer(game: Game, id: string, users: User[]): void {
   const newPlayer: Player = {
     cards: [],
-    name: "New Player",
+    name: users.find((user) => user.userID === id)!.userName,
     playerID: id,
     stackAmount: 5.0,
     isTurn: false,
@@ -99,18 +99,8 @@ export function createGame(): Game {
     currentPot: 0,
     bigBlind: 0.1,
     littleBlind: 0.05,
-    player: {
-      cards: [],
-      name: "",
-      playerID: "",
-      stackAmount: 5.0,
-      isTurn: false,
-      isLittleBlind: false,
-      isBigBlind: false,
-      dealer: false,
-      status: "",
-      bet: "",
-    },
+    currentPlayerID: "",
+    cardBack: "gray_back",
   };
 }
 
@@ -119,18 +109,38 @@ export function getGameState(currentGame: Game, playerID: string): GameState {
     ...{
       board: currentGame.board,
       gameID: currentGame.gameID,
-      players: currentGame.players,
+      players: getGameStatePlayers(
+        currentGame.players,
+        playerID,
+        currentGame.cardBack
+      ),
       pot: currentGame.pot,
       round: currentGame.round,
       bigBlind: currentGame.bigBlind,
       littleBlind: currentGame.littleBlind,
       currentBet: currentGame.currentBet,
       currentPot: currentGame.currentPot,
-      player: currentGame.players.find(
-        (player) => player.playerID === playerID
-      )!,
+      currentPlayerID: playerID,
+      cardBack: currentGame.cardBack,
     },
   };
+}
+
+function getGameStatePlayers(
+  players: Player[],
+  currentPlayerID: string,
+  cardBack: string
+): Player[] {
+  const copyPlayers = players.concat();
+
+  copyPlayers
+    .filter(
+      (player) => player.playerID !== currentPlayerID && player.cards.length > 0
+    )
+    .map((player) => {
+      player.cards = [cardBack, cardBack];
+    });
+  return copyPlayers;
 }
 
 export function getGame(games: Game[], gameID: string): Game {

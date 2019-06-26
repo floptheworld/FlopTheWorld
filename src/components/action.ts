@@ -85,6 +85,9 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button blue-button action-button"
                         id="bet-button"
+                        ?disabled=${parseFloat(this.player.bet) <
+                          this.bigBlind ||
+                          parseFloat(this.player.bet) > this.player.stackAmount}
                       >
                         Bet
                       </button>

@@ -29,119 +29,127 @@ export class Action extends LitElement {
   @property() private player?: Player;
 
   protected render(): TemplateResult {
-    return html`
-      ${!this.player || !this.player.isTurn
-        ? ""
-        : html`
-            <div class="action-box">
-              <div class="main-actions">
-                ${this.game.currentBet <= 0
-                  ? ""
-                  : html`
-                      <button
-                        .action=${"fold"}
-                        @click=${this._callPlayerAction}
-                        class="button red-button action-button"
-                        id="fold-button"
-                      >
-                        Fold
-                      </button>
-                      <button
-                        .action=${"call"}
-                        @click=${this._callPlayerAction}
-                        class="button green-button action-button"
-                        id="call-button"
-                      >
-                        Call
-                      </button>
-                      <button
-                        .action=${"raise"}
-                        @click=${this._callPlayerAction}
-                        class="button blue-button action-button"
-                        id="raise-button"
-                        ?disabled=${parseFloat(this.player.bet) <
-                          this.game.currentBet + this.game.bigBlind ||
-                          parseFloat(this.player.bet) > this.player.stackAmount}
-                      >
-                        Raise
-                      </button>
-                    `}
-                ${this.game.currentBet !== 0
-                  ? ""
-                  : html`
-                      <button
-                        .action=${"check"}
-                        @click=${this._callPlayerAction}
-                        class="button green-button action-button"
-                        id="check-button"
-                      >
-                        Check
-                      </button>
-                      <button
-                        .action=${"bet"}
-                        @click=${this._callPlayerAction}
-                        class="button blue-button action-button"
-                        id="bet-button"
-                        ?disabled=${parseFloat(this.player.bet) <
-                          this.game.bigBlind ||
-                          parseFloat(this.player.bet) > this.player.stackAmount}
-                      >
-                        Bet
-                      </button>
-                    `}
-              </div>
-              <div>
-                <input
-                  @keyup=${this._setBetFromText}
-                  .value=${this.player.bet}
-                  class="bet-text"
-                  type="text"
-                />
-              </div>
-              <div class="bet-actions">
-                <button
-                  .multiplier=${0.25}
-                  @click=${this._setBet}
-                  class="button-small dark-blue-button"
-                >
-                  1/4
-                </button>
-                <button
-                  .multiplier=${0.5}
-                  @click=${this._setBet}
-                  class="button-small dark-blue-button"
-                >
-                  1/2
-                </button>
-                <button
-                  .multiplier=${0.75}
-                  @click=${this._setBet}
-                  class="button-small dark-blue-button"
-                >
-                  3/4
-                </button>
-                <button
-                  .multiplier=${1}
-                  @click=${this._setBet}
-                  class="button-small dark-blue-button"
-                >
-                  Full
-                </button>
-              </div>
-            </div>
-          `}
-    `;
-  }
-
-  protected updated(changedProps: PropertyValues) {
-    super.updated(changedProps);
     if (!this.game) {
-      return;
+      return html``;
     }
 
     this.player = this.game.players.find(
       (player) => player.playerID === this.game.currentPlayerID
     );
+
+    if (!this.player || !this.player.isTurn) {
+      return html``;
+    }
+
+    if (this.player.bet === "") {
+      this.player.bet = (this.game.currentBet !== 0
+        ? this.game.currentBet
+        : this.game.bigBlind
+      )
+        .toFixed(2)
+        .toString();
+    }
+
+    return html`
+      <div class="action-box">
+        <div class="main-actions">
+          ${this.game.currentBet <= 0
+            ? ""
+            : html`
+                <button
+                  .action=${"fold"}
+                  @click=${this._callPlayerAction}
+                  class="button red-button action-button"
+                  id="fold-button"
+                >
+                  Fold
+                </button>
+                <button
+                  .action=${"call"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="call-button"
+                >
+                  Call
+                </button>
+                <button
+                  .action=${"raise"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="raise-button"
+                  ?disabled=${parseFloat(this.player.bet) <
+                    this.game.currentBet + this.game.bigBlind ||
+                    parseFloat(this.player.bet) > this.player.stackAmount ||
+                    this.player.bet === ""}
+                >
+                  Raise
+                </button>
+              `}
+          ${this.game.currentBet !== 0
+            ? ""
+            : html`
+                <button
+                  .action=${"check"}
+                  @click=${this._callPlayerAction}
+                  class="button green-button action-button"
+                  id="check-button"
+                >
+                  Check
+                </button>
+                <button
+                  .action=${"bet"}
+                  @click=${this._callPlayerAction}
+                  class="button blue-button action-button"
+                  id="bet-button"
+                  ?disabled=${parseFloat(this.player.bet) <
+                    this.game.bigBlind ||
+                    parseFloat(this.player.bet) > this.player.stackAmount ||
+                    this.player.bet === ""}
+                >
+                  Bet
+                </button>
+              `}
+        </div>
+        <div>
+          <input
+            @keyup=${this._setBetFromText}
+            .value=${this.player.bet}
+            class="bet-text"
+            type="text"
+          />
+        </div>
+        <div class="bet-actions">
+          <button
+            .multiplier=${0.25}
+            @click=${this._setBet}
+            class="button-small dark-blue-button"
+          >
+            1/4
+          </button>
+          <button
+            .multiplier=${0.5}
+            @click=${this._setBet}
+            class="button-small dark-blue-button"
+          >
+            1/2
+          </button>
+          <button
+            .multiplier=${0.75}
+            @click=${this._setBet}
+            class="button-small dark-blue-button"
+          >
+            3/4
+          </button>
+          <button
+            .multiplier=${1}
+            @click=${this._setBet}
+            class="button-small dark-blue-button"
+          >
+            Full
+          </button>
+        </div>
+      </div>
+    `;
   }
 
   static get styles(): CSSResult {
@@ -231,11 +239,14 @@ export class Action extends LitElement {
     if (!this.player) {
       return;
     }
-    if (parseFloat(this.player.bet) > this.player.stackAmount) {
-      return;
-    }
     this.player.status = (e.target! as ActionTarget).action;
 
+    if (
+      parseFloat(this.player.bet) > this.player.stackAmount &&
+      this.player.status !== "check"
+    ) {
+      return;
+    }
     this.dispatchEvent(
       new CustomEvent("playerAction", {
         detail: { bet: this.player.bet, action: this.player.status },

@@ -23,8 +23,6 @@ export function findOrCreatePlayer(
   playerID: string = ""
 ) {
   socket.emit("findOrCreatePlayer", playerID, playerName, (player: User) => {
-    console.log(player);
-
     localStorage.playerID = player.userID;
     localStorage.name = player.userName;
 

@@ -11,6 +11,7 @@ export interface Player {
   bet: string;
   invested: number;
   result: number;
+  solvedHand?: Hand;
 }
 
 export interface GameState {

@@ -20,6 +20,7 @@ export function getGameState(currentGame: Game, playerID: string): GameState {
       currentPlayerID: playerID,
       cardBack: currentGame.cardBack,
       winDesc: currentGame.winDesc,
+      pots: currentGame.pots,
     },
   };
 }

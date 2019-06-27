@@ -16,5 +16,6 @@ export function createGame(): Game {
     currentPlayerID: "",
     cardBack: "gray_back",
     winDesc: "",
+    pots: [],
   };
 }

@@ -27,6 +27,7 @@ export interface GameState {
   currentPlayerID: string;
   cardBack: string;
   winDesc: string;
+  pots: number[];
 }
 
 export interface Game extends GameState {

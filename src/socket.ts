@@ -1,21 +1,20 @@
 import { Server } from "http";
 import { listen } from "socket.io";
 import uuid = require("uuid");
-import {
-  addPlayer,
-  getGame,
-  getGameState,
-  nextRound,
-  startGame,
-  playerAction,
-  nextPlayerTurn,
-  isPlayerAction,
-  createGame,
-} from "./common/public-api";
 import { Game, Player, User } from "./common/types";
+import { createGame } from "./common/game/create-game";
+import { getGame } from "./common/game/get-game";
+import { addPlayer } from "./common/player/add-player";
+import { startGame } from "./common/game/start-game";
+import { nextRound } from "./common/game/next-round";
+import { isPlayerAction } from "./common/player/is-player-action";
+import { playerAction } from "./common/player/player-action";
+import { nextPlayerTurn } from "./common/player/next-player-turn";
+import { getGameState } from "./common/game/get-game-state";
+import { games, users } from "./common/const";
 
-const games: Game[] = [];
-const users: User[] = [];
+// const games: Game[] = [];
+// const users: User[] = [];
 games.push(createGame());
 
 export function createSocket(server: Server) {

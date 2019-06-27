@@ -4,18 +4,16 @@ import { Game, Card, Player, Hand } from "../types";
 import { roundToPrecision } from "../round-to-precision";
 
 export function solveHands(game: Game): void {
-  let solvedHands: Hand[] = [];
+  const solvedHands: Hand[] = [];
   let boardWinner: boolean = true;
   let winners: Hand[] = [];
   let sidePot: number = 0;
   let minInvested: number = 0;
 
-  let investedPlayers: Player[] = game.players.filter(
-    (player) => player.invested > 0
-  );
-  let livePlayers: Player[] = investedPlayers.filter(
-    (player) => player.status !== "fold"
-  );
+  game.players.map((player) => {
+    // filter out folded
+    solvedHands.push(Hand.solve(player.cards.concat(game.board)));
+  });
 
   // While there are still players with invested money
   while (investedPlayers.length > 0) {
@@ -24,10 +22,72 @@ export function solveHands(game: Game): void {
       prev.invested < curr.invested ? prev : curr
     ).invested;
 
-    // Create a Side pot of the Min Invested Amount * How many players invest atleast that much
-    sidePot = roundToPrecision(
-      roundToPrecision(minInvested, 0.01) * investedPlayers.length,
-      0.01
+  // Start of testing Pot
+  // ================================================================================
+  console.log("berfore", game.players);
+  const flag = 0;
+
+  game.players.map((player) => (player.result -= player.invested));
+
+  while (
+    game.players.filter(
+      (player) => player.invested > 0 && player.status !== "fold"
+    ).length > 0
+  ) {
+    const solvedHands2: Hand[] = [];
+    let sidePot: number = 0;
+
+    const minInvested: Player = game.players.reduce((prev, curr) =>
+      prev.invested < curr.invested ? prev : curr
+    );
+    game.players
+      .filter((player) => player.invested > 0 && player.status !== "fold")
+      .map((player) =>
+        solvedHands2.push(Hand.solve(player.cards.concat(game.board)))
+      );
+
+    sidePot +=
+      minInvested.invested *
+      game.players.filter((player) => player.invested > 0).length;
+
+    const bestHand: Hand = solvedHands2.reduce((prev, curr) =>
+      prev.rank < curr.rank ? prev : curr
+    );
+
+    const winners2 = game.players.filter(
+      (player) =>
+        player.invested > 0 &&
+        player.status !== "fold" &&
+        player.cards.some((playerCard) =>
+          bestHand.cardPool
+            .map((c: Card) => c.wildValue + c.suit.toUpperCase())
+            .includes(playerCard)
+        )
+    );
+
+    winners2.map((player) => (player.result += sidePot * winners2.length));
+
+    game.players
+      .filter((player) => player.invested > 0 && player.status !== "fold")
+      .map((player) => (player.invested -= minInvested.invested));
+  }
+
+  if (
+    game.players.filter(
+      (player) => player.invested > 0 && player.status !== "fold"
+    ).length === 1
+  ) {
+    game.players
+      .filter((player) => player.invested > 0 && player.status !== "fold")
+      .map((player) => (player.result += player.invested));
+  }
+
+  // ==================================================================================
+
+  winners.map((winner: Hand) => {
+    let winningHand: string[] = [];
+    winningHand = winner.cards.map(
+      (c: Card) => c.wildValue + c.suit.toUpperCase()
     );
 
     // Solve the hands of all players who arent folded

@@ -7,55 +7,73 @@ export function solveHands(game: Game): void {
   let solvedHands: Hand[] = [];
   let boardWinner: boolean = true;
   let winners: Hand[] = [];
-
-  game.players.map((player) => (player.result -= player.invested));
+  let sidePot: number = 0;
+  let minInvested: number = 0;
 
   let investedPlayers: Player[] = game.players.filter(
     (player) => player.invested > 0
   );
+  let livePlayers: Player[] = investedPlayers.filter(
+    (player) => player.status !== "fold"
+  );
 
+  // While there are still players with invested money
   while (investedPlayers.length > 0) {
-    boardWinner = true;
-    let sidePot: number = 0;
-    const livePlayers: Player[] = investedPlayers.filter(
-      (player) => player.status !== "fold"
-    );
-
-    const minInvested: number = investedPlayers.reduce((prev, curr) =>
+    // Find the Minimum Invested Player and store that amount
+    minInvested = investedPlayers.reduce((prev, curr) =>
       prev.invested < curr.invested ? prev : curr
     ).invested;
+    console.log(`Min Invested: ${minInvested}`);
 
+    // Create a Side pot of the Min Invested Amount * How many players invest atleast that much
     sidePot = roundToPrecision(
       roundToPrecision(minInvested, 0.01) * investedPlayers.length,
       0.01
     );
+    console.log(`Side Pot: ${sidePot}`);
 
+    // Solve the hands of all players who arent folded
     livePlayers.map((player) => {
       solvedHands.push(Hand.solve(player.cards.concat(game.board)));
     });
 
+    // Find the Winning Hand/s - Could be Multiple if there is a tie
     winners = Hand.winners(solvedHands);
+    console.log(`Winners: ${winners.length} -> ${winners[0].cards.toString()}`);
 
+    // For Each Winning Hand, find the player that the hand belongs to and split the pot by the number of winners
     winners.map((winner: Hand) => {
       let winningHand: string[] = [];
+      // Upper case each Card Value to match the servers cards
       winningHand = winner.cards.map(
         (c: Card) => c.wildValue + c.suit.toUpperCase()
       );
 
-      livePlayers.map((player: Player) => {
+      // For each Player that hasn't folded, check the winning hand against their hand
+      livePlayers.map((player: Player, ind) => {
         if (player.cards.some((card: string) => winningHand.includes(card))) {
+          // Add to the player's result the pot split by how many players won
+          console.log(
+            `Player[${ind}].Result: ${player.result + sidePot / winners.length}`
+          );
+
           player.result += sidePot / winners.length;
           boardWinner = false;
         }
       });
     });
 
+    // If the board wins, i.e. No cards in the players hands played
     if (boardWinner) {
+      console.log("Board");
+
+      // Split the Pot between each player that hasn't folded
       livePlayers.map(
         (player: Player) => (player.result += sidePot / livePlayers.length)
       );
     }
 
+    // Subtract the Min Invested from each players investment
     investedPlayers.map(
       (player) =>
         (player.invested = roundToPrecision(
@@ -64,12 +82,21 @@ export function solveHands(game: Game): void {
         ))
     );
 
+    // Update the invested players as at least 1 player should be dropped off every loop
     investedPlayers = investedPlayers.filter((player) => player.invested > 0);
+    livePlayers = investedPlayers.filter((player) => player.status !== "fold");
 
     game.winDesc = winners[0].descr;
+
+    // Reset Variables
     solvedHands = [];
     winners = [];
+    boardWinner = true;
   }
+
+  game.players.map((player, i) =>
+    console.log(`Player[${i}]`, player.cards, player.invested, player.result)
+  );
 
   game.players
     .filter((player) => player.result > 0)

@@ -11,4 +11,6 @@ export function subtractBetFromPlayerStack(game: Game, player: Player): void {
     roundToPrecision(player.invested, 0.01) +
     (roundToPrecision(game.currentBet, 0.01) -
       roundToPrecision(parseFloat(player.bet) || 0, 0.01));
+
+  console.log(`Player: ${player.cards} -> Invested: ${player.invested}`);
 }

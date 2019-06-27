@@ -86,7 +86,7 @@ export function createSocket(server: Server) {
           setTimeout(() => {
             startGame(currentGame);
             updateGameState(io, currentGame);
-          }, 2000);
+          }, 15000);
         }
       }
     );

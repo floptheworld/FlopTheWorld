@@ -9,6 +9,9 @@ export interface Player {
   dealer: boolean;
   status: string;
   bet: string;
+  invested: number;
+  result: number;
+  solvedHand?: Hand;
 }
 
 export interface GameState {
@@ -44,4 +47,7 @@ export interface Card {
 export interface Hand {
   cards: Card[];
   descr: string;
+  rank: number;
+  name: string;
+  cardPool: Card[];
 }

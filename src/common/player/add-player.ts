@@ -1,3 +1,5 @@
+// tslint:disable-next-line:no-var-requires
+const Hand = require("pokersolver").Hand;
 import { Game, Player, User } from "../types";
 
 export function addPlayer(game: Game, id: string, users: User[]): void {
@@ -12,6 +14,8 @@ export function addPlayer(game: Game, id: string, users: User[]): void {
     isBigBlind: false,
     status: "",
     bet: "",
+    invested: 0,
+    result: 0,
   };
 
   game.players.push(newPlayer);

@@ -6,7 +6,6 @@ import {
   LitElement,
   property,
   TemplateResult,
-  PropertyValues,
 } from "lit-element";
 import { GameState, Player } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";

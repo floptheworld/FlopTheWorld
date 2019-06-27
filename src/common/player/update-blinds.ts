@@ -9,10 +9,12 @@ export function updateBlinds(game: Game): void {
     game.players[dealerIndex + 1].isLittleBlind = true;
     game.players[dealerIndex + 1].bet = game.littleBlind.toString();
     game.players[dealerIndex + 1].stackAmount -= game.littleBlind;
+    game.players[dealerIndex + 1].invested += game.littleBlind;
   } else {
     game.players[0].isLittleBlind = true;
     game.players[0].bet = game.littleBlind.toString();
     game.players[0].stackAmount -= game.littleBlind;
+    game.players[0].invested += game.littleBlind;
   }
 
   const littleBlindIndex = game.players.findIndex(
@@ -23,9 +25,11 @@ export function updateBlinds(game: Game): void {
     game.players[littleBlindIndex + 1].isBigBlind = true;
     game.players[littleBlindIndex + 1].bet = game.bigBlind.toString();
     game.players[littleBlindIndex + 1].stackAmount -= game.bigBlind;
+    game.players[littleBlindIndex + 1].invested += game.bigBlind;
   } else {
     game.players[0].isBigBlind = true;
     game.players[0].bet = game.bigBlind.toString();
     game.players[0].stackAmount -= game.bigBlind;
+    game.players[0].invested += game.bigBlind;
   }
 }

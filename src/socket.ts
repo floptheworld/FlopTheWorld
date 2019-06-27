@@ -1,7 +1,7 @@
 import { Server } from "http";
 import { listen } from "socket.io";
 import uuid = require("uuid");
-import { Game, Player, User } from "./common/types";
+import { Game, Player } from "./common/types";
 import { createGame } from "./common/game/create-game";
 import { getGame } from "./common/game/get-game";
 import { addPlayer } from "./common/player/add-player";
@@ -13,8 +13,6 @@ import { nextPlayerTurn } from "./common/player/next-player-turn";
 import { getGameState } from "./common/game/get-game-state";
 import { games, users } from "./common/const";
 
-// const games: Game[] = [];
-// const users: User[] = [];
 games.push(createGame());
 
 export function createSocket(server: Server) {
@@ -88,7 +86,7 @@ export function createSocket(server: Server) {
           setTimeout(() => {
             startGame(currentGame);
             updateGameState(io, currentGame);
-          }, 2000);
+          }, 15000);
         }
       }
     );

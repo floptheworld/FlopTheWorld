@@ -9,7 +9,7 @@ import {
   PropertyValues,
 } from "lit-element";
 import { GameState, Player } from "../common/types";
-import { roundToPrecision } from "../common/functions";
+import { roundToPrecision } from "../common/round-to-precision";
 
 interface BetTarget extends EventTarget {
   multiplier: number;

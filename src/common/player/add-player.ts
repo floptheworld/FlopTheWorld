@@ -12,6 +12,8 @@ export function addPlayer(game: Game, id: string, users: User[]): void {
     isBigBlind: false,
     status: "",
     bet: "",
+    invested: 0,
+    result: 0,
   };
 
   game.players.push(newPlayer);

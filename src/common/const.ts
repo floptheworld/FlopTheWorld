@@ -28,14 +28,4 @@ export const users: User[] = [];
 // game.players[2].cards = ["4D", "5S"];
 // game.board = ["AC", "JD", "JH", "AD", "JS"];
 
-// Three way tie, side pots
-
-// game.players[0].cards = ["QS", "JS"];
-//   game.players[0].invested = 50;
-//   game.players[1].cards = ["QD", "3D"];
-//   game.players[1].invested = 100;
-//   game.players[2].cards = ["QH", "5S"];
-//   game.players[2].invested = 150;
-//   game.board = ["AS", "KS", "7D", "7C", "9H"];
-
 // ================================================================================

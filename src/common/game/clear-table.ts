@@ -11,6 +11,7 @@ export function clearTable(game: Game): void {
   });
   game.board = [];
   game.deck = [];
+  game.pots = [];
   game.round = 0;
   game.pot = 0;
   game.winDesc = "";

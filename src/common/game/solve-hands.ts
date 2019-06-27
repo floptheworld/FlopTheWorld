@@ -10,6 +10,15 @@ export function solveHands(game: Game): void {
   let sidePot: number = 0;
   let minInvested: number = 0;
 
+  // ================================================================================
+
+  game.players[0].cards = ["3D", "4S"];
+  game.players[1].cards = ["5H", "6C"];
+  game.players[2].cards = ["4D", "5S"];
+  game.board = ["AC", "JD", "JH", "AD", "JS"];
+
+  // ================================================================================
+
   game.players.map((player) => {
     // filter out folded
     solvedHands.push(Hand.solve(player.cards.concat(game.board)));
@@ -24,62 +33,85 @@ export function solveHands(game: Game): void {
 
   // Start of testing Pot
   // ================================================================================
-  console.log("berfore", game.players);
-  const flag = 0;
-
   game.players.map((player) => (player.result -= player.invested));
 
-  while (
-    game.players.filter(
-      (player) => player.invested > 0 && player.status !== "fold"
-    ).length > 0
-  ) {
+  let investedPlayers: Player[] = game.players.filter(
+    (player) => player.invested > 0
+  );
+
+  while (investedPlayers.length > 0) {
     const solvedHands2: Hand[] = [];
     let sidePot: number = 0;
-
-    const minInvested: Player = game.players.reduce((prev, curr) =>
-      prev.invested < curr.invested ? prev : curr
+    const livePlayers: Player[] = investedPlayers.filter(
+      (player) => player.status !== "fold"
     );
-    game.players
-      .filter((player) => player.invested > 0 && player.status !== "fold")
-      .map((player) =>
-        solvedHands2.push(Hand.solve(player.cards.concat(game.board)))
+
+    const minInvested: number = investedPlayers.reduce((prev, curr) =>
+      prev.invested < curr.invested ? prev : curr
+    ).invested;
+
+    sidePot = roundToPrecision(
+      roundToPrecision(minInvested, 0.01) * investedPlayers.length,
+      0.01
+    );
+
+    // ================================================================================
+
+    let boardWinner2: boolean = true;
+    livePlayers.map((player) => {
+      solvedHands2.push(Hand.solve(player.cards.concat(game.board)));
+    });
+
+    const winners3: Hand[] = Hand.winners(solvedHands2);
+
+    winners3.map((winner: Hand) => {
+      let winningHand: string[] = [];
+      winningHand = winner.cards.map(
+        (c: Card) => c.wildValue + c.suit.toUpperCase()
       );
 
-    sidePot +=
-      minInvested.invested *
-      game.players.filter((player) => player.invested > 0).length;
+      livePlayers.map((player: Player) => {
+        if (player.cards.some((card: string) => winningHand.includes(card))) {
+          player.result += sidePot / winners3.length;
+          boardWinner2 = false;
+        }
+      });
+    });
 
-    const bestHand: Hand = solvedHands2.reduce((prev, curr) =>
-      prev.rank < curr.rank ? prev : curr
-    );
+    if (boardWinner2) {
+      livePlayers.map(
+        (player: Player) => (player.result += sidePot / livePlayers.length)
+      );
+    }
 
-    const winners2 = game.players.filter(
+    // ================================================================================
+
+    // livePlayers.map(
+    //   (player) =>
+    //     (player.solvedHand = Hand.solve(player.cards.concat(game.board)))
+    // );
+
+    // const bestHandRank: number = livePlayers.reduce((prev, curr) =>
+    //   prev.solvedHand!.rank > curr.solvedHand!.rank ? prev : curr
+    // ).solvedHand!.rank;
+
+    // const winners2 = livePlayers.filter(
+    //   (player) => player.solvedHand!.rank === bestHandRank
+    // );
+
+    // winners2.map((player) => (player.result += sidePot * winners2.length));
+
+    // ================================================================================
+
+    investedPlayers.map(
       (player) =>
-        player.invested > 0 &&
-        player.status !== "fold" &&
-        player.cards.some((playerCard) =>
-          bestHand.cardPool
-            .map((c: Card) => c.wildValue + c.suit.toUpperCase())
-            .includes(playerCard)
-        )
+        (player.invested = roundToPrecision(
+          player.invested - minInvested,
+          0.01
+        ))
     );
 
-    winners2.map((player) => (player.result += sidePot * winners2.length));
-
-    game.players
-      .filter((player) => player.invested > 0 && player.status !== "fold")
-      .map((player) => (player.invested -= minInvested.invested));
-  }
-
-  if (
-    game.players.filter(
-      (player) => player.invested > 0 && player.status !== "fold"
-    ).length === 1
-  ) {
-    game.players
-      .filter((player) => player.invested > 0 && player.status !== "fold")
-      .map((player) => (player.result += player.invested));
+    investedPlayers = investedPlayers.filter((player) => player.invested > 0);
   }
 
   // ==================================================================================

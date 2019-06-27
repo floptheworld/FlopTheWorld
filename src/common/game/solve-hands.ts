@@ -23,14 +23,12 @@ export function solveHands(game: Game): void {
     minInvested = investedPlayers.reduce((prev, curr) =>
       prev.invested < curr.invested ? prev : curr
     ).invested;
-    console.log(`Min Invested: ${minInvested}`);
 
     // Create a Side pot of the Min Invested Amount * How many players invest atleast that much
     sidePot = roundToPrecision(
       roundToPrecision(minInvested, 0.01) * investedPlayers.length,
       0.01
     );
-    console.log(`Side Pot: ${sidePot}`);
 
     // Solve the hands of all players who arent folded
     livePlayers.map((player) => {
@@ -39,7 +37,6 @@ export function solveHands(game: Game): void {
 
     // Find the Winning Hand/s - Could be Multiple if there is a tie
     winners = Hand.winners(solvedHands);
-    console.log(`Winners: ${winners.length} -> ${winners[0].cards.toString()}`);
 
     // For Each Winning Hand, find the player that the hand belongs to and split the pot by the number of winners
     winners.map((winner: Hand) => {
@@ -53,10 +50,6 @@ export function solveHands(game: Game): void {
       livePlayers.map((player: Player, ind) => {
         if (player.cards.some((card: string) => winningHand.includes(card))) {
           // Add to the player's result the pot split by how many players won
-          console.log(
-            `Player[${ind}].Result: ${player.result + sidePot / winners.length}`
-          );
-
           player.result += sidePot / winners.length;
           boardWinner = false;
         }
@@ -65,8 +58,6 @@ export function solveHands(game: Game): void {
 
     // If the board wins, i.e. No cards in the players hands played
     if (boardWinner) {
-      console.log("Board");
-
       // Split the Pot between each player that hasn't folded
       livePlayers.map(
         (player: Player) => (player.result += sidePot / livePlayers.length)
@@ -93,10 +84,6 @@ export function solveHands(game: Game): void {
     winners = [];
     boardWinner = true;
   }
-
-  game.players.map((player, i) =>
-    console.log(`Player[${i}]`, player.cards, player.invested, player.result)
-  );
 
   game.players
     .filter((player) => player.result > 0)

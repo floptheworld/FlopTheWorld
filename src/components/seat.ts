@@ -66,12 +66,14 @@ export class Seat extends LitElement {
         margin: 0px;
       }
       .player-box {
-        background-color: #333;
-        border: 2px solid #000;
+        background-color: #373737;
+        border-radius: 5px;
         margin-top: -50px;
         position: absolute;
         width: 150px;
         z-index: 3;
+        box-shadow: 0px 0px 10px #000;
+        -webkit-box-shadow: 0px 0px 10px #000;
       }
       .player-bet[data-player-bet] {
         display: none !important;
@@ -82,10 +84,12 @@ export class Seat extends LitElement {
       .player-bet {
         position: absolute;
         background-color: #333;
-        border: 2px solid #000;
+        border-radius: 5px;
         color: #fcbd07;
         text-align: center;
         font-weight: bold;
+        box-shadow: 0px 0px 4px #000;
+        -webkit-box-shadow: 0px 0px 4px #000;
       }
       .player-bet p {
         margin: 0px;

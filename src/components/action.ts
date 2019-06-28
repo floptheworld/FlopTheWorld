@@ -154,8 +154,8 @@ export class Action extends LitElement {
   static get styles(): CSSResult {
     return css`
       .action-box {
-        background-color: #333;
-        border: 2px solid #000;
+        background-color: #373737;
+        border-radius: 5px;
         width: 400px;
         margin: auto;
         padding: 10px;
@@ -198,7 +198,7 @@ export class Action extends LitElement {
       }
       .bet-text {
         padding: 10px;
-        border: 1px solid #000;
+        border: none;
         border-radius: 5px;
         display: block;
         width: 100%;

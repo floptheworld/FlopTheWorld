@@ -31,14 +31,21 @@ export class Table extends LitElement {
     return html`
       ${!this.game
         ? html`
-            <input
-              @keydown=${this._enterKeyPress}
-              type="text"
-              class="player-input"
-            />
-            <button type="button" @click=${this._createPlayer}>
-              Join Game!
-            </button>
+            <div class="login-box">
+              <p class="player-input-label">Choose a Nickname</p>
+              <input
+                @keydown=${this._enterKeyPress}
+                type="text"
+                class="player-input"
+              />
+              <button
+                type="button"
+                class="button green-button"
+                @click=${this._createPlayer}
+              >
+                Join Game!
+              </button>
+            </div>
           `
         : html`
             <div id="Table">
@@ -81,18 +88,62 @@ export class Table extends LitElement {
         margin: auto;
         background-color: #8a0000;
         border-radius: 50%;
-        border: 5px solid #000;
         position: relative;
+        box-shadow: 0px 0px 20px #000;
+        -webkit-box-shadow: 0px 0px 20px #000;
+      }
+      .login-box {
+        background-color: #373737;
+        border-radius: 5px;
+        width: 300px;
+        margin: auto;
+        padding: 20px;
+        margin-top: 10%;
+      }
+      .player-input-label {
+        font-weight: bold;
+        color: white;
+        margin: 0px;
+      }
+      .green-button {
+        border: 1px solid #003000;
+        background-color: green;
+      }
+      .button:hover,
+      .button-small:hover {
+        opacity: 0.8;
+        cursor: pointer;
+      }
+      .button,
+      .button-small {
+        border-radius: 5px;
+        padding: 10px;
+        color: white;
+      }
+      .player-input {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        display: block;
+        width: 100%;
+        margin: 10px 0px;
+        color: white;
+        background-color: #5f5f5f;
+        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box; /* Firefox, other Gecko */
+        box-sizing: border-box;
       }
       .table-pot {
         position: absolute;
         background-color: #333;
-        border: 2px solid #000;
+        border-radius: 5px;
         color: #fcbd07;
         text-align: center;
         font-weight: bold;
         left: 479px;
         top: 160px;
+        box-shadow: 0px 0px 4px #000;
+        -webkit-box-shadow: 0px 0px 4px #000;
       }
       .table-pot p {
         margin: 0px;

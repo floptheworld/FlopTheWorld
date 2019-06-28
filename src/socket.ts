@@ -6,7 +6,6 @@ import { createGame } from "./common/game/create-game";
 import { getGame } from "./common/game/get-game";
 import { addPlayer } from "./common/player/add-player";
 import { startGame } from "./common/game/start-game";
-import { nextRound } from "./common/game/next-round";
 import { isPlayerAction } from "./common/player/is-player-action";
 import { playerAction } from "./common/player/player-action";
 import { nextPlayerTurn } from "./common/player/next-player-turn";
@@ -47,33 +46,26 @@ export function createSocket(server: Server) {
       console.log(`client is subscribing the game: ${gameID} @ ${userID}`);
       socket.join(gameID);
 
-      const currentGame = getGame(games, gameID);
+      const currentGame = getGame(gameID);
 
       if (!currentGame.players.find((player) => player.playerID === userID)) {
-        addPlayer(currentGame, userID, users);
+        addPlayer(currentGame, userID);
       }
 
       updateGameState(io, currentGame);
     });
 
     socket.on("startGame", (gameID: string) => {
-      const currentGame = getGame(games, gameID);
+      const currentGame = getGame(gameID);
 
       startGame(currentGame);
-      updateGameState(io, currentGame);
-    });
-
-    socket.on("nextRound", (gameID: string) => {
-      const currentGame = getGame(games, gameID);
-
-      nextRound(currentGame);
       updateGameState(io, currentGame);
     });
 
     socket.on(
       "playerAction",
       (gameID: string, userID: string, action: string, data: string) => {
-        const currentGame = getGame(games, gameID);
+        const currentGame = getGame(gameID);
         const player: Player = isPlayerAction(currentGame, userID);
         if (!player) {
           return;

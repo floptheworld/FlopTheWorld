@@ -1,2 +1,2 @@
-import "./components/table";
 import "@webcomponents/webcomponentsjs";
+import "./components/table";

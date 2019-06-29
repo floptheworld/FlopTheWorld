@@ -1,5 +1,3 @@
-// tslint:disable-next-line:no-var-requires
-const Hand = require("pokersolver").Hand;
 import { Game, Player } from "../types";
 import { users } from "../const";
 

@@ -1,2 +1,2 @@
-import "./components/card";
+import "@webcomponents/webcomponentsjs";
 import "./components/table";

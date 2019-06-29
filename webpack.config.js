@@ -56,7 +56,7 @@ const frontend = {
     ]),
     new HtmlWebpackPlugin({
       title: "Flop The World Poker",
-      template: "static/index.template.html",
+      template: "src/index.template.html",
     }),
   ],
 };

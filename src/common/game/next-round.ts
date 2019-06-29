@@ -29,9 +29,14 @@ export function nextRound(game: Game) {
       break;
     default:
       solveHands(game);
+      return;
   }
 
   let minInvested: number = 0;
+
+  const investedTemp: number[] = [];
+
+  game.players.map((player) => investedTemp.push(player.invested));
 
   let investedPlayers: Player[] = game.players.filter(
     (player) => player.invested > 0
@@ -67,4 +72,6 @@ export function nextRound(game: Game) {
     investedPlayers = investedPlayers.filter((player) => player.invested > 0);
     index++;
   }
+
+  game.players.map((player, i) => (player.invested = investedTemp[i]));
 }

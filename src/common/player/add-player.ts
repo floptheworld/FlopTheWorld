@@ -1,6 +1,6 @@
 // tslint:disable-next-line:no-var-requires
 const Hand = require("pokersolver").Hand;
-import { Game, Player, User } from "../types";
+import { Game, Player } from "../types";
 import { users } from "../const";
 
 export function addPlayer(game: Game, id: string): void {

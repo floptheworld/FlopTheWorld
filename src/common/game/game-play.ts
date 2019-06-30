@@ -1,7 +1,7 @@
 import { PlayerType, GamePlayType } from "../types";
 import { shuffleDeck } from "../shuffle-deck";
 import { createDeck } from "../create-deck";
-import { nextPlayerTurn } from "./next-turn";
+import { nextTurn } from "./next-turn";
 import { solveHands } from "./solve-hands";
 import { updatePots } from "./update-pots";
 
@@ -141,7 +141,7 @@ export class GamePlay implements GamePlayType {
       return;
     }
 
-    nextPlayerTurn(this);
+    nextTurn(this);
   }
 
   private cleanTable(): void {

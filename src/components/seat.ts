@@ -8,7 +8,7 @@ import {
   TemplateResult,
 } from "lit-element";
 import { styleMap, StyleInfo } from "lit-html/directives/style-map.js";
-import { PlayerType } from "../common/types";
+import { PlayerState } from "../common/types";
 import "./card";
 
 const seatBetStyles: StyleInfo[] = [
@@ -24,7 +24,7 @@ const seatBetStyles: StyleInfo[] = [
 
 @customElement("seat-element")
 export class Seat extends LitElement {
-  @property() public player!: PlayerType;
+  @property() public player!: PlayerState;
   @property() public seatNumber!: number;
   @property() public currentPlayerID!: string;
 

@@ -1,4 +1,4 @@
-export interface PlayerType {
+export interface PlayerState {
   name: string;
   cards: string[];
   playerID: string;
@@ -15,6 +15,9 @@ export interface PlayerType {
   readonly isActive: boolean;
   readonly isCheck: boolean;
   readonly numBet: number;
+}
+
+export interface PlayerType extends PlayerState {
   setLittleBlind(num: number): void;
   setBigBlind(num: number): void;
   subtractBet(num: number): void;
@@ -23,7 +26,7 @@ export interface PlayerType {
 
 export interface GameState {
   gameID: string;
-  players: PlayerType[];
+  players: PlayerState[];
   board: string[];
   round: number;
   pot: number;
@@ -39,6 +42,7 @@ export interface GameState {
 
 export interface GamePlayType extends GameState {
   deck: string[];
+  players: PlayerType[];
   readonly dealerIndex: number;
   readonly littleBlindIndex: number;
   readonly bigBlindIndex: number;

@@ -1,6 +1,6 @@
 import { GamePlayType } from "../types";
 
-export function nextPlayerTurn(game: GamePlayType): void {
+export function nextTurn(game: GamePlayType): void {
   let nextPlayerIndex: number = game.playerTurnIndex + 1;
   let firstTurnIndex: number = game.littleBlindIndex;
 
@@ -8,7 +8,7 @@ export function nextPlayerTurn(game: GamePlayType): void {
 
   while (
     !game.players[nextPlayerIndex] ||
-    !game.players[firstTurnIndex].isActive ||
+    !game.players[nextPlayerIndex].isActive ||
     game.players[nextPlayerIndex].stackAmount === 0
   ) {
     if (!game.players[nextPlayerIndex]) {

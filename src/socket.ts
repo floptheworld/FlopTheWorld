@@ -4,7 +4,7 @@ import { listen } from "socket.io";
 import { GameType, PlayerType } from "./common/types";
 import { getGame } from "./common/get-game";
 import { games, users } from "./common/const";
-import { getUser } from "./common/getUser";
+import { getUser } from "./common/get-user";
 import { Player } from "./common/player/player";
 import { Game } from "./common/game/game";
 

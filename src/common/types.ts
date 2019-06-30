@@ -1,4 +1,4 @@
-export interface Player {
+export interface PlayerState {
   name: string;
   cards: string[];
   playerID: string;
@@ -12,11 +12,21 @@ export interface Player {
   invested: number;
   result: number;
   solvedHand?: Hand;
+  readonly isActive: boolean;
+  readonly isCheck: boolean;
+  readonly numBet: number;
+}
+
+export interface PlayerType extends PlayerState {
+  setLittleBlind(num: number): void;
+  setBigBlind(num: number): void;
+  subtractBet(num: number): void;
+  cleanPlayer(): void;
 }
 
 export interface GameState {
   gameID: string;
-  players: Player[];
+  players: PlayerState[];
   board: string[];
   round: number;
   pot: number;
@@ -30,8 +40,24 @@ export interface GameState {
   pots: number[];
 }
 
-export interface Game extends GameState {
+export interface GamePlayType extends GameState {
   deck: string[];
+  players: PlayerType[];
+  readonly dealerIndex: number;
+  readonly littleBlindIndex: number;
+  readonly bigBlindIndex: number;
+  readonly playerTurnIndex: number;
+  readonly activePlayers: PlayerType[];
+  solveHands(): void;
+  start(): void;
+  updateRound(): void;
+}
+
+export interface GameType extends GamePlayType {
+  getGameState(currentPlayerID: string): GameState;
+  addPlayer(player: PlayerType): void;
+  findPlayerByID(userID: string): PlayerType | undefined;
+  playerAction(player: PlayerType, action: string, data: string): void;
 }
 
 export interface User {

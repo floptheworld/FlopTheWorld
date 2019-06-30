@@ -1,18 +1,14 @@
+import uuid from "uuid";
 import { Server } from "http";
 import { listen } from "socket.io";
-import uuid = require("uuid");
-import { Game, Player } from "./common/types";
-import { createGame } from "./common/game/create-game";
-import { getGame } from "./common/game/get-game";
-import { addPlayer } from "./common/player/add-player";
-import { startGame } from "./common/game/start-game";
-import { isPlayerAction } from "./common/player/is-player-action";
-import { playerAction } from "./common/player/player-action";
-import { nextPlayerTurn } from "./common/player/next-player-turn";
-import { getGameState } from "./common/game/get-game-state";
+import { GameType, PlayerType } from "./common/types";
+import { getGame } from "./common/get-game";
 import { games, users } from "./common/const";
+import { getUser } from "./common/get-user";
+import { Player } from "./common/player/player";
+import { Game } from "./common/game/game";
 
-games.push(createGame());
+games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
 
 export function createSocket(server: Server) {
   const io = listen(server);
@@ -46,38 +42,41 @@ export function createSocket(server: Server) {
       console.log(`client is subscribing the game: ${gameID} @ ${userID}`);
       socket.join(gameID);
 
-      const currentGame = getGame(gameID);
+      const game = getGame(gameID);
+      const user = getUser(userID);
 
-      if (!currentGame.players.find((player) => player.playerID === userID)) {
-        addPlayer(currentGame, userID);
+      if (!game.findPlayerByID(userID)) {
+        game.addPlayer(new Player(userID, user.userName));
       }
 
-      updateGameState(io, currentGame);
+      sendGameState(io, game);
     });
 
     socket.on("startGame", (gameID: string) => {
-      const currentGame = getGame(gameID);
+      const game = getGame(gameID);
 
-      startGame(currentGame);
-      updateGameState(io, currentGame);
+      game.start();
+      sendGameState(io, game);
     });
 
     socket.on(
       "playerAction",
       (gameID: string, userID: string, action: string, data: string) => {
-        const currentGame = getGame(gameID);
-        const player: Player = isPlayerAction(currentGame, userID);
-        if (!player) {
+        const game = getGame(gameID);
+        const player: PlayerType = game.findPlayerByID(userID)!;
+
+        if (!player || !player.isTurn) {
           return;
         }
 
-        playerAction(currentGame, player, action, data);
-        nextPlayerTurn(currentGame);
-        updateGameState(io, currentGame);
-        if (currentGame.winDesc !== "") {
+        game.playerAction(player, action, data);
+        sendGameState(io, game);
+
+        // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
+        if (game.winDesc !== "") {
           setTimeout(() => {
-            startGame(currentGame);
-            updateGameState(io, currentGame);
+            game.start();
+            sendGameState(io, game);
           }, 5000);
         }
       }
@@ -85,13 +84,12 @@ export function createSocket(server: Server) {
   });
 }
 
-function updateGameState(io: SocketIO.Server, game: Game): void {
+function sendGameState(io: SocketIO.Server, game: GameType): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
       io.to(client).emit(
         "gameUpdate",
-        getGameState(
-          game,
+        game.getGameState(
           users.find((user) => user.clientID === client)!.userID
         )
       );

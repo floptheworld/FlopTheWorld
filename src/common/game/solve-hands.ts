@@ -1,19 +1,19 @@
 // tslint:disable-next-line:no-var-requires
 const Hand = require("pokersolver").Hand;
-import { Game, Card, Player, Hand } from "../types";
+import { Card, PlayerType, Hand, GamePlayType } from "../types";
 import { roundToPrecision } from "../round-to-precision";
 
-export function solveHands(game: Game): void {
+export function solveHands(game: GamePlayType): void {
   let solvedHands: Hand[] = [];
   let boardWinner: boolean = true;
   let winners: Hand[] = [];
   let sidePot: number = 0;
   let minInvested: number = 0;
 
-  let investedPlayers: Player[] = game.players.filter(
+  let investedPlayers: PlayerType[] = game.players.filter(
     (player) => player.invested > 0
   );
-  let livePlayers: Player[] = investedPlayers.filter(
+  let livePlayers: PlayerType[] = investedPlayers.filter(
     (player) => player.status !== "fold"
   );
 
@@ -47,7 +47,7 @@ export function solveHands(game: Game): void {
       );
 
       // For each Player that hasn't folded, check the winning hand against their hand
-      livePlayers.map((player: Player, ind) => {
+      livePlayers.map((player: PlayerType, ind) => {
         if (player.cards.some((card: string) => winningHand.includes(card))) {
           // Add to the player's result the pot split by how many players won
           player.result += sidePot / winners.length;
@@ -60,7 +60,7 @@ export function solveHands(game: Game): void {
     if (boardWinner) {
       // Split the Pot between each player that hasn't folded
       livePlayers.map(
-        (player: Player) => (player.result += sidePot / livePlayers.length)
+        (player: PlayerType) => (player.result += sidePot / livePlayers.length)
       );
     }
 

@@ -1,44 +1,14 @@
-import { Game, Player } from "../types";
-import { clearActivePlayers } from "../player/clear-active-players";
-import { updatePot } from "./update-pot";
-import { solveHands } from "./solve-hands";
+import { PlayerType, GamePlayType } from "../types";
 import { roundToPrecision } from "../round-to-precision";
 
-export function nextRound(game: Game) {
-  game.round++;
-  game.currentBet = 0;
-  game.currentPot = 0;
-  updatePot(game);
-  clearActivePlayers(game);
-  switch (game.round) {
-    case 1:
-      game.deck!.pop();
-      game.board.push(game.deck!.pop()!);
-      game.deck!.pop();
-      game.board.push(game.deck!.pop()!);
-      game.deck!.pop();
-      game.board.push(game.deck!.pop()!);
-      break;
-    case 2:
-      game.deck!.pop();
-      game.board.push(game.deck!.pop()!);
-      break;
-    case 3:
-      game.deck!.pop();
-      game.board.push(game.deck!.pop()!);
-      break;
-    default:
-      solveHands(game);
-      return;
-  }
-
+export function updatePots(game: GamePlayType) {
   let minInvested: number = 0;
 
   const investedTemp: number[] = [];
 
   game.players.map((player) => investedTemp.push(player.invested));
 
-  let investedPlayers: Player[] = game.players.filter(
+  let investedPlayers: PlayerType[] = game.players.filter(
     (player) => player.invested > 0
   );
 

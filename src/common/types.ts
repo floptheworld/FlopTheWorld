@@ -12,6 +12,9 @@ export interface PlayerType {
   invested: number;
   result: number;
   solvedHand?: Hand;
+  readonly isActive: boolean;
+  readonly isCheck: boolean;
+  readonly numBet: number;
   setLittleBlind(num: number): void;
   setBigBlind(num: number): void;
   subtractBet(num: number): void;

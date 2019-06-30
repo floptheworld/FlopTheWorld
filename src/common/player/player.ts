@@ -15,12 +15,24 @@ export class Player implements PlayerType {
   public invested: number = 0;
   public result: number = 0;
 
+  get isActive(): boolean {
+    return this.status !== "fold";
+  }
+
+  get isCheck(): boolean {
+    return this.status === "check";
+  }
+
+  get numBet(): number {
+    return parseFloat(this.bet);
+  }
+
   constructor(uuid: string, name: string) {
     this.name = name;
     this.playerID = uuid;
   }
 
-  public subtractBet(currentBet: number) {
+  public subtractBet(currentBet: number): void {
     const turnBet =
       roundToPrecision(currentBet, 0.01) -
       roundToPrecision(parseFloat(this.bet) || 0, 0.01);
@@ -43,7 +55,7 @@ export class Player implements PlayerType {
     this.invested += blind;
   }
 
-  public cleanPlayer() {
+  public cleanPlayer(): void {
     this.cards = [];
     this.isTurn = false;
     this.isBigBlind = false;

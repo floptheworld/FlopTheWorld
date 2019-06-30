@@ -2,7 +2,7 @@ import assert from "assert";
 import uuid from "uuid";
 // tslint:disable-next-line:no-implicit-dependencies
 import { describe, it } from "mocha";
-import { getGame } from "../src/common/game/get-game";
+import { getGame } from "../src/common/get-game";
 import { games, users } from "../src/common/const";
 import { Game } from "../src/common/game/game";
 import { Player } from "../src/common/player/player";
@@ -12,7 +12,7 @@ let currentGame: Game;
 
 describe("Creates a Game", () => {
   it("Should push new game to Game Array", () => {
-    games.push(new Game());
+    games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
 
     assert.strictEqual(games.length, 1);
   });

@@ -2,13 +2,13 @@ import uuid from "uuid";
 import { Server } from "http";
 import { listen } from "socket.io";
 import { GameType, PlayerType } from "./common/types";
-import { getGame } from "./common/game/get-game";
+import { getGame } from "./common/get-game";
 import { games, users } from "./common/const";
 import { getUser } from "./common/getUser";
 import { Player } from "./common/player/player";
 import { Game } from "./common/game/game";
 
-games.push(new Game());
+games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
 
 export function createSocket(server: Server) {
   const io = listen(server);
@@ -70,8 +70,9 @@ export function createSocket(server: Server) {
         }
 
         game.playerAction(player, action, data);
-        // nextPlayerTurn(game);
         sendGameState(io, game);
+
+        // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
         if (game.winDesc !== "") {
           setTimeout(() => {
             game.start();

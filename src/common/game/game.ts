@@ -2,8 +2,13 @@ import { PlayerType, GameState } from "../types";
 import { GamePlay } from "./game-play";
 
 export class Game extends GamePlay {
-  constructor() {
-    super();
+  constructor(
+    gameID: string,
+    bigBlind: number,
+    littleBlind: number,
+    cardBack: string
+  ) {
+    super(gameID, bigBlind, littleBlind, cardBack);
   }
 
   public getGameState(currentPlayerID: string): GameState {
@@ -54,30 +59,6 @@ export class Game extends GamePlay {
       return;
     }
 
-    switch (action) {
-      case "fold":
-        player.cards = [];
-        break;
-      case "check":
-        break;
-      case "call":
-        player.subtractBet(this.currentBet);
-        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
-        player.bet = this.currentBet.toFixed(2);
-        break;
-      case "bet":
-      case "raise":
-        this.currentBet = dataNum;
-        player.subtractBet(this.currentBet);
-        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
-        player.bet = parseFloat(data).toFixed(2);
-        break;
-      default:
-        break;
-    }
-
-    player.status = action;
-
-    this.nextTurn();
+    this.actionPlayed(player, action, dataNum);
   }
 }

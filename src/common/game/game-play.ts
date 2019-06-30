@@ -1,22 +1,22 @@
 import { PlayerType, GamePlayType } from "../types";
 import { shuffleDeck } from "../shuffle-deck";
 import { createDeck } from "../create-deck";
-import { nextPlayerTurn } from "../player/next-player-turn";
+import { nextPlayerTurn } from "./next-turn";
 import { solveHands } from "./solve-hands";
 import { updatePots } from "./update-pots";
 
 export class GamePlay implements GamePlayType {
-  public gameID: string = "asdf1234";
+  public gameID: string;
+  public cardBack: string;
+  public bigBlind: number;
+  public littleBlind: number;
   public players: PlayerType[] = [];
   public board: string[] = [];
   public round: number = 0;
   public pot: number = 0;
-  public bigBlind: number = 0.1;
-  public littleBlind: number = 0.05;
   public currentBet: number = 0;
   public currentPot: number = 0;
   public currentPlayerID: string = "";
-  public cardBack: string = "gray_back";
   public winDesc: string = "";
   public pots: number[] = [];
   public deck: string[] = [];
@@ -41,6 +41,18 @@ export class GamePlay implements GamePlayType {
     return this.players.findIndex((player) => player.isTurn === true);
   }
 
+  constructor(
+    gameID: string,
+    bigBlind: number,
+    littleBlind: number,
+    cardBack: string
+  ) {
+    this.gameID = gameID;
+    this.bigBlind = bigBlind;
+    this.littleBlind = littleBlind;
+    this.cardBack = cardBack;
+  }
+
   public start(): void {
     this.cleanTable();
     this.clearPlayers();
@@ -54,13 +66,38 @@ export class GamePlay implements GamePlayType {
     } else {
       this.players[0].isTurn = true;
     }
-
-    this.currentBet = this.bigBlind;
-    this.currentPot = this.bigBlind + this.littleBlind;
   }
 
   public solveHands(): void {
     solveHands(this);
+  }
+
+  public actionPlayed(player: PlayerType, action: string, data: number): void {
+    switch (action) {
+      case "fold":
+        player.cards = [];
+        break;
+      case "check":
+        break;
+      case "call":
+        player.subtractBet(this.currentBet);
+        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
+        player.bet = this.currentBet.toFixed(2);
+        break;
+      case "bet":
+      case "raise":
+        this.currentBet = data;
+        player.subtractBet(this.currentBet);
+        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
+        player.bet = data.toFixed(2);
+        break;
+      default:
+        break;
+    }
+
+    player.status = action;
+
+    this.nextTurn();
   }
 
   public updateRound(): void {
@@ -68,7 +105,7 @@ export class GamePlay implements GamePlayType {
     this.currentBet = 0;
     this.currentPot = 0;
     this.updatePot();
-    this.clearActivePlayers();
+    this.clearPlayers(true);
 
     switch (this.round) {
       case 1:
@@ -95,7 +132,19 @@ export class GamePlay implements GamePlayType {
     updatePots(this);
   }
 
-  protected cleanTable(): void {
+  private nextTurn(): void {
+    if (this.activePlayers.length === 1) {
+      this.activePlayers.map((player) => {
+        player.stackAmount += this.pot + this.currentPot;
+      });
+      this.start();
+      return;
+    }
+
+    nextPlayerTurn(this);
+  }
+
+  private cleanTable(): void {
     this.players.map((player) => {
       player.cleanPlayer();
     });
@@ -108,24 +157,29 @@ export class GamePlay implements GamePlayType {
     this.winDesc = "";
   }
 
-  protected clearPlayers(): void {
+  private clearPlayers(active: boolean = false): void {
     this.players.map((player) => {
       player.bet = "";
+      if (active && !player.isActive) {
+        return;
+      }
       player.status = "";
     });
   }
 
-  protected newDeck(): void {
+  private newDeck(): void {
     this.deck = shuffleDeck(createDeck());
   }
 
-  protected deal() {
+  private deal() {
+    // Deal First Card
     this.players.map((player) => {
       if (player.cards.length < 2) {
         player.cards.push(this.deck!.pop()!);
       }
     });
 
+    // Deal Second Card
     this.players.map((player) => {
       if (player.cards.length < 2) {
         player.cards.push(this.deck!.pop()!);
@@ -133,7 +187,7 @@ export class GamePlay implements GamePlayType {
     });
   }
 
-  protected updateDealer(): void {
+  private updateDealer(): void {
     if (this.dealerIndex === -1) {
       this.players[0].dealer = true;
       return;
@@ -149,7 +203,7 @@ export class GamePlay implements GamePlayType {
     this.players[0].dealer = true;
   }
 
-  protected updateBlinds(): void {
+  private updateBlinds(): void {
     if (this.players[this.dealerIndex + 1]) {
       this.players[this.dealerIndex + 1].setLittleBlind(this.littleBlind);
     } else {
@@ -161,24 +215,14 @@ export class GamePlay implements GamePlayType {
     } else {
       this.players[this.littleBlindIndex + 1].setBigBlind(this.bigBlind);
     }
-  }
 
-  protected nextTurn(): void {
-    nextPlayerTurn(this);
+    this.currentBet = this.bigBlind;
+    this.currentPot = this.bigBlind + this.littleBlind;
   }
 
   private updatePot(): void {
     this.players
       .filter((player) => player.bet !== "")
       .map((player) => (this.pot = this.pot + parseFloat(player.bet)));
-  }
-
-  private clearActivePlayers(): void {
-    this.players.map((player) => {
-      player.bet = "";
-      if (player.status !== "fold") {
-        player.status = "";
-      }
-    });
   }
 }

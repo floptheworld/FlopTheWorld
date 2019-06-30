@@ -34,8 +34,23 @@ export interface GameState {
   pots: number[];
 }
 
-export interface GameType extends GameState {
+export interface GamePlayType extends GameState {
   deck: string[];
+  readonly dealerIndex: number;
+  readonly littleBlindIndex: number;
+  readonly bigBlindIndex: number;
+  readonly playerTurnIndex: number;
+  readonly activePlayers: PlayerType[];
+  solveHands(): void;
+  start(): void;
+  updateRound(): void;
+}
+
+export interface GameType extends GamePlayType {
+  getGameState(currentPlayerID: string): GameState;
+  addPlayer(player: PlayerType): void;
+  findPlayerByID(userID: string): PlayerType | undefined;
+  playerAction(player: PlayerType, action: string, data: string): void;
 }
 
 export interface User {

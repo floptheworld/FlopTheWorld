@@ -29,15 +29,6 @@ export class Player implements PlayerType {
     this.invested = roundToPrecision(this.invested, 0.01) + turnBet;
   }
 
-  public cleanPlayer() {
-    this.cards = [];
-    this.isTurn = false;
-    this.isBigBlind = false;
-    this.isLittleBlind = false;
-    this.invested = 0;
-    this.result = 0;
-  }
-
   public setBigBlind(blind: number): void {
     this.isBigBlind = true;
     this.bet = blind.toString();
@@ -50,5 +41,14 @@ export class Player implements PlayerType {
     this.bet = blind.toString();
     this.stackAmount -= blind;
     this.invested += blind;
+  }
+
+  public cleanPlayer() {
+    this.cards = [];
+    this.isTurn = false;
+    this.isBigBlind = false;
+    this.isLittleBlind = false;
+    this.invested = 0;
+    this.result = 0;
   }
 }

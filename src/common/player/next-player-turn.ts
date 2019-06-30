@@ -1,6 +1,6 @@
-import { Game } from "../game/game";
+import { GamePlayType } from "../types";
 
-export function nextPlayerTurn(game: Game): void {
+export function nextPlayerTurn(game: GamePlayType): void {
   if (game.activePlayers.length === 1) {
     game.activePlayers.map((player) => {
       player.stackAmount += game.pot + game.currentPot;
@@ -9,10 +9,10 @@ export function nextPlayerTurn(game: Game): void {
     return;
   }
 
-  let nextPlayerIndex: number = game.isTurnIndex + 1;
+  let nextPlayerIndex: number = game.playerTurnIndex + 1;
   let firstTurnIndex: number = game.littleBlindIndex;
 
-  game.players[game.isTurnIndex].isTurn = false;
+  game.players[game.playerTurnIndex].isTurn = false;
 
   while (
     !game.players[nextPlayerIndex] ||
@@ -29,7 +29,7 @@ export function nextPlayerTurn(game: Game): void {
   if (
     (game.players[nextPlayerIndex].status === "check" &&
       game.currentBet === 0) ||
-    nextPlayerIndex === game.isTurnIndex ||
+    nextPlayerIndex === game.playerTurnIndex ||
     parseFloat(game.players[nextPlayerIndex].bet).toFixed(2) ===
       game.currentBet.toFixed(2)
   ) {

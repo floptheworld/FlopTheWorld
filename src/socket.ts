@@ -1,18 +1,12 @@
+import uuid from "uuid";
 import { Server } from "http";
 import { listen } from "socket.io";
-import uuid = require("uuid");
 import { GameType, PlayerType } from "./common/types";
 import { getGame } from "./common/game/get-game";
-import { addPlayer } from "./common/player/add-player";
-import { startGame } from "./common/game/start-game";
-import { isPlayerAction } from "./common/player/is-player-action";
-import { playerAction } from "./common/player/player-action";
-import { nextPlayerTurn } from "./common/player/next-player-turn";
-import { getGameState } from "./common/game/get-game-state";
 import { games, users } from "./common/const";
-import { Game } from "./common/game/game";
 import { getUser } from "./common/getUser";
 import { Player } from "./common/player/player";
+import { Game } from "./common/game/game";
 
 games.push(new Game());
 
@@ -55,14 +49,14 @@ export function createSocket(server: Server) {
         game.addPlayer(new Player(userID, user.userName));
       }
 
-      updateGameState(io, game);
+      sendGameState(io, game);
     });
 
     socket.on("startGame", (gameID: string) => {
       const game = getGame(gameID);
 
       game.start();
-      updateGameState(io, game);
+      sendGameState(io, game);
     });
 
     socket.on(
@@ -77,11 +71,11 @@ export function createSocket(server: Server) {
 
         game.playerAction(player, action, data);
         // nextPlayerTurn(game);
-        updateGameState(io, game);
+        sendGameState(io, game);
         if (game.winDesc !== "") {
           setTimeout(() => {
             game.start();
-            updateGameState(io, game);
+            sendGameState(io, game);
           }, 5000);
         }
       }
@@ -89,13 +83,12 @@ export function createSocket(server: Server) {
   });
 }
 
-function updateGameState(io: SocketIO.Server, game: GameType): void {
+function sendGameState(io: SocketIO.Server, game: GameType): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
       io.to(client).emit(
         "gameUpdate",
-        getGameState(
-          game,
+        game.getGameState(
           users.find((user) => user.clientID === client)!.userID
         )
       );

@@ -1,6 +1,6 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 
-export function clearPlayers(game: Game): void {
+export function clearPlayers(game: GameType): void {
   game.players.map((player) => {
     player.bet = "";
     player.status = "";

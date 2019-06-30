@@ -1,15 +1,16 @@
-import { Game, Player } from "../types";
+import { PlayerType } from "../types";
 import { clearActivePlayers } from "../player/clear-active-players";
 import { updatePot } from "./update-pot";
 import { solveHands } from "./solve-hands";
 import { roundToPrecision } from "../round-to-precision";
+import { Game } from "./game";
 
 export function nextRound(game: Game) {
   game.round++;
   game.currentBet = 0;
   game.currentPot = 0;
-  updatePot(game);
-  clearActivePlayers(game);
+  game.updatePot();
+  game.clearActivePlayers();
   switch (game.round) {
     case 1:
       game.deck!.pop();
@@ -38,7 +39,7 @@ export function nextRound(game: Game) {
 
   game.players.map((player) => investedTemp.push(player.invested));
 
-  let investedPlayers: Player[] = game.players.filter(
+  let investedPlayers: PlayerType[] = game.players.filter(
     (player) => player.invested > 0
   );
 

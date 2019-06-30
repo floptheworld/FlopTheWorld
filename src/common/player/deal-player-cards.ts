@@ -1,6 +1,6 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 
-export function dealPlayerCards(game: Game): void {
+export function dealPlayerCards(game: GameType): void {
   const players = game.players;
 
   players.map((player) => {

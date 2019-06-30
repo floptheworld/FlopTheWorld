@@ -2,7 +2,7 @@ import assert from "assert";
 // tslint:disable-next-line:no-implicit-dependencies
 import { describe, it } from "mocha";
 import uuid = require("uuid");
-import { Game } from "../src/common/types";
+import { GameType } from "../src/common/types";
 import { createGame } from "../src/common/game/create-game";
 import { getGame } from "../src/common/game/get-game";
 import { addPlayer } from "../src/common/player/add-player";
@@ -12,7 +12,7 @@ import { solveHands } from "../src/common/game/solve-hands";
 import { nextRound } from "../src/common/game/next-round";
 
 const userNames: string[] = ["Bob", "Joe", "Sally"];
-let currentGame: Game;
+let currentGame: GameType;
 
 describe("Creates a Game", () => {
   it("Should push new game to Game Array", () => {

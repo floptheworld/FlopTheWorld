@@ -1,10 +1,10 @@
-import { Player } from "../types";
+import { PlayerType } from "../types";
 
 export function getGameStatePlayers(
-  players: Player[],
+  players: PlayerType[],
   currentPlayerID: string,
   cardBack: string
-): Player[] {
+): PlayerType[] {
   const copyPlayers = players.map((player) => ({ ...player }));
 
   copyPlayers

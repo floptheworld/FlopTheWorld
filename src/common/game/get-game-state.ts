@@ -1,7 +1,10 @@
-import { Game, GameState } from "../types";
+import { GameType, GameState } from "../types";
 import { getGameStatePlayers } from "../player/get-game-state-players";
 
-export function getGameState(currentGame: Game, playerID: string): GameState {
+export function getGameState(
+  currentGame: GameType,
+  playerID: string
+): GameState {
   return {
     ...{
       board: currentGame.board,

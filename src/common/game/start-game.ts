@@ -1,4 +1,4 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 import { clearTable } from "./clear-table";
 import { clearPlayers } from "../player/clear-players";
 import { shuffleDeck } from "../shuffle-deck";
@@ -7,7 +7,7 @@ import { updateBlinds } from "../player/update-blinds";
 import { updateNextDealer } from "../player/update-next-dealer";
 import { dealPlayerCards } from "../player/deal-player-cards";
 
-export function startGame(game: Game): void {
+export function startGame(game: GameType): void {
   clearTable(game);
   clearPlayers(game);
   game.deck = shuffleDeck(createDeck());

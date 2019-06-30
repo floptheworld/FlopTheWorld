@@ -1,4 +1,5 @@
-import { Game, User } from "./types";
+import { User } from "./types";
+import { Game } from "./game/game";
 
 export const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 export const numbers: Set<string> = new Set([

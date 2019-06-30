@@ -1,6 +1,6 @@
-import { Game } from "../types";
 import { games } from "../const";
+import { Game } from "./game";
 
 export function getGame(gameID: string): Game {
-  return games[games.findIndex((game) => game.gameID === gameID)!];
+  return games.find((game) => game.gameID === gameID)!;
 }

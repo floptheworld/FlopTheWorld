@@ -7,7 +7,7 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { GameState, Player } from "../common/types";
+import { GameState, PlayerType } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
 
 interface BetTarget extends EventTarget {
@@ -25,7 +25,7 @@ interface ActionTarget extends EventTarget {
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public game!: GameState;
-  @property() private player?: Player;
+  @property() private player?: PlayerType;
 
   protected render(): TemplateResult {
     if (!this.game) {

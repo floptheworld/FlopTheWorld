@@ -1,9 +1,9 @@
-import { Game, Player } from "../types";
+import { GameType, PlayerType } from "../types";
 import { subtractBetFromPlayerStack } from "./subtract-bet-from-player-stack";
 
 export function playerAction(
-  game: Game,
-  player: Player,
+  game: GameType,
+  player: PlayerType,
   action: string,
   data: string
 ): void {

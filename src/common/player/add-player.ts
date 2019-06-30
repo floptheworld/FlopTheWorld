@@ -1,10 +1,10 @@
-import { Game, Player } from "../types";
-import { users } from "../const";
+import { GameType, PlayerType } from "../types";
+import { players } from "../const";
 
-export function addPlayer(game: Game, id: string): void {
-  const newPlayer: Player = {
+export function addPlayer(game: GameType, id: string): void {
+  const newPlayer: PlayerType = {
     cards: [],
-    name: users.find((user) => user.userID === id)!.userName,
+    name: players.find((user) => user.userID === id)!.userName,
     playerID: id,
     stackAmount: 5.0,
     isTurn: false,

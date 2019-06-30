@@ -1,4 +1,4 @@
-export interface Player {
+export interface PlayerType {
   name: string;
   cards: string[];
   playerID: string;
@@ -12,11 +12,15 @@ export interface Player {
   invested: number;
   result: number;
   solvedHand?: Hand;
+  setLittleBlind(num: number): void;
+  setBigBlind(num: number): void;
+  subtractBet(num: number): void;
+  cleanPlayer(): void;
 }
 
 export interface GameState {
   gameID: string;
-  players: Player[];
+  players: PlayerType[];
   board: string[];
   round: number;
   pot: number;
@@ -30,7 +34,7 @@ export interface GameState {
   pots: number[];
 }
 
-export interface Game extends GameState {
+export interface GameType extends GameState {
   deck: string[];
 }
 

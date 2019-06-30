@@ -1,7 +1,10 @@
-import { Game, Player } from "../types";
+import { GameType, PlayerType } from "../types";
 import { roundToPrecision } from "../round-to-precision";
 
-export function subtractBetFromPlayerStack(game: Game, player: Player): void {
+export function subtractBetFromPlayerStack(
+  game: GameType,
+  player: PlayerType
+): void {
   player.stackAmount =
     roundToPrecision(player.stackAmount, 0.01) -
     (roundToPrecision(game.currentBet, 0.01) -

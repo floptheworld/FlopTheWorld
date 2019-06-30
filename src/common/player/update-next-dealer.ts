@@ -1,6 +1,6 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 
-export function updateNextDealer(game: Game): void {
+export function updateNextDealer(game: GameType): void {
   const dealerIndex = game.players.findIndex(
     (player) => player.dealer === true
   );

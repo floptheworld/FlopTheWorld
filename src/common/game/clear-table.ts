@@ -1,6 +1,6 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 
-export function clearTable(game: Game): void {
+export function clearTable(game: GameType): void {
   game.players.map((player) => {
     player.cards = [];
     player.isTurn = false;

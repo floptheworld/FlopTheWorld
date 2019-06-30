@@ -1,27 +1,18 @@
-import { Game } from "../types";
-import { startGame } from "../game/start-game";
-import { nextRound } from "../game/next-round";
+import { Game } from "../game/game";
 
 export function nextPlayerTurn(game: Game): void {
-  if (game.players.filter((player) => player.status !== "fold").length === 1) {
-    game.players
-      .filter((player) => player.status !== "fold")
-      .map((player) => {
-        player.stackAmount += game.pot + game.currentPot;
-      });
-    startGame(game);
+  if (game.activePlayers.length === 1) {
+    game.activePlayers.map((player) => {
+      player.stackAmount += game.pot + game.currentPot;
+    });
+    game.start();
     return;
   }
 
-  const playerIndex: number = game.players.findIndex(
-    (player) => player.isTurn === true
-  );
-  let firstTurnIndex: number = game.players.findIndex(
-    (player) => player.isLittleBlind === true
-  );
-  let nextPlayerIndex: number = playerIndex + 1;
+  let nextPlayerIndex: number = game.isTurnIndex + 1;
+  let firstTurnIndex: number = game.littleBlindIndex;
 
-  game.players[playerIndex].isTurn = false;
+  game.players[game.isTurnIndex].isTurn = false;
 
   while (
     !game.players[nextPlayerIndex] ||
@@ -38,7 +29,7 @@ export function nextPlayerTurn(game: Game): void {
   if (
     (game.players[nextPlayerIndex].status === "check" &&
       game.currentBet === 0) ||
-    nextPlayerIndex === playerIndex ||
+    nextPlayerIndex === game.isTurnIndex ||
     parseFloat(game.players[nextPlayerIndex].bet).toFixed(2) ===
       game.currentBet.toFixed(2)
   ) {
@@ -54,7 +45,7 @@ export function nextPlayerTurn(game: Game): void {
       }
     }
     game.players[firstTurnIndex].isTurn = true;
-    nextRound(game);
+    game.updateRound();
     return;
   }
 

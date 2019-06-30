@@ -1,6 +1,6 @@
-import { Game } from "../types";
+import { GameType } from "../types";
 
-export function createGame(): Game {
+export function createGame(): GameType {
   return {
     board: [],
     deck: [],

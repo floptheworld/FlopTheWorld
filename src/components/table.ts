@@ -26,7 +26,7 @@ export class Table extends LitElement {
 
   protected render(): TemplateResult {
     // tslint:disable-next-line: no-console
-    console.log(this.game);
+    console.log(this.game); // TODO: Remove before production build
 
     return html`
       ${!this.game

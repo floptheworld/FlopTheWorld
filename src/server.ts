@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
+import path from "path";
 import { createServer } from "http";
 import { createSocket } from "./socket";
 
@@ -13,7 +14,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static("./build"));
-app.use(express.static(__dirname, { extensions: ["html"] }));
+app.get("/*", (req, res) => {
+  res.sendFile(path.resolve("./build/index.html"));
+});
 
 server.listen(port, () => {
   // tslint:disable-next-line:no-console

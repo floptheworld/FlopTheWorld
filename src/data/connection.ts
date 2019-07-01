@@ -30,3 +30,16 @@ export function findOrCreatePlayer(
     socket.emit("gameStart", "asdf1234");
   });
 }
+
+export function sendPlayerAction(
+  socket: SocketIOClient.Socket,
+  gameID: string,
+  action: string,
+  amount: string
+) {
+  socket.emit("playerAction", gameID, localStorage.playerID, action, amount);
+}
+
+export function startGame(socket: SocketIOClient.Socket, gameID: string) {
+  socket.emit("startGame", gameID);
+}

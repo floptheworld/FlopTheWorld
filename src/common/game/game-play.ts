@@ -20,6 +20,8 @@ export class GamePlay implements GamePlayType {
   public winDesc: string = "";
   public pots: number[] = [];
   public deck: string[] = [];
+  public isStarted: boolean = false;
+  public isGameOver: boolean = false;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -33,12 +35,16 @@ export class GamePlay implements GamePlayType {
     return this.players.findIndex((player) => player.isBigBlind === true);
   }
 
-  get activePlayers(): PlayerType[] {
-    return this.players.filter((player) => player.status !== "fold");
-  }
-
   get playerTurnIndex(): number {
     return this.players.findIndex((player) => player.isTurn === true);
+  }
+
+  get activePlayers(): PlayerType[] {
+    return this.players.filter((player) => player.isActive === true);
+  }
+
+  get sittingInPlayers(): PlayerType[] {
+    return this.players.filter((player) => player.isSittingOut !== true);
   }
 
   constructor(
@@ -56,16 +62,34 @@ export class GamePlay implements GamePlayType {
   public start(): void {
     this.cleanTable();
     this.clearPlayers();
+    this.updateSitting();
+
+    if (this.sittingInPlayers.length < 2) {
+      this.isStarted = false;
+      return;
+    }
+
     this.newDeck();
-    this.deal();
     this.updateDealer();
     this.updateBlinds();
+    this.deal();
 
-    if (this.players[this.bigBlindIndex + 1]) {
-      this.players[this.bigBlindIndex + 1].isTurn = true;
-    } else {
-      this.players[0].isTurn = true;
+    let nextTurnIndex = this.bigBlindIndex + 1;
+
+    while (
+      !this.players[nextTurnIndex] ||
+      this.players[nextTurnIndex].isSittingOut
+    ) {
+      if (!this.players[nextTurnIndex]) {
+        nextTurnIndex = 0;
+      } else {
+        nextTurnIndex++;
+      }
     }
+
+    this.players[nextTurnIndex].isTurn = true;
+
+    this.isStarted = true;
   }
 
   public solveHands(): void {
@@ -91,6 +115,15 @@ export class GamePlay implements GamePlayType {
         this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
         player.bet = data.toFixed(2);
         break;
+      case "rebuy":
+        player.stackAmount += data || 0;
+        return;
+      case "toggleSitOut":
+        player.pendingSitOut = !player.pendingSitOut;
+        if (!this.isStarted) {
+          this.updateSitting();
+        }
+        return;
       default:
         break;
     }
@@ -155,6 +188,7 @@ export class GamePlay implements GamePlayType {
     this.round = 0;
     this.pot = 0;
     this.winDesc = "";
+    this.isGameOver = false;
   }
 
   private clearPlayers(active: boolean = false): void {
@@ -173,14 +207,14 @@ export class GamePlay implements GamePlayType {
 
   private deal() {
     // Deal First Card
-    this.players.map((player) => {
+    this.sittingInPlayers.map((player) => {
       if (player.cards.length < 2) {
         player.cards.push(this.deck!.pop()!);
       }
     });
 
     // Deal Second Card
-    this.players.map((player) => {
+    this.sittingInPlayers.map((player) => {
       if (player.cards.length < 2) {
         player.cards.push(this.deck!.pop()!);
       }
@@ -189,32 +223,57 @@ export class GamePlay implements GamePlayType {
 
   private updateDealer(): void {
     if (this.dealerIndex === -1) {
-      this.players[0].dealer = true;
+      this.sittingInPlayers[0].dealer = true;
       return;
     }
 
-    if (this.players[this.dealerIndex + 1]) {
-      this.players[this.dealerIndex].dealer = false;
-      this.players[this.dealerIndex + 1].dealer = true;
-      return;
+    let nextDealerIndex = this.dealerIndex + 1;
+
+    while (
+      !this.players[nextDealerIndex] ||
+      this.players[nextDealerIndex].isSittingOut
+    ) {
+      if (!this.players[nextDealerIndex]) {
+        nextDealerIndex = 0;
+      } else {
+        nextDealerIndex++;
+      }
     }
 
-    this.players[this.players.length - 1].dealer = false;
-    this.players[0].dealer = true;
+    this.players[this.dealerIndex].dealer = false;
+    this.players[nextDealerIndex].dealer = true;
   }
 
   private updateBlinds(): void {
-    if (this.players[this.dealerIndex + 1]) {
-      this.players[this.dealerIndex + 1].setLittleBlind(this.littleBlind);
-    } else {
-      this.players[0].setLittleBlind(this.littleBlind);
+    let nextLittleBlindIndex = this.dealerIndex + 1;
+
+    while (
+      !this.players[nextLittleBlindIndex] ||
+      this.players[nextLittleBlindIndex].isSittingOut
+    ) {
+      if (!this.players[nextLittleBlindIndex]) {
+        nextLittleBlindIndex = 0;
+      } else {
+        nextLittleBlindIndex++;
+      }
     }
 
-    if (this.players[this.littleBlindIndex + 1]) {
-      this.players[this.littleBlindIndex + 1].setBigBlind(this.bigBlind);
-    } else {
-      this.players[this.littleBlindIndex + 1].setBigBlind(this.bigBlind);
+    this.players[nextLittleBlindIndex].setLittleBlind(this.littleBlind);
+
+    let nextBigBlindIndex = this.littleBlindIndex + 1;
+
+    while (
+      !this.players[nextBigBlindIndex] ||
+      this.players[nextBigBlindIndex].isSittingOut
+    ) {
+      if (!this.players[nextBigBlindIndex]) {
+        nextBigBlindIndex = 0;
+      } else {
+        nextBigBlindIndex++;
+      }
     }
+
+    this.players[nextBigBlindIndex].setBigBlind(this.bigBlind);
 
     this.currentBet = this.bigBlind;
     this.currentPot = this.bigBlind + this.littleBlind;
@@ -224,5 +283,18 @@ export class GamePlay implements GamePlayType {
     this.players
       .filter((player) => player.bet !== "")
       .map((player) => (this.pot = this.pot + parseFloat(player.bet)));
+  }
+
+  private updateSitting(): void {
+    this.players
+      .filter((player) => player.pendingSitOut || player.stackAmount === 0)
+      .map((player) => (player.isSittingOut = true));
+
+    this.players
+      .filter(
+        (player) =>
+          !player.pendingSitOut && player.isSittingOut && player.stackAmount > 0
+      )
+      .map((player) => (player.isSittingOut = false));
   }
 }

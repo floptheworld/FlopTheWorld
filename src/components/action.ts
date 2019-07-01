@@ -9,6 +9,7 @@ import {
 } from "lit-element";
 import { GameState, PlayerState } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
+import { sendPlayerAction, startGame } from "../data/connection";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -25,6 +26,7 @@ interface ActionTarget extends EventTarget {
 @customElement("action-element")
 export class Action extends LitElement {
   @property() public game!: GameState;
+  @property() public socket!: SocketIOClient.Socket;
   @property() private player?: PlayerState;
 
   protected render(): TemplateResult {
@@ -36,85 +38,89 @@ export class Action extends LitElement {
       (player) => player.playerID === this.game.currentPlayerID
     );
 
-    if (!this.player || !this.player.isTurn) {
+    if (!this.player) {
       return html``;
     }
 
-    if (this.player.bet === "") {
+    if (this.player.bet === "" && this.player.isTurn && !this.game.isGameOver) {
       this.player.bet = (this.game.currentBet !== 0
         ? this.game.currentBet
         : this.game.bigBlind
-      )
-        .toFixed(2)
-        .toString();
+      ).toFixed(2);
     }
 
     return html`
       <div class="action-box">
         <div class="main-actions">
-          ${this.game.currentBet <= 0
+          ${!this.player.isTurn || this.game.isGameOver || !this.game.isStarted
             ? ""
             : html`
-                <button
-                  .action=${"fold"}
-                  @click=${this._callPlayerAction}
-                  class="button red-button action-button"
-                  id="fold-button"
-                >
-                  Fold
-                </button>
-                <button
-                  .action=${"call"}
-                  @click=${this._callPlayerAction}
-                  class="button green-button action-button"
-                  id="call-button"
-                >
-                  Call
-                </button>
-                <button
-                  .action=${"raise"}
-                  @click=${this._callPlayerAction}
-                  class="button blue-button action-button"
-                  id="raise-button"
-                  ?disabled=${parseFloat(this.player.bet) <
-                    this.game.currentBet + this.game.bigBlind ||
-                    parseFloat(this.player.bet) > this.player.stackAmount ||
-                    this.player.bet === ""}
-                >
-                  Raise
-                </button>
-              `}
-          ${this.game.currentBet !== 0
-            ? ""
-            : html`
-                <button
-                  .action=${"check"}
-                  @click=${this._callPlayerAction}
-                  class="button green-button action-button"
-                  id="check-button"
-                >
-                  Check
-                </button>
-                <button
-                  .action=${"bet"}
-                  @click=${this._callPlayerAction}
-                  class="button blue-button action-button"
-                  id="bet-button"
-                  ?disabled=${parseFloat(this.player.bet) <
-                    this.game.bigBlind ||
-                    parseFloat(this.player.bet) > this.player.stackAmount ||
-                    this.player.bet === ""}
-                >
-                  Bet
-                </button>
+                ${this.game.currentBet <= 0
+                  ? ""
+                  : html`
+                      <button
+                        .action=${"fold"}
+                        @click=${this._callPlayerAction}
+                        class="button red-button action-button"
+                        id="fold-button"
+                      >
+                        Fold
+                      </button>
+                      <button
+                        .action=${"call"}
+                        @click=${this._callPlayerAction}
+                        class="button green-button action-button"
+                        id="call-button"
+                      >
+                        Call
+                      </button>
+                      <button
+                        .action=${"raise"}
+                        @click=${this._callPlayerAction}
+                        class="button blue-button action-button"
+                        id="raise-button"
+                        ?disabled=${parseFloat(this.player.bet) <
+                          this.game.currentBet + this.game.bigBlind ||
+                          parseFloat(this.player.bet) >
+                            this.player.stackAmount ||
+                          this.player.bet === ""}
+                      >
+                        Raise
+                      </button>
+                    `}
+                ${this.game.currentBet !== 0
+                  ? ""
+                  : html`
+                      <button
+                        .action=${"check"}
+                        @click=${this._callPlayerAction}
+                        class="button green-button action-button"
+                        id="check-button"
+                      >
+                        Check
+                      </button>
+                      <button
+                        .action=${"bet"}
+                        @click=${this._callPlayerAction}
+                        class="button blue-button action-button"
+                        id="bet-button"
+                        ?disabled=${parseFloat(this.player.bet) <
+                          this.game.bigBlind ||
+                          parseFloat(this.player.bet) >
+                            this.player.stackAmount ||
+                          this.player.bet === ""}
+                      >
+                        Bet
+                      </button>
+                    `}
               `}
         </div>
         <div>
           <input
             @keyup=${this._setBetFromText}
             .value=${this.player.bet}
-            class="bet-text"
-            type="text"
+            class="bet-text input"
+            type="number"
           />
         </div>
         <div class="bet-actions">
@@ -148,18 +154,69 @@ export class Action extends LitElement {
           </button>
         </div>
       </div>
+      <div class="action-box sm-box">
+        <div class="rebuy-action">
+          <button
+            .action=${"rebuy"}
+            @click=${this._callPlayerAction}
+            class="button dark-blue-button"
+          >
+            Buy Chips
+          </button>
+          <input class="input rebuy-input" type="number" step="0.1" min="0" />
+        </div>
+        <div class="sit-out-action">
+          <button
+            .action=${"toggleSitOut"}
+            @click=${this._callPlayerAction}
+            class="button dark-blue-button sit-out-button"
+          >
+            ${this.player.isSittingOut || this.player.pendingSitOut
+              ? html`
+                  Sit Down
+                `
+              : html`
+                  Sit Out
+                `}
+          </button>
+        </div>
+        ${this.game.isStarted ||
+        this.game.sittingInPlayers.length < 2 ||
+        this.player.isSittingOut
+          ? ""
+          : html`
+              <div class="start-game-action">
+                <button
+                  @click=${this._startGame}
+                  class="button green-button start-game-button"
+                >
+                  Start Game!
+                </button>
+              </div>
+            `}
+      </div>
     `;
   }
 
   static get styles(): CSSResult {
     return css`
+      :host {
+        display: flex;
+        justify-content: center;
+      }
       .action-box {
         background-color: #373737;
         border-radius: 5px;
         width: 400px;
-        margin: auto;
         padding: 10px;
         margin-top: 20px;
+        margin-right: 20px;
+      }
+      .sm-box {
+        width: 175px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
       }
       .button:hover,
       .button-small:hover {
@@ -196,12 +253,10 @@ export class Action extends LitElement {
         border: 1px solid #202020;
         background-color: #808080;
       }
-      .bet-text {
+      .input {
         padding: 10px;
         border: none;
         border-radius: 5px;
-        display: block;
-        width: 100%;
         margin: 10px 0px;
         color: white;
         background-color: #5f5f5f;
@@ -209,7 +264,32 @@ export class Action extends LitElement {
         -moz-box-sizing: border-box; /* Firefox, other Gecko */
         box-sizing: border-box;
       }
+      .bet-text {
+        display: block;
+        width: 100%;
+      }
+      .rebuy-input {
+        flex-grow: 1;
+        width: 0rem;
+        margin: 0 0 0 5px;
+      }
+      .rebuy-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .sit-out-button,
+      .start-game-button {
+        width: 100%;
+      }
+      .main-actions {
+        height: 37px;
+      }
     `;
+  }
+
+  private get _rebuyInput(): HTMLInputElement {
+    return this.shadowRoot!.querySelector(".rebuy-input") as HTMLInputElement;
   }
 
   private _setBet(e: MouseEvent): void {
@@ -238,18 +318,23 @@ export class Action extends LitElement {
     if (!this.player) {
       return;
     }
-    this.player.status = (e.target! as ActionTarget).action;
+
+    const action: string = (e.target! as ActionTarget).action;
 
     if (
       parseFloat(this.player.bet) > this.player.stackAmount &&
-      this.player.status !== "check"
+      (action === "raise" || action === "bet")
     ) {
       return;
     }
-    this.dispatchEvent(
-      new CustomEvent("playerAction", {
-        detail: { bet: this.player.bet, action: this.player.status },
-      })
-    );
+
+    const amount: string =
+      action !== "rebuy" ? this.player.bet : this._rebuyInput.value;
+
+    sendPlayerAction(this.socket, this.game.gameID, action, amount);
+  }
+
+  private _startGame(): void {
+    startGame(this.socket, this.game.gameID);
   }
 }

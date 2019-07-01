@@ -65,7 +65,11 @@ export function createSocket(server: Server) {
         const game = getGame(gameID);
         const player: PlayerType = game.findPlayerByID(userID)!;
 
-        if (!player || !player.isTurn) {
+        if (
+          (!player || !player.isTurn) &&
+          action !== "rebuy" &&
+          action !== "toggleSitOut"
+        ) {
           return;
         }
 

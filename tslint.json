@@ -1,10 +1,19 @@
 {
   "defaultSeverity": "error",
-  "extends": [
-    "tslint-plugin-prettier",
-    "tslint:recommended",
-    "tslint-config-prettier",
-    "tslint-eslint-rules"
-  ],
-  "rules": { "prettier": true, "interface-name": false }
+  "extends": ["tslint:latest", "tslint-eslint-rules", "tslint-config-prettier"],
+  "rulesDirectory": ["tslint-plugin-prettier"],
+  "rules": {
+    "prettier": true,
+    "interface-name": false,
+    "object-literal-sort-keys": false,
+    "ordered-imports": false,
+    "no-submodule-imports": false,
+    "no-implicit-dependencies": [true, "dev"],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ]
+  }
 }

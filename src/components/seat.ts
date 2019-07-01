@@ -30,10 +30,6 @@ export class Seat extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <link
-        rel="stylesheet"
-        href="https://kit-free.fontawesome.com/releases/latest/css/free.min.css"
-      />
       <div class="seat">
         ${this.player.bet === ""
           ? ""

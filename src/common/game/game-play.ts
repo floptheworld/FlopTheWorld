@@ -24,7 +24,7 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
 
   get dealerIndex(): number {
-    return this.sittingInPlayers.findIndex((player) => player.dealer === true);
+    return this.players.findIndex((player) => player.dealer === true);
   }
 
   get littleBlindIndex(): number {
@@ -287,18 +287,13 @@ export class GamePlay implements GamePlayType {
 
   private updateSitting(): void {
     this.players
-      .filter(
-        (player) =>
-          player.pendingSitOut === true || player.stackAmount < this.bigBlind
-      )
+      .filter((player) => player.pendingSitOut || player.stackAmount === 0)
       .map((player) => (player.isSittingOut = true));
 
     this.players
       .filter(
         (player) =>
-          player.pendingSitOut === false &&
-          player.isSittingOut === true &&
-          player.stackAmount >= this.bigBlind
+          !player.pendingSitOut && player.isSittingOut && player.stackAmount > 0
       )
       .map((player) => (player.isSittingOut = false));
   }

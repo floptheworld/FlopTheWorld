@@ -59,9 +59,6 @@ export class Table extends LitElement {
                     ></seat-element>
                   `
               )}
-              <div id="Board">
-                <board-element .cards=${this.game.board}></board-element>
-              </div>
               ${this.game.pot === 0
                 ? ""
                 : html`
@@ -69,13 +66,26 @@ export class Table extends LitElement {
                       <p>$${this.game.pot.toFixed(2)}</p>
                     </div>
                   `}
+              <div id="Board">
+                <board-element .cards=${this.game.board}></board-element>
+              </div>
+              ${this.game.winDesc === ""
+                ? ""
+                : html`
+                    <div id="WinDesc">${this.game.winDesc}</div>
+                  `}
             </div>
             <action-element
               .game=${this.game}
               @playerAction=${this._playerAction}
             ></action-element>
-            <button type="button" @click=${this._startGame}>Start Game!</button>
-            ${this.game.winDesc}
+            ${this.game.isStarted
+              ? ""
+              : html`
+                  <button type="button" @click=${this._startGame}>
+                    Start Game!
+                  </button>
+                `}
           `}
     `;
   }
@@ -86,7 +96,7 @@ export class Table extends LitElement {
         width: 1000px;
         height: 500px;
         margin: auto;
-        background-color: #8a0000;
+        background-color: #2a2c3c;
         border-radius: 50%;
         position: relative;
         box-shadow: 0px 0px 20px #000;
@@ -135,28 +145,47 @@ export class Table extends LitElement {
       }
       .table-pot {
         position: absolute;
-        background-color: #333;
-        border-radius: 5px;
-        color: #fcbd07;
+        background: hsla(230, 6%, 25%, 1);
         text-align: center;
-        font-weight: bold;
+        padding: 0px 15px;
+        height: 30px;
+        color: #d4d4d4;
+        font-size: 16px;
+        line-height: 30px;
+        border-radius: 25px;
         left: 479px;
         top: 160px;
-        box-shadow: 0px 0px 4px #000;
-        -webkit-box-shadow: 0px 0px 4px #000;
       }
       .table-pot p {
         margin: 0px;
-        padding: 5px;
       }
       #Board {
         position: absolute;
         left: 342px;
         top: 205px;
+        border: 5px solid hsla(233, 18%, 28%, 1);
+        width: 317px;
+        padding: 5px 5px 0px 5px;
+        border-radius: 8px;
+        height: 95px;
       }
       .App-intro {
         color: #fff;
         font-weight: bold;
+      }
+      #WinDesc {
+        position: absolute;
+        background: hsla(230, 6%, 25%, 1);
+        border-radius: 25px;
+        color: #d4d4d4;
+        text-align: center;
+        width: 11rem;
+        left: 415px;
+        top: 325px;
+        padding: 0px 15px;
+        height: 30px;
+        font-size: 16px;
+        line-height: 30px;
       }
       #Table seat-element:nth-child(1) {
         position: absolute;
@@ -231,7 +260,7 @@ export class Table extends LitElement {
       this.game!.gameID,
       localStorage.playerID,
       e.detail.action,
-      e.detail.bet
+      e.detail.amount
     );
   }
 }

@@ -16,7 +16,7 @@ export class Player implements PlayerType {
   public result: number = 0;
 
   get isActive(): boolean {
-    return this.status !== "fold";
+    return this.cards.length === 2 && this.status !== "fold";
   }
 
   get isCheck(): boolean {

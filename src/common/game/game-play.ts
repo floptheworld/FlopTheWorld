@@ -20,6 +20,8 @@ export class GamePlay implements GamePlayType {
   public winDesc: string = "";
   public pots: number[] = [];
   public deck: string[] = [];
+  public isStarted: boolean = false;
+  public isGameOver: boolean = false;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -34,7 +36,7 @@ export class GamePlay implements GamePlayType {
   }
 
   get activePlayers(): PlayerType[] {
-    return this.players.filter((player) => player.status !== "fold");
+    return this.players.filter((player) => player.isActive === true);
   }
 
   get playerTurnIndex(): number {
@@ -66,6 +68,8 @@ export class GamePlay implements GamePlayType {
     } else {
       this.players[0].isTurn = true;
     }
+
+    this.isStarted = true;
   }
 
   public solveHands(): void {
@@ -91,6 +95,9 @@ export class GamePlay implements GamePlayType {
         this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
         player.bet = data.toFixed(2);
         break;
+      case "rebuy":
+        player.stackAmount += data || 0;
+        return;
       default:
         break;
     }
@@ -155,6 +162,7 @@ export class GamePlay implements GamePlayType {
     this.round = 0;
     this.pot = 0;
     this.winDesc = "";
+    this.isGameOver = false;
   }
 
   private clearPlayers(active: boolean = false): void {
@@ -213,7 +221,7 @@ export class GamePlay implements GamePlayType {
     if (this.players[this.littleBlindIndex + 1]) {
       this.players[this.littleBlindIndex + 1].setBigBlind(this.bigBlind);
     } else {
-      this.players[this.littleBlindIndex + 1].setBigBlind(this.bigBlind);
+      this.players[0].setBigBlind(this.bigBlind);
     }
 
     this.currentBet = this.bigBlind;

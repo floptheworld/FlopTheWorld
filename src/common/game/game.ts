@@ -26,6 +26,8 @@ export class Game extends GamePlay {
       cardBack: this.cardBack,
       winDesc: this.winDesc,
       pots: this.pots,
+      isGameOver: this.isGameOver,
+      isStarted: this.isStarted,
     };
   }
 

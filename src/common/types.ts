@@ -38,6 +38,8 @@ export interface GameState {
   cardBack: string;
   winDesc: string;
   pots: number[];
+  isStarted: boolean;
+  isGameOver: boolean;
 }
 
 export interface GamePlayType extends GameState {

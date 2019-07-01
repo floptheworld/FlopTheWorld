@@ -28,7 +28,7 @@ export class Action extends LitElement {
   @property() private player?: PlayerState;
 
   protected render(): TemplateResult {
-    if (!this.game) {
+    if (!this.game || this.game.isGameOver) {
       return html``;
     }
 
@@ -44,9 +44,7 @@ export class Action extends LitElement {
       this.player.bet = (this.game.currentBet !== 0
         ? this.game.currentBet
         : this.game.bigBlind
-      )
-        .toFixed(2)
-        .toString();
+      ).toFixed(2);
     }
 
     return html`
@@ -113,8 +111,8 @@ export class Action extends LitElement {
           <input
             @keyup=${this._setBetFromText}
             .value=${this.player.bet}
-            class="bet-text"
-            type="text"
+            class="bet-text input"
+            type="number"
           />
         </div>
         <div class="bet-actions">
@@ -148,18 +146,34 @@ export class Action extends LitElement {
           </button>
         </div>
       </div>
+      <div class="action-box">
+        <div class="rebuy-action">
+          <button
+            .action=${"rebuy"}
+            @click=${this._callPlayerAction}
+            class="button dark-blue-button"
+          >
+            Buy Chips
+          </button>
+          <input class="input rebuy-input" type="number" step="0.1" min="0" />
+        </div>
+      </div>
     `;
   }
 
   static get styles(): CSSResult {
     return css`
+      :host {
+        display: flex;
+        justify-content: center;
+      }
       .action-box {
         background-color: #373737;
         border-radius: 5px;
         width: 400px;
-        margin: auto;
         padding: 10px;
         margin-top: 20px;
+        margin-right: 20px;
       }
       .button:hover,
       .button-small:hover {
@@ -196,12 +210,10 @@ export class Action extends LitElement {
         border: 1px solid #202020;
         background-color: #808080;
       }
-      .bet-text {
+      .input {
         padding: 10px;
         border: none;
         border-radius: 5px;
-        display: block;
-        width: 100%;
         margin: 10px 0px;
         color: white;
         background-color: #5f5f5f;
@@ -209,7 +221,24 @@ export class Action extends LitElement {
         -moz-box-sizing: border-box; /* Firefox, other Gecko */
         box-sizing: border-box;
       }
+      .bet-text {
+        display: block;
+        width: 100%;
+      }
+      .rebuy-input {
+        flex-grow: 1;
+        margin-left: 5px;
+      }
+      .rebuy-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
     `;
+  }
+
+  private get _rebuyInput(): HTMLInputElement {
+    return this.shadowRoot!.querySelector(".rebuy-input") as HTMLInputElement;
   }
 
   private _setBet(e: MouseEvent): void {
@@ -238,17 +267,22 @@ export class Action extends LitElement {
     if (!this.player) {
       return;
     }
-    this.player.status = (e.target! as ActionTarget).action;
+
+    const action: string = (e.target! as ActionTarget).action;
 
     if (
       parseFloat(this.player.bet) > this.player.stackAmount &&
-      this.player.status !== "check"
+      (action === "raise" || action === "bet")
     ) {
       return;
     }
+
+    const amount: string =
+      action !== "rebuy" ? this.player.bet : this._rebuyInput.value;
+
     this.dispatchEvent(
       new CustomEvent("playerAction", {
-        detail: { bet: this.player.bet, action: this.player.status },
+        detail: { amount, action },
       })
     );
   }

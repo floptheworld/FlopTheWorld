@@ -38,18 +38,6 @@ const frontend = {
   plugins: [
     new CopyWebpackPlugin([
       {
-        from: path.resolve(
-          "node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"
-        ),
-        to: path.resolve(__dirname, "build/vendor"),
-      },
-      {
-        from: path.resolve(
-          "node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"
-        ),
-        to: path.resolve(__dirname, "build/vendor"),
-      },
-      {
         from: path.resolve(__dirname, "static/"),
         to: path.resolve(__dirname, "build/static"),
       },

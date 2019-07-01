@@ -15,7 +15,9 @@ export class Game extends GamePlay {
     return {
       board: this.board,
       gameID: this.gameID,
-      players: this.getGameStatePlayers(currentPlayerID),
+      players: this.isGameOver
+        ? this.players
+        : this.getGameStatePlayers(currentPlayerID),
       pot: this.pot,
       round: this.round,
       bigBlind: this.bigBlind,

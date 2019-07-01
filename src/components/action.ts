@@ -180,7 +180,9 @@ export class Action extends LitElement {
                 `}
           </button>
         </div>
-        ${this.game.isStarted || this.game.sittingInPlayers.length < 2
+        ${this.game.isStarted ||
+        this.game.sittingInPlayers.length < 2 ||
+        this.player.isSittingOut
           ? ""
           : html`
               <div class="start-game-action">

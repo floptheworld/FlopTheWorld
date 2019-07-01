@@ -24,7 +24,7 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
 
   get dealerIndex(): number {
-    return this.players.findIndex((player) => player.dealer === true);
+    return this.sittingInPlayers.findIndex((player) => player.dealer === true);
   }
 
   get littleBlindIndex(): number {
@@ -77,10 +77,10 @@ export class GamePlay implements GamePlayType {
     let nextTurnIndex = this.bigBlindIndex + 1;
 
     while (
-      !this.players[this.bigBlindIndex + 1] ||
-      this.players[this.bigBlindIndex + 1].isSittingOut
+      !this.players[nextTurnIndex] ||
+      this.players[nextTurnIndex].isSittingOut
     ) {
-      if (!this.players[this.bigBlindIndex + 1]) {
+      if (!this.players[nextTurnIndex]) {
         nextTurnIndex = 0;
       } else {
         nextTurnIndex++;
@@ -246,7 +246,6 @@ export class GamePlay implements GamePlayType {
 
   private updateBlinds(): void {
     let nextLittleBlindIndex = this.dealerIndex + 1;
-    let nextBigBlindIndex = this.littleBlindIndex + 1;
 
     while (
       !this.players[nextLittleBlindIndex] ||
@@ -260,6 +259,8 @@ export class GamePlay implements GamePlayType {
     }
 
     this.players[nextLittleBlindIndex].setLittleBlind(this.littleBlind);
+
+    let nextBigBlindIndex = this.littleBlindIndex + 1;
 
     while (
       !this.players[nextBigBlindIndex] ||

@@ -76,16 +76,9 @@ export class Table extends LitElement {
                   `}
             </div>
             <action-element
+              .socket=${this.socket!}
               .game=${this.game}
-              @playerAction=${this._playerAction}
             ></action-element>
-            ${this.game.isStarted
-              ? ""
-              : html`
-                  <button type="button" @click=${this._startGame}>
-                    Start Game!
-                  </button>
-                `}
           `}
     `;
   }
@@ -246,21 +239,7 @@ export class Table extends LitElement {
     }
   }
 
-  private _startGame(): void {
-    this.socket!.emit("startGame", this.game!.gameID);
-  }
-
   private _createPlayer(): void {
     findOrCreatePlayer(this.socket!, this._playerNameInput.value);
-  }
-
-  private _playerAction(e: CustomEvent): void {
-    this.socket!.emit(
-      "playerAction",
-      this.game!.gameID,
-      localStorage.playerID,
-      e.detail.action,
-      e.detail.amount
-    );
   }
 }

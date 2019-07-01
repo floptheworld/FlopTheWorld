@@ -28,6 +28,7 @@ export class Game extends GamePlay {
       pots: this.pots,
       isGameOver: this.isGameOver,
       isStarted: this.isStarted,
+      sittingInPlayers: this.sittingInPlayers,
     };
   }
 

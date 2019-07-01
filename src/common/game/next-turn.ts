@@ -4,14 +4,14 @@ export function nextTurn(game: GamePlayType): void {
   let nextPlayerIndex: number = game.playerTurnIndex + 1;
   let firstTurnIndex: number = game.littleBlindIndex;
 
-  game.players[game.playerTurnIndex].isTurn = false;
+  game.sittingInPlayers[game.playerTurnIndex].isTurn = false;
 
   while (
-    !game.players[nextPlayerIndex] ||
-    !game.players[nextPlayerIndex].isActive ||
-    game.players[nextPlayerIndex].stackAmount === 0
+    !game.sittingInPlayers[nextPlayerIndex] ||
+    !game.sittingInPlayers[nextPlayerIndex].isActive ||
+    game.sittingInPlayers[nextPlayerIndex].stackAmount === 0
   ) {
-    if (!game.players[nextPlayerIndex]) {
+    if (!game.sittingInPlayers[nextPlayerIndex]) {
       nextPlayerIndex = 0;
     } else {
       nextPlayerIndex++;
@@ -19,23 +19,23 @@ export function nextTurn(game: GamePlayType): void {
   }
 
   if (
-    (game.players[nextPlayerIndex].isCheck && game.currentBet === 0) ||
+    (game.sittingInPlayers[nextPlayerIndex].isCheck && game.currentBet === 0) ||
     nextPlayerIndex === game.playerTurnIndex ||
-    game.players[nextPlayerIndex].numBet.toFixed(2) ===
+    game.sittingInPlayers[nextPlayerIndex].numBet.toFixed(2) ===
       game.currentBet.toFixed(2)
   ) {
     while (
-      !game.players[firstTurnIndex] ||
-      !game.players[firstTurnIndex].isActive ||
-      game.players[firstTurnIndex].stackAmount === 0
+      !game.sittingInPlayers[firstTurnIndex] ||
+      !game.sittingInPlayers[firstTurnIndex].isActive ||
+      game.sittingInPlayers[firstTurnIndex].stackAmount === 0
     ) {
-      if (!game.players[firstTurnIndex]) {
+      if (!game.sittingInPlayers[firstTurnIndex]) {
         firstTurnIndex = 0;
       } else {
         firstTurnIndex++;
       }
     }
-    game.players[firstTurnIndex].isTurn = true;
+    game.sittingInPlayers[firstTurnIndex].isTurn = true;
     game.updateRound();
     return;
   }

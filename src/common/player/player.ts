@@ -14,6 +14,8 @@ export class Player implements PlayerType {
   public bet: string = "";
   public invested: number = 0;
   public result: number = 0;
+  public pendingSitOut: boolean = false;
+  public isSittingOut: boolean = false;
 
   get isActive(): boolean {
     return this.cards.length === 2 && this.status !== "fold";
@@ -43,14 +45,14 @@ export class Player implements PlayerType {
 
   public setBigBlind(blind: number): void {
     this.isBigBlind = true;
-    this.bet = blind.toString();
+    this.bet = blind.toFixed(2);
     this.stackAmount -= blind;
     this.invested += blind;
   }
 
   public setLittleBlind(blind: number): void {
     this.isLittleBlind = true;
-    this.bet = blind.toString();
+    this.bet = blind.toFixed(2);
     this.stackAmount -= blind;
     this.invested += blind;
   }

@@ -25,7 +25,7 @@ export function updatePots(game: GamePlayType) {
       game.pots.push(0);
     }
 
-    game.pots[index] += roundToPrecision(
+    game.pots[index] = roundToPrecision(
       roundToPrecision(minInvested, 0.01) * investedPlayers.length,
       0.01
     );

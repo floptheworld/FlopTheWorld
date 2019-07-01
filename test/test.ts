@@ -71,7 +71,7 @@ describe("Evaluates Game Rounds", () => {
     assert.strictEqual(currentGame.round, 2);
     assert.strictEqual(currentGame.board.length, 4);
     assert.strictEqual(currentGame.pots.length, 1);
-    assert.strictEqual(currentGame.pots[0], 450);
+    assert.strictEqual(currentGame.pots[0], 300);
   });
 
   it("Should move to round 3, The River", () => {
@@ -84,7 +84,7 @@ describe("Evaluates Game Rounds", () => {
     assert.strictEqual(currentGame.round, 3);
     assert.strictEqual(currentGame.board.length, 5);
     assert.strictEqual(currentGame.pots.length, 1);
-    assert.strictEqual(currentGame.pots[0], 1050);
+    assert.strictEqual(currentGame.pots[0], 600);
   });
 
   it("Should move to round 1, with 2 Pots - 150 & 100", () => {

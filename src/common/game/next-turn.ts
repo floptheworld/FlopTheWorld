@@ -4,38 +4,45 @@ export function nextTurn(game: GamePlayType): void {
   let nextPlayerIndex: number = game.playerTurnIndex + 1;
   let firstTurnIndex: number = game.littleBlindIndex;
 
-  game.sittingInPlayers[game.playerTurnIndex].isTurn = false;
+  game.players[game.playerTurnIndex].isTurn = false;
 
+  // While next player Doesnt Exist, isn't Active, has no stack or is sitting out
   while (
-    !game.sittingInPlayers[nextPlayerIndex] ||
-    !game.sittingInPlayers[nextPlayerIndex].isActive ||
-    game.sittingInPlayers[nextPlayerIndex].stackAmount === 0
+    !game.players[nextPlayerIndex] ||
+    !game.players[nextPlayerIndex].isActive ||
+    game.players[nextPlayerIndex].stackAmount === 0 ||
+    game.players[nextPlayerIndex].isSittingOut
   ) {
-    if (!game.sittingInPlayers[nextPlayerIndex]) {
+    if (!game.players[nextPlayerIndex]) {
       nextPlayerIndex = 0;
     } else {
       nextPlayerIndex++;
     }
   }
 
+  // If next player Checked && everyone else checked,
+  // went around the table, or Called all around
   if (
-    (game.sittingInPlayers[nextPlayerIndex].isCheck && game.currentBet === 0) ||
+    (game.players[nextPlayerIndex].isCheck && game.currentBet === 0) ||
     nextPlayerIndex === game.playerTurnIndex ||
-    game.sittingInPlayers[nextPlayerIndex].numBet.toFixed(2) ===
+    game.players[nextPlayerIndex].numBet.toFixed(2) ===
       game.currentBet.toFixed(2)
   ) {
+    // While first turn player Doesnt Exist, isn't Active, has no stack or is sitting out
     while (
-      !game.sittingInPlayers[firstTurnIndex] ||
-      !game.sittingInPlayers[firstTurnIndex].isActive ||
-      game.sittingInPlayers[firstTurnIndex].stackAmount === 0
+      !game.players[firstTurnIndex] ||
+      !game.players[firstTurnIndex].isActive ||
+      game.players[firstTurnIndex].stackAmount === 0 ||
+      game.players[nextPlayerIndex].isSittingOut
     ) {
-      if (!game.sittingInPlayers[firstTurnIndex]) {
+      if (!game.players[firstTurnIndex]) {
         firstTurnIndex = 0;
       } else {
         firstTurnIndex++;
       }
     }
-    game.sittingInPlayers[firstTurnIndex].isTurn = true;
+
+    game.players[firstTurnIndex].isTurn = true;
     game.updateRound();
     return;
   }

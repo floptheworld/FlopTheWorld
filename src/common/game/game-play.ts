@@ -24,27 +24,23 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
 
   get dealerIndex(): number {
-    return this.sittingInPlayers.findIndex((player) => player.dealer === true);
+    return this.players.findIndex((player) => player.dealer === true);
   }
 
   get littleBlindIndex(): number {
-    return this.sittingInPlayers.findIndex(
-      (player) => player.isLittleBlind === true
-    );
+    return this.players.findIndex((player) => player.isLittleBlind === true);
   }
 
   get bigBlindIndex(): number {
-    return this.sittingInPlayers.findIndex(
-      (player) => player.isBigBlind === true
-    );
+    return this.players.findIndex((player) => player.isBigBlind === true);
   }
 
   get playerTurnIndex(): number {
-    return this.sittingInPlayers.findIndex((player) => player.isTurn === true);
+    return this.players.findIndex((player) => player.isTurn === true);
   }
 
   get activePlayers(): PlayerType[] {
-    return this.sittingInPlayers.filter((player) => player.isActive === true);
+    return this.players.filter((player) => player.isActive === true);
   }
 
   get sittingInPlayers(): PlayerType[] {
@@ -78,11 +74,20 @@ export class GamePlay implements GamePlayType {
     this.updateBlinds();
     this.deal();
 
-    if (this.sittingInPlayers[this.bigBlindIndex + 1]) {
-      this.sittingInPlayers[this.bigBlindIndex + 1].isTurn = true;
-    } else {
-      this.sittingInPlayers[0].isTurn = true;
+    let nextTurnIndex = this.bigBlindIndex + 1;
+
+    while (
+      !this.players[this.bigBlindIndex + 1] ||
+      this.players[this.bigBlindIndex + 1].isSittingOut
+    ) {
+      if (!this.players[this.bigBlindIndex + 1]) {
+        nextTurnIndex = 0;
+      } else {
+        nextTurnIndex++;
+      }
     }
+
+    this.players[nextTurnIndex].isTurn = true;
 
     this.isStarted = true;
   }
@@ -224,30 +229,50 @@ export class GamePlay implements GamePlayType {
 
     let nextDealerIndex = this.dealerIndex + 1;
 
-    if (!this.sittingInPlayers[nextDealerIndex]) {
-      nextDealerIndex = 0;
+    while (
+      !this.players[nextDealerIndex] ||
+      this.players[nextDealerIndex].isSittingOut
+    ) {
+      if (!this.players[nextDealerIndex]) {
+        nextDealerIndex = 0;
+      } else {
+        nextDealerIndex++;
+      }
     }
 
-    this.sittingInPlayers[this.dealerIndex].dealer = false;
-    this.sittingInPlayers[nextDealerIndex].dealer = true;
+    this.players[this.dealerIndex].dealer = false;
+    this.players[nextDealerIndex].dealer = true;
   }
 
   private updateBlinds(): void {
-    if (this.sittingInPlayers[this.dealerIndex + 1]) {
-      this.sittingInPlayers[this.dealerIndex + 1].setLittleBlind(
-        this.littleBlind
-      );
-    } else {
-      this.sittingInPlayers[0].setLittleBlind(this.littleBlind);
+    let nextLittleBlindIndex = this.dealerIndex + 1;
+    let nextBigBlindIndex = this.littleBlindIndex + 1;
+
+    while (
+      !this.players[nextLittleBlindIndex] ||
+      this.players[nextLittleBlindIndex].isSittingOut
+    ) {
+      if (!this.players[nextLittleBlindIndex]) {
+        nextLittleBlindIndex = 0;
+      } else {
+        nextLittleBlindIndex++;
+      }
     }
 
-    if (this.sittingInPlayers[this.littleBlindIndex + 1]) {
-      this.sittingInPlayers[this.littleBlindIndex + 1].setBigBlind(
-        this.bigBlind
-      );
-    } else {
-      this.sittingInPlayers[0].setBigBlind(this.bigBlind);
+    this.players[nextLittleBlindIndex].setLittleBlind(this.littleBlind);
+
+    while (
+      !this.players[nextBigBlindIndex] ||
+      this.players[nextBigBlindIndex].isSittingOut
+    ) {
+      if (!this.players[nextBigBlindIndex]) {
+        nextBigBlindIndex = 0;
+      } else {
+        nextBigBlindIndex++;
+      }
     }
+
+    this.players[nextBigBlindIndex].setBigBlind(this.bigBlind);
 
     this.currentBet = this.bigBlind;
     this.currentPot = this.bigBlind + this.littleBlind;

@@ -94,6 +94,9 @@ export class Table extends LitElement {
         position: relative;
         box-shadow: 0px 0px 20px #000;
         -webkit-box-shadow: 0px 0px 20px #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       .login-box {
         background-color: #373737;
@@ -153,9 +156,6 @@ export class Table extends LitElement {
         margin: 0px;
       }
       #Board {
-        position: absolute;
-        left: 342px;
-        top: 205px;
         border: 5px solid hsla(233, 18%, 28%, 1);
         width: 317px;
         padding: 5px 5px 0px 5px;

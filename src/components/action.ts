@@ -10,7 +10,12 @@ import {
 import { classMap } from "lit-html/directives/class-map";
 import { GameState, PlayerState } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
-import { sendPlayerAction, startGame, leaveGame } from "../data/connection";
+import {
+  sendPlayerAction,
+  startGame,
+  leaveGame,
+  callClock,
+} from "../data/connection";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -45,8 +50,8 @@ export class Action extends LitElement {
 
     if (this.player.bet === "" && this.player.isTurn && !this.game.isGameOver) {
       this.player.bet = (this.game.currentBet !== 0
-        ? this.game.currentBet
-        : this.game.bigBlind
+        ? this.game.currentBet + this.game.bigBlind
+        : this.game.bigBlind + this.game.littleBlind
       ).toFixed(2);
     }
 
@@ -124,35 +129,38 @@ export class Action extends LitElement {
             type="number"
           />
         </div>
-        <div class="bet-actions">
-          <button
-            .multiplier=${0.25}
-            @click=${this._setBet}
-            class="button-small dark-blue-button"
-          >
-            1/4
-          </button>
-          <button
-            .multiplier=${0.5}
-            @click=${this._setBet}
-            class="button-small dark-blue-button"
-          >
-            1/2
-          </button>
-          <button
-            .multiplier=${0.75}
-            @click=${this._setBet}
-            class="button-small dark-blue-button"
-          >
-            3/4
-          </button>
-          <button
-            .multiplier=${1}
-            @click=${this._setBet}
-            class="button-small dark-blue-button"
-          >
-            Full
-          </button>
+        <div class="bottom-main-box">
+          <div class="bet-actions">
+            <button
+              .multiplier=${0.25}
+              @click=${this._setBet}
+              class="button-small dark-blue-button"
+            >
+              1/4
+            </button>
+            <button
+              .multiplier=${0.5}
+              @click=${this._setBet}
+              class="button-small dark-blue-button"
+            >
+              1/2
+            </button>
+            <button
+              .multiplier=${0.75}
+              @click=${this._setBet}
+              class="button-small dark-blue-button"
+            >
+              3/4
+            </button>
+            <button
+              .multiplier=${1}
+              @click=${this._setBet}
+              class="button-small dark-blue-button"
+            >
+              Full
+            </button>
+          </div>
+          <div class="timer">${this.game.timer || ""}</div>
         </div>
       </div>
       <div class="action-box sm-box">
@@ -214,6 +222,17 @@ export class Action extends LitElement {
                   Start Game!
                 </button>
               </div>
+            `}
+        ${this.game.timer !== undefined ||
+        !this.game.isStarted ||
+        this.player.isSittingOut ||
+        this.game.isGameOver ||
+        this.game.isOpen
+          ? ""
+          : html`
+              <button @click=${this._callClock} class="button dark-blue-button">
+                Call Clock
+              </button>
             `}
       </div>
     `;
@@ -317,6 +336,15 @@ export class Action extends LitElement {
       .rebuy-button {
         font-size: 12px;
       }
+      .bottom-main-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .timer {
+        color: white;
+        padding-right: 4px;
+      }
     `;
   }
 
@@ -372,5 +400,9 @@ export class Action extends LitElement {
 
   private _leaveGame(): void {
     leaveGame(this.socket, this.game.gameID);
+  }
+
+  private _callClock(): void {
+    callClock(this.socket, this.game.gameID);
   }
 }

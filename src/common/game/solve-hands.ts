@@ -84,10 +84,4 @@ export function solveHands(game: GamePlayType): void {
     winners = [];
     boardWinner = true;
   }
-
-  game.players
-    .filter((player) => player.result > 0)
-    .map((player) => (player.stackAmount += player.result));
-
-  game.isGameOver = true;
 }

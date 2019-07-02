@@ -115,6 +115,21 @@ describe("Evaluates Hand Results", () => {
     currentGame.start();
   });
 
+  it("should be a Two Pair, K's & J's WIN, Player 0 Wins", () => {
+    currentGame.players[0].cards = ["AC", "5S"];
+    currentGame.players[0].invested = 50;
+    currentGame.players[1].cards = ["QH", "3S"];
+    currentGame.players[1].invested = 50;
+    currentGame.players[2].cards = ["8D", "9C"];
+    currentGame.players[2].invested = 50;
+    currentGame.board = ["TS", "JD", "JH", "KD", "KH"];
+
+    currentGame.solveHands();
+
+    assert.strictEqual(currentGame.winDesc, "Two Pair, K's & J's");
+    assert.strictEqual(currentGame.players[0].result, 150);
+  });
+
   it("should be a High Card Win, Player 0 Wins", () => {
     currentGame.players[0].cards = ["AS", "4S"];
     currentGame.players[0].invested = 50;

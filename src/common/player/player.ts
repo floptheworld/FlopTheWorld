@@ -16,6 +16,8 @@ export class Player implements PlayerType {
   public result: number = 0;
   public pendingSitOut: boolean = false;
   public isSittingOut: boolean = false;
+  public isLastAggressor: boolean = false;
+  public showCards: boolean = false;
 
   get isActive(): boolean {
     return this.cards.length === 2 && this.status !== "fold";
@@ -62,6 +64,8 @@ export class Player implements PlayerType {
     this.isTurn = false;
     this.isBigBlind = false;
     this.isLittleBlind = false;
+    this.isLastAggressor = false;
+    this.showCards = false;
     this.invested = 0;
     this.result = 0;
   }

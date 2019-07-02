@@ -23,6 +23,7 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
   public isStarted: boolean = false;
   public isOpen: boolean = false;
+  public timer?: number;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -115,6 +116,8 @@ export class GamePlay implements GamePlayType {
         player.subtractBet(this.currentBet);
         this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
         player.bet = data.toFixed(2);
+        this.clearLastAggresor();
+        player.isLastAggressor = true;
         break;
       case "rebuy":
         player.stackAmount += data || 0;
@@ -158,8 +161,8 @@ export class GamePlay implements GamePlayType {
         this.board.push(this.deck!.pop()!);
         break;
       default:
-        this.solveHands();
-        return;
+        this.isGameOver = true;
+        break;
     }
 
     updatePots(this);
@@ -297,5 +300,9 @@ export class GamePlay implements GamePlayType {
           !player.pendingSitOut && player.isSittingOut && player.stackAmount > 0
       )
       .map((player) => (player.isSittingOut = false));
+  }
+
+  private clearLastAggresor(): void {
+    this.players.map((player) => (player.isLastAggressor = false));
   }
 }

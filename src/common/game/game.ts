@@ -15,10 +15,9 @@ export class Game extends GamePlay {
     return {
       board: this.board,
       gameID: this.gameID,
-      players:
-        this.isGameOver || this.isOpen
-          ? this.players
-          : this.getGameStatePlayers(currentPlayerID),
+      players: this.isOpen
+        ? this.players
+        : this.getGameStatePlayers(currentPlayerID),
       pot: this.pot,
       round: this.round,
       bigBlind: this.bigBlind,
@@ -33,6 +32,7 @@ export class Game extends GamePlay {
       isStarted: this.isStarted,
       isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
+      timer: this.timer,
     };
   }
 
@@ -45,7 +45,9 @@ export class Game extends GamePlay {
           player.playerID !== currentPlayerID && player.cards.length > 0
       )
       .map((player) => {
-        player.cards = [this.cardBack, this.cardBack];
+        player.cards = player.showCards
+          ? player.cards
+          : [this.cardBack, this.cardBack];
       });
 
     return copyPlayers;
@@ -89,5 +91,80 @@ export class Game extends GamePlay {
     }
 
     setTimeout(() => this.OpenGame(callback), 3000);
+  }
+
+  public showdown(callback: () => void): void {
+    this.solveHands();
+
+    const livePlayers: PlayerType[] = this.activePlayers.concat();
+    const winnerFound: boolean = false;
+    const lastAggressorIndex = livePlayers.findIndex(
+      (player) => player.isLastAggressor === true
+    );
+    const resultTemp: number[] = [];
+    this.activePlayers.map((activePlayer) =>
+      resultTemp.push(activePlayer.result)
+    );
+
+    setTimeout(
+      () =>
+        this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+          callback()
+        ),
+      1500
+    );
+  }
+
+  private showdownHelper(
+    lastAggressorIndex: number,
+    winnerFound: boolean,
+    resultTemp: number[],
+    callback: () => void
+  ): void {
+    if (
+      this.activePlayers.filter((activePlayer) => activePlayer.result > 0)
+        .length === 0
+    ) {
+      this.activePlayers.map(
+        (activePlayer, i) => (activePlayer.stackAmount += resultTemp[i])
+      );
+      callback();
+      return;
+    }
+
+    const player = this.activePlayers[lastAggressorIndex];
+
+    if (!player) {
+      lastAggressorIndex = 0;
+
+      this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+        callback()
+      );
+      return;
+    }
+
+    lastAggressorIndex++;
+
+    if (winnerFound && player.result === 0) {
+      this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+        callback()
+      );
+      return;
+    }
+
+    if (player.result > 0) {
+      winnerFound = true;
+      player.result = 0;
+    }
+
+    player.showCards = true;
+    callback();
+    setTimeout(
+      () =>
+        this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+          callback()
+        ),
+      1500
+    );
   }
 }

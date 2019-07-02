@@ -49,3 +49,7 @@ export function leaveGame(socket: SocketIOClient.Socket, gameID: string) {
   localStorage.clear();
   document.location.reload();
 }
+
+export function callClock(socket: SocketIOClient.Socket, gameID: string) {
+  socket.emit("callClock", gameID);
+}

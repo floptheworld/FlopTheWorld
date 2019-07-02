@@ -73,6 +73,7 @@ export function createSocket(server: Server) {
           return;
         }
 
+        game.timer = undefined;
         game.playerAction(player, action, data);
         sendGameState(io, game);
 
@@ -82,7 +83,9 @@ export function createSocket(server: Server) {
         }
 
         // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
-        if (game.winDesc !== "") {
+        if (game.isGameOver) {
+          game.showdown(() => sendGameState(io, game));
+
           setTimeout(() => {
             game.start();
             sendGameState(io, game);
@@ -100,6 +103,33 @@ export function createSocket(server: Server) {
       users.splice(users.findIndex((user) => user.userID === userID), 1);
 
       sendGameState(io, game);
+    });
+
+    socket.on("callClock", (gameID: string) => {
+      const game = getGame(gameID);
+      game.timer = 15;
+
+      sendGameState(io, game);
+      const interval = setInterval(() => {
+        if (game.timer === undefined) {
+          clearInterval(interval);
+          return;
+        }
+
+        if (game.timer === 0) {
+          const player = game.players[game.playerTurnIndex];
+          player.pendingSitOut = true;
+          game.timer = undefined;
+
+          game.playerAction(player, "fold", "");
+          sendGameState(io, game);
+          clearInterval(interval);
+          return;
+        }
+
+        game.timer!--;
+        sendGameState(io, game);
+      }, 1000);
     });
   });
 }

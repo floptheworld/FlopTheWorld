@@ -76,6 +76,11 @@ export function createSocket(server: Server) {
         game.playerAction(player, action, data);
         sendGameState(io, game);
 
+        if (game.isOpen) {
+          game.OpenGame(() => sendGameState(io, game));
+          return;
+        }
+
         // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
         if (game.winDesc !== "") {
           setTimeout(() => {

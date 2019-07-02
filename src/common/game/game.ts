@@ -15,9 +15,10 @@ export class Game extends GamePlay {
     return {
       board: this.board,
       gameID: this.gameID,
-      players: this.isGameOver
-        ? this.players
-        : this.getGameStatePlayers(currentPlayerID),
+      players:
+        this.isGameOver || this.isOpen
+          ? this.players
+          : this.getGameStatePlayers(currentPlayerID),
       pot: this.pot,
       round: this.round,
       bigBlind: this.bigBlind,
@@ -30,6 +31,7 @@ export class Game extends GamePlay {
       pots: this.pots,
       isGameOver: this.isGameOver,
       isStarted: this.isStarted,
+      isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
     };
   }
@@ -72,5 +74,20 @@ export class Game extends GamePlay {
     }
 
     this.actionPlayed(player, action, dataNum);
+  }
+
+  public OpenGame(callback: () => void): void {
+    this.updateRound();
+    callback();
+
+    if (this.isGameOver) {
+      setTimeout(() => {
+        this.start();
+        callback();
+      }, 5000);
+      return;
+    }
+
+    setTimeout(() => this.OpenGame(callback), 3000);
   }
 }

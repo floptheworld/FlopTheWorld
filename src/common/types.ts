@@ -42,6 +42,7 @@ export interface GameState {
   pots: number[];
   isStarted: boolean;
   isGameOver: boolean;
+  isOpen: boolean;
   readonly sittingInPlayers: PlayerType[];
 }
 

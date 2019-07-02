@@ -83,6 +83,9 @@ export class Game extends GamePlay {
     callback();
 
     if (this.isGameOver) {
+      this.solveHands();
+      this.updatePlayerStacks();
+
       setTimeout(() => {
         this.start();
         callback();
@@ -96,9 +99,8 @@ export class Game extends GamePlay {
   public showdown(callback: () => void): void {
     this.solveHands();
 
-    const livePlayers: PlayerType[] = this.activePlayers.concat();
     const winnerFound: boolean = false;
-    const lastAggressorIndex = livePlayers.findIndex(
+    const lastAggressorIndex = this.activePlayers.findIndex(
       (player) => player.isLastAggressor === true
     );
     const resultTemp: number[] = [];
@@ -126,8 +128,9 @@ export class Game extends GamePlay {
         .length === 0
     ) {
       this.activePlayers.map(
-        (activePlayer, i) => (activePlayer.stackAmount += resultTemp[i])
+        (activePlayer, i) => (activePlayer.result = resultTemp[i])
       );
+      this.updatePlayerStacks();
       callback();
       return;
     }

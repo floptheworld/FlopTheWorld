@@ -106,9 +106,13 @@ export class GamePlay implements GamePlayType {
       case "check":
         break;
       case "call":
-        player.subtractBet(this.currentBet);
-        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
-        player.bet = this.currentBet.toFixed(2);
+        const bet =
+          this.currentBet > player.stackAmount
+            ? player.stackAmount
+            : this.currentBet;
+        player.subtractBet(bet);
+        this.currentPot += bet - (parseFloat(player.bet) || 0);
+        player.bet = bet.toFixed(2);
         break;
       case "bet":
       case "raise":
@@ -166,6 +170,12 @@ export class GamePlay implements GamePlayType {
     }
 
     updatePots(this);
+  }
+
+  public updatePlayerStacks(): void {
+    this.activePlayers.map(
+      (activePlayer, i) => (activePlayer.stackAmount += activePlayer.result)
+    );
   }
 
   private nextTurn(): void {

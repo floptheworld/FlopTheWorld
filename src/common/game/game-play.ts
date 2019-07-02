@@ -6,22 +6,23 @@ import { solveHands } from "./solve-hands";
 import { updatePots } from "./update-pots";
 
 export class GamePlay implements GamePlayType {
-  public gameID: string;
-  public cardBack: string;
-  public bigBlind: number;
-  public littleBlind: number;
   public players: PlayerType[] = [];
   public board: string[] = [];
-  public round: number = 0;
-  public pot: number = 0;
-  public currentBet: number = 0;
-  public currentPot: number = 0;
-  public currentPlayerID: string = "";
-  public winDesc: string = "";
   public pots: number[] = [];
   public deck: string[] = [];
-  public isStarted: boolean = false;
+  public currentPlayerID: string = "";
+  public winDesc: string = "";
+  public cardBack: string;
+  public gameID: string;
+  public currentBet: number = 0;
+  public currentPot: number = 0;
+  public round: number = 0;
+  public pot: number = 0;
+  public littleBlind: number;
+  public bigBlind: number;
   public isGameOver: boolean = false;
+  public isStarted: boolean = false;
+  public isOpen: boolean = false;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -129,7 +130,6 @@ export class GamePlay implements GamePlayType {
     }
 
     player.status = action;
-
     this.nextTurn();
   }
 
@@ -189,6 +189,7 @@ export class GamePlay implements GamePlayType {
     this.pot = 0;
     this.winDesc = "";
     this.isGameOver = false;
+    this.isOpen = false;
   }
 
   private clearPlayers(active: boolean = false): void {

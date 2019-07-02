@@ -8,17 +8,27 @@ import {
 
 @customElement("card-element")
 export class Card extends LitElement {
-  @property() public card?: string;
+  @property() public card!: string;
   @property() private width: string = "60px";
   @property() private height: string = "90px";
 
   protected render(): TemplateResult {
     return html`
-      <img
-        width="${this.width}"
-        height="${this.height}"
-        src="../static/images/${this.card}.png"
-      />
+      <picture style="width: ${this.width}; height: ${this.height}">
+        <source
+          srcset="../static/images/webp/${this.card}.webp"
+          type="image/webp"
+        />
+        <source
+          srcset="../static/images/png/${this.card}.png"
+          type="image/png"
+        />
+        <img
+          style="width: ${this.width}; height: ${this.height}"
+          src="../static/images/png/${this.card}.png"
+          alt="${this.card}"
+        />
+      </picture>
     `;
   }
 }

@@ -7,9 +7,10 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
 import { GameState, PlayerState } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
-import { sendPlayerAction, startGame } from "../data/connection";
+import { sendPlayerAction, startGame, leaveGame } from "../data/connection";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -159,17 +160,27 @@ export class Action extends LitElement {
           <button
             .action=${"rebuy"}
             @click=${this._callPlayerAction}
-            class="button dark-blue-button"
+            class="button dark-blue-button width-50 rebuy-button"
           >
             Buy Chips
           </button>
-          <input class="input rebuy-input" type="number" step="0.1" min="0" />
+          <input
+            class="input rebuy-input width-50"
+            type="number"
+            step="0.1"
+            min="0"
+          />
         </div>
         <div class="sit-out-action">
           <button
             .action=${"toggleSitOut"}
             @click=${this._callPlayerAction}
-            class="button dark-blue-button sit-out-button"
+            class="${classMap({
+              button: true,
+              "dark-blue-button": true,
+              "sit-out-button": true,
+              "width-50": this.player.isSittingOut,
+            })}"
           >
             ${this.player.isSittingOut || this.player.pendingSitOut
               ? html`
@@ -179,6 +190,16 @@ export class Action extends LitElement {
                   Sit Out
                 `}
           </button>
+          ${!this.player.isSittingOut
+            ? ""
+            : html`
+                <button
+                  @click=${this._leaveGame}
+                  class="button red-button leave-button width-50"
+                >
+                  Leave
+                </button>
+              `}
         </div>
         ${this.game.isStarted ||
         this.game.sittingInPlayers.length < 2 ||
@@ -273,7 +294,8 @@ export class Action extends LitElement {
         width: 0rem;
         margin: 0 0 0 5px;
       }
-      .rebuy-action {
+      .rebuy-action,
+      .sit-out-action {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -282,8 +304,18 @@ export class Action extends LitElement {
       .start-game-button {
         width: 100%;
       }
+      .width-50 {
+        width: calc(50% - 5px);
+      }
+      .leave-button {
+        margin: 0 0 0 5px;
+        flex-grow: 1;
+      }
       .main-actions {
         height: 37px;
+      }
+      .rebuy-button {
+        font-size: 12px;
       }
     `;
   }
@@ -336,5 +368,9 @@ export class Action extends LitElement {
 
   private _startGame(): void {
     startGame(this.socket, this.game.gameID);
+  }
+
+  private _leaveGame(): void {
+    leaveGame(this.socket, this.game.gameID);
   }
 }

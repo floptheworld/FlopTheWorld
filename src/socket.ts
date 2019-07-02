@@ -85,6 +85,17 @@ export function createSocket(server: Server) {
         }
       }
     );
+
+    socket.on("leaveGame", (gameID: string, userID: string) => {
+      const game = getGame(gameID);
+      const player: PlayerType = game.findPlayerByID(userID)!;
+
+      game.removePlayer(player);
+      socket.leave(gameID);
+      users.splice(users.findIndex((user) => user.userID === userID), 1);
+
+      sendGameState(io, game);
+    });
   });
 }
 
@@ -94,7 +105,7 @@ function sendGameState(io: SocketIO.Server, game: GameType): void {
       io.to(client).emit(
         "gameUpdate",
         game.getGameState(
-          users.find((user) => user.clientID === client)!.userID
+          users.find((user) => user.clientID === client)!.userID || ""
         )
       );
     });

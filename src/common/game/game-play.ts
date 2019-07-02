@@ -6,22 +6,24 @@ import { solveHands } from "./solve-hands";
 import { updatePots } from "./update-pots";
 
 export class GamePlay implements GamePlayType {
-  public gameID: string;
-  public cardBack: string;
-  public bigBlind: number;
-  public littleBlind: number;
   public players: PlayerType[] = [];
   public board: string[] = [];
-  public round: number = 0;
-  public pot: number = 0;
-  public currentBet: number = 0;
-  public currentPot: number = 0;
-  public currentPlayerID: string = "";
-  public winDesc: string = "";
   public pots: number[] = [];
   public deck: string[] = [];
-  public isStarted: boolean = false;
+  public currentPlayerID: string = "";
+  public winDesc: string = "";
+  public cardBack: string;
+  public gameID: string;
+  public currentBet: number = 0;
+  public currentPot: number = 0;
+  public round: number = 0;
+  public pot: number = 0;
+  public littleBlind: number;
+  public bigBlind: number;
   public isGameOver: boolean = false;
+  public isStarted: boolean = false;
+  public isOpen: boolean = false;
+  public timer?: number;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -104,16 +106,24 @@ export class GamePlay implements GamePlayType {
       case "check":
         break;
       case "call":
-        player.subtractBet(this.currentBet);
-        this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
-        player.bet = this.currentBet.toFixed(2);
+        const bet =
+          this.currentBet > player.stackAmount
+            ? player.stackAmount
+            : this.currentBet;
+        player.subtractBet(bet);
+        this.currentPot += bet - (parseFloat(player.bet) || 0);
+        player.bet = bet.toFixed(2);
         break;
       case "bet":
       case "raise":
         this.currentBet = data;
         player.subtractBet(this.currentBet);
+
         this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
         player.bet = data.toFixed(2);
+
+        this.clearLastAggresor();
+        player.isLastAggressor = true;
         break;
       case "rebuy":
         player.stackAmount += data || 0;
@@ -129,7 +139,6 @@ export class GamePlay implements GamePlayType {
     }
 
     player.status = action;
-
     this.nextTurn();
   }
 
@@ -158,11 +167,17 @@ export class GamePlay implements GamePlayType {
         this.board.push(this.deck!.pop()!);
         break;
       default:
-        this.solveHands();
-        return;
+        this.isGameOver = true;
+        break;
     }
 
     updatePots(this);
+  }
+
+  public updatePlayerStacks(): void {
+    this.activePlayers.map(
+      (activePlayer, i) => (activePlayer.stackAmount += activePlayer.result)
+    );
   }
 
   private nextTurn(): void {
@@ -189,6 +204,7 @@ export class GamePlay implements GamePlayType {
     this.pot = 0;
     this.winDesc = "";
     this.isGameOver = false;
+    this.isOpen = false;
   }
 
   private clearPlayers(active: boolean = false): void {
@@ -296,5 +312,9 @@ export class GamePlay implements GamePlayType {
           !player.pendingSitOut && player.isSittingOut && player.stackAmount > 0
       )
       .map((player) => (player.isSittingOut = false));
+  }
+
+  private clearLastAggresor(): void {
+    this.players.map((player) => (player.isLastAggressor = false));
   }
 }

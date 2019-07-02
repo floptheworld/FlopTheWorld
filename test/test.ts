@@ -71,7 +71,7 @@ describe("Evaluates Game Rounds", () => {
     assert.strictEqual(currentGame.round, 2);
     assert.strictEqual(currentGame.board.length, 4);
     assert.strictEqual(currentGame.pots.length, 1);
-    assert.strictEqual(currentGame.pots[0], 450);
+    assert.strictEqual(currentGame.pots[0], 300);
   });
 
   it("Should move to round 3, The River", () => {
@@ -84,7 +84,7 @@ describe("Evaluates Game Rounds", () => {
     assert.strictEqual(currentGame.round, 3);
     assert.strictEqual(currentGame.board.length, 5);
     assert.strictEqual(currentGame.pots.length, 1);
-    assert.strictEqual(currentGame.pots[0], 1050);
+    assert.strictEqual(currentGame.pots[0], 600);
   });
 
   it("Should move to round 1, with 2 Pots - 150 & 100", () => {
@@ -113,6 +113,21 @@ describe("Evaluates Game Rounds", () => {
 describe("Evaluates Hand Results", () => {
   beforeEach(() => {
     currentGame.start();
+  });
+
+  it("should be a Two Pair, K's & J's WIN, Player 0 Wins", () => {
+    currentGame.players[0].cards = ["AC", "5S"];
+    currentGame.players[0].invested = 50;
+    currentGame.players[1].cards = ["QH", "3S"];
+    currentGame.players[1].invested = 50;
+    currentGame.players[2].cards = ["8D", "9C"];
+    currentGame.players[2].invested = 50;
+    currentGame.board = ["TS", "JD", "JH", "KD", "KH"];
+
+    currentGame.solveHands();
+
+    assert.strictEqual(currentGame.winDesc, "Two Pair, K's & J's");
+    assert.strictEqual(currentGame.players[0].result, 150);
   });
 
   it("should be a High Card Win, Player 0 Wins", () => {

@@ -15,7 +15,7 @@ export class Game extends GamePlay {
     return {
       board: this.board,
       gameID: this.gameID,
-      players: this.isGameOver
+      players: this.isOpen
         ? this.players
         : this.getGameStatePlayers(currentPlayerID),
       pot: this.pot,
@@ -30,7 +30,9 @@ export class Game extends GamePlay {
       pots: this.pots,
       isGameOver: this.isGameOver,
       isStarted: this.isStarted,
+      isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
+      timer: this.timer,
     };
   }
 
@@ -43,7 +45,9 @@ export class Game extends GamePlay {
           player.playerID !== currentPlayerID && player.cards.length > 0
       )
       .map((player) => {
-        player.cards = [this.cardBack, this.cardBack];
+        player.cards = player.showCards
+          ? player.cards
+          : [this.cardBack, this.cardBack];
       });
 
     return copyPlayers;
@@ -51,6 +55,13 @@ export class Game extends GamePlay {
 
   public addPlayer(player: PlayerType): void {
     this.players.push(player);
+  }
+
+  public removePlayer(removePlayer: PlayerType): void {
+    this.players.splice(
+      this.players.findIndex((player) => player === removePlayer),
+      1
+    );
   }
 
   public findPlayerByID(userID: string): PlayerType | undefined {
@@ -65,5 +76,105 @@ export class Game extends GamePlay {
     }
 
     this.actionPlayed(player, action, dataNum);
+  }
+
+  public OpenGame(callback: () => void): void {
+    this.updateRound();
+    callback();
+
+    if (this.isGameOver) {
+      this.solveHands();
+      this.updatePlayerStacks();
+
+      setTimeout(() => {
+        this.start();
+        callback();
+      }, 5000);
+      return;
+    }
+
+    setTimeout(() => this.OpenGame(callback), 3000);
+  }
+
+  public showdown(callback: () => void): void {
+    this.solveHands();
+
+    const winnerFound: boolean = false;
+    const lastAggressorIndex = this.activePlayers.findIndex(
+      (player) => player.isLastAggressor === true
+    );
+    const resultTemp: number[] = [];
+    this.activePlayers.map((activePlayer) =>
+      resultTemp.push(activePlayer.result)
+    );
+
+    setTimeout(
+      () =>
+        this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+          callback()
+        ),
+      1500
+    );
+  }
+
+  private showdownHelper(
+    lastAggressorIndex: number,
+    winnerFound: boolean,
+    resultTemp: number[],
+    callback: () => void
+  ): void {
+    if (
+      this.activePlayers.filter((activePlayer) => activePlayer.result > 0)
+        .length === 0
+    ) {
+      this.activePlayers.map(
+        (activePlayer, i) => (activePlayer.result = resultTemp[i])
+      );
+
+      this.updatePlayerStacks();
+      callback();
+
+      setTimeout(() => {
+        this.start();
+        callback();
+      }, 5000);
+
+      return;
+    }
+
+    const player = this.activePlayers[lastAggressorIndex];
+
+    if (!player) {
+      lastAggressorIndex = 0;
+
+      this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+        callback()
+      );
+      return;
+    }
+
+    lastAggressorIndex++;
+
+    if (winnerFound && player.result === 0) {
+      this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+        callback()
+      );
+      return;
+    }
+
+    if (player.result > 0) {
+      winnerFound = true;
+      player.result = 0;
+    }
+
+    player.showCards = true;
+    callback();
+    setTimeout(
+      () =>
+        this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
+          callback()
+        ),
+      1500
+    );
   }
 }

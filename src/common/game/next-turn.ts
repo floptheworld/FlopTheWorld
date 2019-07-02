@@ -6,6 +6,14 @@ export function nextTurn(game: GamePlayType): void {
 
   game.players[game.playerTurnIndex].isTurn = false;
 
+  // all players in the pot are all-in, or one player is playing alone against opponents who are all all-in
+  if (
+    game.activePlayers.filter((player) => player.stackAmount > 0).length <= 1
+  ) {
+    game.isOpen = true;
+    return;
+  }
+
   // While next player Doesnt Exist, isn't Active, has no stack or is sitting out
   while (
     !game.players[nextPlayerIndex] ||

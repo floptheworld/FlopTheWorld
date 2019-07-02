@@ -53,6 +53,13 @@ export class Game extends GamePlay {
     this.players.push(player);
   }
 
+  public removePlayer(removePlayer: PlayerType): void {
+    this.players.splice(
+      this.players.findIndex((player) => player === removePlayer),
+      1
+    );
+  }
+
   public findPlayerByID(userID: string): PlayerType | undefined {
     return this.players.find((player) => player.playerID === userID);
   }

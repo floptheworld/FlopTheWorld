@@ -43,3 +43,9 @@ export function sendPlayerAction(
 export function startGame(socket: SocketIOClient.Socket, gameID: string) {
   socket.emit("startGame", gameID);
 }
+
+export function leaveGame(socket: SocketIOClient.Socket, gameID: string) {
+  socket.emit("leaveGame", gameID, localStorage.playerID);
+  localStorage.clear();
+  document.location.reload();
+}

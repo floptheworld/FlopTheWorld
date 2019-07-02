@@ -105,7 +105,7 @@ function sendGameState(io: SocketIO.Server, game: GameType): void {
       io.to(client).emit(
         "gameUpdate",
         game.getGameState(
-          users.find((user) => user.clientID === client)!.userID || ""
+          users.find((user) => user.clientID === client)!.userID
         )
       );
     });

@@ -118,8 +118,10 @@ export class GamePlay implements GamePlayType {
       case "raise":
         this.currentBet = data;
         player.subtractBet(this.currentBet);
+
         this.currentPot += this.currentBet - (parseFloat(player.bet) || 0);
         player.bet = data.toFixed(2);
+
         this.clearLastAggresor();
         player.isLastAggressor = true;
         break;

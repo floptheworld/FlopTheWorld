@@ -85,11 +85,6 @@ export function createSocket(server: Server) {
         // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
         if (game.isGameOver) {
           game.showdown(() => sendGameState(io, game));
-
-          setTimeout(() => {
-            game.start();
-            sendGameState(io, game);
-          }, 5000);
         }
       }
     );

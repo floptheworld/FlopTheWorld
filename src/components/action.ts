@@ -226,7 +226,8 @@ export class Action extends LitElement {
         ${this.game.timer !== undefined ||
         !this.game.isStarted ||
         this.player.isSittingOut ||
-        this.game.isGameOver
+        this.game.isGameOver ||
+        this.game.isOpen
           ? ""
           : html`
               <button @click=${this._callClock} class="button dark-blue-button">

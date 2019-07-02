@@ -130,8 +130,15 @@ export class Game extends GamePlay {
       this.activePlayers.map(
         (activePlayer, i) => (activePlayer.result = resultTemp[i])
       );
+
       this.updatePlayerStacks();
       callback();
+
+      setTimeout(() => {
+        this.start();
+        callback();
+      }, 5000);
+
       return;
     }
 

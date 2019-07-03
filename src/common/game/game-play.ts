@@ -23,6 +23,7 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
   public isStarted: boolean = false;
   public isOpen: boolean = false;
+  public showWinningDescription: boolean = false;
   public timer?: number;
 
   get dealerIndex(): number {
@@ -205,6 +206,7 @@ export class GamePlay implements GamePlayType {
     this.winDesc = "";
     this.isGameOver = false;
     this.isOpen = false;
+    this.showWinningDescription = false;
   }
 
   private clearPlayers(active: boolean = false): void {

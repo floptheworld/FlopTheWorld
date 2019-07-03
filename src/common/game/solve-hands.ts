@@ -77,7 +77,10 @@ export function solveHands(game: GamePlayType): void {
     investedPlayers = investedPlayers.filter((player) => player.invested > 0);
     livePlayers = investedPlayers.filter((player) => player.status !== "fold");
 
-    game.winDesc = winners[0].descr;
+    game.winDesc =
+      !game.winDesc || winners[0].descr === game.winDesc
+        ? winners[0].descr
+        : game.winDesc + " / " + winners[0].descr;
 
     // Reset Variables
     solvedHands = [];

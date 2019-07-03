@@ -57,6 +57,7 @@ export function createSocket(server: Server) {
 
       game.start();
       sendGameState(io, game);
+      sendSound(io, game, "Beep.wav");
     });
 
     socket.on(
@@ -86,6 +87,8 @@ export function createSocket(server: Server) {
         if (game.isGameOver) {
           game.showdown(() => sendGameState(io, game));
         }
+
+        sendSound(io, game, "Beep.wav");
       }
     );
 
@@ -138,6 +141,19 @@ function sendGameState(io: SocketIO.Server, game: GameType): void {
           users.find((user) => user.clientID === client)!.userID
         )
       );
+    });
+  });
+}
+
+function sendSound(io: SocketIO.Server, game: GameType, sound: string): void {
+  io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
+    clients.map((client: string) => {
+      if (
+        users.find((user) => user.clientID === client)!.userID ===
+        game.players[game.playerTurnIndex].playerID
+      ) {
+        io.to(client).emit("sound", sound);
+      }
     });
   });
 }

@@ -127,6 +127,8 @@ export class Action extends LitElement {
             .value=${this.player.bet}
             class="bet-text input"
             type="number"
+            step="0.1"
+            min="0"
           />
         </div>
         <div class="bottom-main-box">

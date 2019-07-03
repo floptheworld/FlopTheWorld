@@ -145,8 +145,10 @@ export class Seat extends LitElement {
         color: white;
         display: flex;
         justify-content: center;
+        align-items: center;
       }
       .icon-currency-dollar {
+        height: 18px;
         width: 1.125rem;
         margin-right: 4px;
       }

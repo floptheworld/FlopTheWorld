@@ -59,11 +59,18 @@ export class Table extends LitElement {
                     ></seat-element>
                   `
               )}
-              ${this.game.pot === 0
+              ${this.game.pots.length === 0
                 ? ""
                 : html`
                     <div class="table-pot">
-                      <p>$${this.game.pot.toFixed(2)}</p>
+                      <p>
+                        $${this.game.pots.map(
+                          (pot) =>
+                            html`
+                              ${pot.toFixed(2)}
+                            `
+                        )}
+                      </p>
                     </div>
                   `}
               <div id="Board">

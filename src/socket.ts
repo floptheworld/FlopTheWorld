@@ -63,7 +63,7 @@ export function createSocket(server: Server) {
     socket.on(
       "playerAction",
       (gameID: string, userID: string, action: string, data: string) => {
-        const game = getGame(gameID);
+        const game: Game = getGame(gameID);
         const player: PlayerType = game.findPlayerByID(userID)!;
 
         if (
@@ -75,20 +75,11 @@ export function createSocket(server: Server) {
         }
 
         game.timer = undefined;
-        game.playerAction(player, action, data);
-        sendGameState(io, game);
+        game.playerAction(player, action, data, () => sendGameState(io, game));
 
-        if (game.isOpen) {
-          game.OpenGame(() => sendGameState(io, game));
-          return;
+        if (game.isStarted && game.playerTurnIndex !== -1) {
+          sendSound(io, game, "Beep.wav");
         }
-
-        // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
-        if (game.isGameOver) {
-          game.showdown(() => sendGameState(io, game));
-        }
-
-        sendSound(io, game, "Beep.wav");
       }
     );
 
@@ -119,9 +110,8 @@ export function createSocket(server: Server) {
           player.pendingSitOut = true;
           game.timer = undefined;
 
-          game.playerAction(player, "fold", "");
-          sendGameState(io, game);
           clearInterval(interval);
+          game.playerAction(player, "fold", "", () => sendGameState(io, game));
           return;
         }
 
@@ -132,7 +122,7 @@ export function createSocket(server: Server) {
   });
 }
 
-function sendGameState(io: SocketIO.Server, game: GameType): void {
+function sendGameState(io: SocketIO.Server, game: Game): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
       io.to(client).emit(
@@ -145,7 +135,7 @@ function sendGameState(io: SocketIO.Server, game: GameType): void {
   });
 }
 
-function sendSound(io: SocketIO.Server, game: GameType, sound: string): void {
+function sendSound(io: SocketIO.Server, game: Game, sound: string): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
       if (

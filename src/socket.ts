@@ -3,7 +3,7 @@ import { Server } from "http";
 import { listen } from "socket.io";
 import { GameType, PlayerType } from "./common/types";
 import { getGame } from "./common/get-game";
-import { games, users } from "./common/const";
+import { games, users, turnActions } from "./common/const";
 import { getUser } from "./common/get-user";
 import { Player } from "./common/player/player";
 import { Game } from "./common/game/game";
@@ -13,9 +13,6 @@ games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
 export function createSocket(server: Server) {
   const io = listen(server);
   io.on("connection", (socket) => {
-    // tslint:disable-next-line:no-console
-    console.log("Client connected...");
-
     socket.on("findOrCreatePlayer", (userID: string, userName: string, fn) => {
       if (!users.find((user) => user.userID === userID)) {
         userID = uuid();
@@ -57,7 +54,7 @@ export function createSocket(server: Server) {
 
       game.start();
       sendGameState(io, game);
-      sendSound(io, game, "Beep.wav");
+      sendSound(io, game, "Beep.wav", true);
     });
 
     socket.on(
@@ -66,19 +63,22 @@ export function createSocket(server: Server) {
         const game: Game = getGame(gameID);
         const player: PlayerType = game.findPlayerByID(userID)!;
 
-        if (
-          (!player || !player.isTurn) &&
-          action !== "rebuy" &&
-          action !== "toggleSitOut"
-        ) {
+        if ((!player || !player.isTurn) && turnActions.has(action)) {
           return;
         }
 
-        game.timer = undefined;
+        if (turnActions.has(action)) {
+          game.timer = undefined;
+        }
+
         game.playerAction(player, action, data, () => sendGameState(io, game));
 
-        if (game.isStarted && game.playerTurnIndex !== -1) {
-          sendSound(io, game, "Beep.wav");
+        if (
+          game.isStarted &&
+          game.playerTurnIndex !== -1 &&
+          turnActions.has(action)
+        ) {
+          sendSound(io, game, "Beep.wav", true);
         }
       }
     );
@@ -115,8 +115,12 @@ export function createSocket(server: Server) {
           return;
         }
 
-        game.timer!--;
         sendGameState(io, game);
+        if (game.timer === 15) {
+          sendSound(io, game, "clock.wav");
+        }
+
+        game.timer!--;
       }, 1000);
     });
   });
@@ -135,12 +139,22 @@ function sendGameState(io: SocketIO.Server, game: Game): void {
   });
 }
 
-function sendSound(io: SocketIO.Server, game: Game, sound: string): void {
+function sendSound(
+  io: SocketIO.Server,
+  game: Game,
+  sound: string,
+  onlyTurnPlayer: boolean = false
+): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
+      const clientUserID = users.find((user) => user.clientID === client)!
+        .userID;
+
       if (
-        users.find((user) => user.clientID === client)!.userID ===
-        game.players[game.playerTurnIndex].playerID
+        clientUserID ===
+        (onlyTurnPlayer
+          ? game.players[game.playerTurnIndex].playerID
+          : clientUserID)
       ) {
         io.to(client).emit("sound", sound);
       }

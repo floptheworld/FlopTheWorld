@@ -29,7 +29,7 @@ export class Player implements PlayerType {
   }
 
   get numBet(): number {
-    return parseFloat(this.bet);
+    return roundToPrecision(parseFloat(this.bet), 0.01);
   }
 
   constructor(uuid: string, name: string) {

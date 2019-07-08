@@ -10,8 +10,7 @@ export function nextTurn(game: GamePlayType): void {
   // If this is the first round the Big blind gets to have the "last" turn if called all the way around
   if (
     game.round === 0 &&
-    game.players[game.bigBlindIndex].numBet.toFixed(2) ===
-      game.currentBet.toFixed(2) &&
+    game.players[game.bigBlindIndex].numBet === game.bigBlind &&
     nextPlayerIndex === game.bigBlindIndex
   ) {
     game.players[nextPlayerIndex].isTurn = true;

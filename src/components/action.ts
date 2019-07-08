@@ -48,12 +48,27 @@ export class Action extends LitElement {
       return html``;
     }
 
-    if (this.player.bet === "" && this.player.isTurn && !this.game.isGameOver) {
-      this.player.bet = (this.game.currentBet !== 0
-        ? this.game.currentBet + this.game.bigBlind
-        : this.game.bigBlind + this.game.littleBlind
-      ).toFixed(2);
-    }
+    // if (this.player.bet === "" && this.player.isTurn && !this.game.isGameOver) {
+    //   this.player.bet = (this.game.currentBet !== 0
+    //     ? this.game.currentBet + this.game.bigBlind
+    //     : this.game.bigBlind + this.game.littleBlind
+    //   ).toFixed(2);
+    // }
+
+    const playerBetNum = roundToPrecision(parseFloat(this.player.bet), 0.01);
+    const playerStackRounded = roundToPrecision(this.player.stackAmount, 0.01);
+
+    const raiseDisabled =
+      (playerBetNum < this.game.currentBet + this.game.bigBlind ||
+        playerBetNum > playerStackRounded ||
+        this.player.bet === "") &&
+      playerBetNum !== playerStackRounded;
+
+    const betDisabled =
+      (playerBetNum < this.game.bigBlind ||
+        playerBetNum > playerStackRounded ||
+        this.player.bet === "") &&
+      playerBetNum !== playerStackRounded;
 
     return html`
       <div class="action-box">
@@ -85,11 +100,7 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button blue-button action-button"
                         id="raise-button"
-                        ?disabled=${parseFloat(this.player.bet) <
-                          this.game.currentBet + this.game.bigBlind ||
-                          parseFloat(this.player.bet) >
-                            this.player.stackAmount ||
-                          this.player.bet === ""}
+                        ?disabled=${raiseDisabled}
                       >
                         Raise
                       </button>
@@ -110,11 +121,7 @@ export class Action extends LitElement {
                         @click=${this._callPlayerAction}
                         class="button blue-button action-button"
                         id="bet-button"
-                        ?disabled=${parseFloat(this.player.bet) <
-                          this.game.bigBlind ||
-                          parseFloat(this.player.bet) >
-                            this.player.stackAmount ||
-                          this.player.bet === ""}
+                        ?disabled=${betDisabled}
                       >
                         Bet
                       </button>
@@ -394,6 +401,12 @@ export class Action extends LitElement {
       action !== "rebuy" ? this.player.bet : this._rebuyInput.value;
 
     sendPlayerAction(this.socket, this.game.gameID, action, amount);
+
+    if (action === "rebuy") {
+      alert(
+        `You bought $${this._rebuyInput.value} that will be added after this hand`
+      );
+    }
   }
 
   private _startGame(): void {

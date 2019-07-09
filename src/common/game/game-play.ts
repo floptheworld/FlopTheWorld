@@ -23,6 +23,7 @@ export class GamePlay implements GamePlayType {
   public isGameOver: boolean = false;
   public isStarted: boolean = false;
   public isOpen: boolean = false;
+  public showWinningDescription: boolean = false;
   public timer?: number;
 
   get dealerIndex(): number {
@@ -64,6 +65,7 @@ export class GamePlay implements GamePlayType {
   public start(): void {
     this.cleanTable();
     this.clearPlayers();
+    this.updateBuyIn();
     this.updateSitting();
 
     if (this.sittingInPlayers.length < 2) {
@@ -107,9 +109,10 @@ export class GamePlay implements GamePlayType {
         break;
       case "call":
         const bet =
-          this.currentBet > player.stackAmount
+          this.currentBet > player.stackAmount + parseFloat(player.bet)
             ? player.stackAmount
             : this.currentBet;
+
         player.subtractBet(bet);
         this.currentPot += bet - (parseFloat(player.bet) || 0);
         player.bet = bet.toFixed(2);
@@ -126,7 +129,10 @@ export class GamePlay implements GamePlayType {
         player.isLastAggressor = true;
         break;
       case "rebuy":
-        player.stackAmount += data || 0;
+        player.pendingBuyIn = data || 0;
+        if (!this.isStarted) {
+          this.updateBuyIn();
+        }
         return;
       case "toggleSitOut":
         player.pendingSitOut = !player.pendingSitOut;
@@ -170,22 +176,17 @@ export class GamePlay implements GamePlayType {
         this.isGameOver = true;
         break;
     }
-
-    updatePots(this);
   }
 
   public updatePlayerStacks(): void {
     this.activePlayers.map(
-      (activePlayer, i) => (activePlayer.stackAmount += activePlayer.result)
+      (activePlayer) => (activePlayer.stackAmount += activePlayer.result)
     );
   }
 
   private nextTurn(): void {
     if (this.activePlayers.length === 1) {
-      this.activePlayers.map((player) => {
-        player.stackAmount += this.pot + this.currentPot;
-      });
-      this.start();
+      this.isGameOver = true;
       return;
     }
 
@@ -205,6 +206,7 @@ export class GamePlay implements GamePlayType {
     this.winDesc = "";
     this.isGameOver = false;
     this.isOpen = false;
+    this.showWinningDescription = false;
   }
 
   private clearPlayers(active: boolean = false): void {
@@ -221,7 +223,7 @@ export class GamePlay implements GamePlayType {
     this.deck = shuffleDeck(createDeck());
   }
 
-  private deal() {
+  private deal(): void {
     // Deal First Card
     this.sittingInPlayers.map((player) => {
       if (player.cards.length < 2) {
@@ -296,9 +298,7 @@ export class GamePlay implements GamePlayType {
   }
 
   private updatePot(): void {
-    this.players
-      .filter((player) => player.bet !== "")
-      .map((player) => (this.pot = this.pot + parseFloat(player.bet)));
+    updatePots(this);
   }
 
   private updateSitting(): void {
@@ -312,6 +312,13 @@ export class GamePlay implements GamePlayType {
           !player.pendingSitOut && player.isSittingOut && player.stackAmount > 0
       )
       .map((player) => (player.isSittingOut = false));
+  }
+
+  private updateBuyIn(): void {
+    this.players.map((player) => {
+      player.stackAmount += player.pendingBuyIn || 0;
+      player.pendingBuyIn = 0;
+    });
   }
 
   private clearLastAggresor(): void {

@@ -3,7 +3,7 @@ import { Server } from "http";
 import { listen } from "socket.io";
 import { GameType, PlayerType } from "./common/types";
 import { getGame } from "./common/get-game";
-import { games, users } from "./common/const";
+import { games, users, turnActions } from "./common/const";
 import { getUser } from "./common/get-user";
 import { Player } from "./common/player/player";
 import { Game } from "./common/game/game";
@@ -13,9 +13,6 @@ games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
 export function createSocket(server: Server) {
   const io = listen(server);
   io.on("connection", (socket) => {
-    // tslint:disable-next-line:no-console
-    console.log("Client connected...");
-
     socket.on("findOrCreatePlayer", (userID: string, userName: string, fn) => {
       if (!users.find((user) => user.userID === userID)) {
         userID = uuid();
@@ -57,34 +54,31 @@ export function createSocket(server: Server) {
 
       game.start();
       sendGameState(io, game);
+      sendSound(io, game, "Beep.wav", true);
     });
 
     socket.on(
       "playerAction",
       (gameID: string, userID: string, action: string, data: string) => {
-        const game = getGame(gameID);
+        const game: Game = getGame(gameID);
         const player: PlayerType = game.findPlayerByID(userID)!;
 
+        if ((!player || !player.isTurn) && turnActions.has(action)) {
+          return;
+        }
+
+        if (turnActions.has(action)) {
+          game.timer = undefined;
+        }
+
+        game.playerAction(player, action, data, () => sendGameState(io, game));
+
         if (
-          (!player || !player.isTurn) &&
-          action !== "rebuy" &&
-          action !== "toggleSitOut"
+          game.isStarted &&
+          game.playerTurnIndex !== -1 &&
+          turnActions.has(action)
         ) {
-          return;
-        }
-
-        game.timer = undefined;
-        game.playerAction(player, action, data);
-        sendGameState(io, game);
-
-        if (game.isOpen) {
-          game.OpenGame(() => sendGameState(io, game));
-          return;
-        }
-
-        // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
-        if (game.isGameOver) {
-          game.showdown(() => sendGameState(io, game));
+          sendSound(io, game, "Beep.wav", true);
         }
       }
     );
@@ -116,20 +110,23 @@ export function createSocket(server: Server) {
           player.pendingSitOut = true;
           game.timer = undefined;
 
-          game.playerAction(player, "fold", "");
-          sendGameState(io, game);
           clearInterval(interval);
+          game.playerAction(player, "fold", "", () => sendGameState(io, game));
           return;
         }
 
-        game.timer!--;
         sendGameState(io, game);
+        if (game.timer === 15) {
+          sendSound(io, game, "clock.wav");
+        }
+
+        game.timer!--;
       }, 1000);
     });
   });
 }
 
-function sendGameState(io: SocketIO.Server, game: GameType): void {
+function sendGameState(io: SocketIO.Server, game: Game): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
     clients.map((client: string) => {
       io.to(client).emit(
@@ -138,6 +135,29 @@ function sendGameState(io: SocketIO.Server, game: GameType): void {
           users.find((user) => user.clientID === client)!.userID
         )
       );
+    });
+  });
+}
+
+function sendSound(
+  io: SocketIO.Server,
+  game: Game,
+  sound: string,
+  onlyTurnPlayer: boolean = false
+): void {
+  io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
+    clients.map((client: string) => {
+      const clientUserID = users.find((user) => user.clientID === client)!
+        .userID;
+
+      if (
+        clientUserID ===
+        (onlyTurnPlayer
+          ? game.players[game.playerTurnIndex].playerID
+          : clientUserID)
+      ) {
+        io.to(client).emit("sound", sound);
+      }
     });
   });
 }

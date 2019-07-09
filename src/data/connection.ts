@@ -10,6 +10,11 @@ export async function createConnection(
     setState(state);
   });
 
+  socket.on("sound", (sound: string) => {
+    const beep = new Audio(`../../static/sounds/${sound}`);
+    beep.play();
+  });
+
   if (localStorage.playerID && localStorage.name) {
     findOrCreatePlayer(socket, localStorage.name, localStorage.playerID);
   }

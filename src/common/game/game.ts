@@ -26,7 +26,7 @@ export class Game extends GamePlay {
       currentPot: this.currentPot,
       currentPlayerID,
       cardBack: this.cardBack,
-      winDesc: this.winDesc,
+      winDesc: !this.showWinningDescription ? "" : this.winDesc,
       pots: this.pots,
       isGameOver: this.isGameOver,
       isStarted: this.isStarted,
@@ -68,7 +68,12 @@ export class Game extends GamePlay {
     return this.players.find((player) => player.playerID === userID);
   }
 
-  public playerAction(player: PlayerType, action: string, data: string): void {
+  public playerAction(
+    player: PlayerType,
+    action: string,
+    data: string,
+    callback: () => void
+  ): void {
     const dataNum = parseFloat(data);
 
     if (data !== "" && isNaN(dataNum)) {
@@ -76,6 +81,20 @@ export class Game extends GamePlay {
     }
 
     this.actionPlayed(player, action, dataNum);
+
+    if (this.isOpen) {
+      this.OpenGame(() => callback());
+      return;
+    }
+
+    // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
+    if (this.isGameOver) {
+      callback();
+      this.showdown(() => callback());
+      return;
+    }
+
+    callback();
   }
 
   public OpenGame(callback: () => void): void {
@@ -97,13 +116,27 @@ export class Game extends GamePlay {
   }
 
   public showdown(callback: () => void): void {
+    // Everyone has folded but one player
+    if (this.activePlayers.length === 1) {
+      this.pots.map((pot) => (this.activePlayers[0].stackAmount += pot));
+      this.activePlayers[0].stackAmount += this.currentPot;
+      callback();
+
+      setTimeout(() => {
+        this.start();
+        callback();
+      }, 1500);
+      return;
+    }
+
     this.solveHands();
 
+    const resultTemp: number[] = [];
     const winnerFound: boolean = false;
     const lastAggressorIndex = this.activePlayers.findIndex(
       (player) => player.isLastAggressor === true
     );
-    const resultTemp: number[] = [];
+
     this.activePlayers.map((activePlayer) =>
       resultTemp.push(activePlayer.result)
     );
@@ -123,6 +156,7 @@ export class Game extends GamePlay {
     resultTemp: number[],
     callback: () => void
   ): void {
+    // If there are no more players hands to show
     if (
       this.activePlayers.filter((activePlayer) => activePlayer.result > 0)
         .length === 0
@@ -132,6 +166,7 @@ export class Game extends GamePlay {
       );
 
       this.updatePlayerStacks();
+      this.showWinningDescription = true;
       callback();
 
       setTimeout(() => {
@@ -169,6 +204,7 @@ export class Game extends GamePlay {
 
     player.showCards = true;
     callback();
+
     setTimeout(
       () =>
         this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>

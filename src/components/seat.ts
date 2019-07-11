@@ -48,7 +48,12 @@ export class Seat extends LitElement {
             `
           )}
         </div>
-        <div class="player-box" ?data-player-turn=${this.player.isTurn}>
+        <div
+          class="player-box"
+          ?data-player-turn=${this.player.isTurn}
+          ?data-current-player-turn=${this.player.playerID ===
+            this.currentPlayerID && this.player.isTurn}
+        >
           ${!this.player.dealer
             ? ""
             : html`
@@ -125,6 +130,9 @@ export class Seat extends LitElement {
       }
       .player-box[data-player-turn] {
         background-color: #152642;
+      }
+      .player-box[data-current-player-turn] {
+        box-shadow: 0 0 0 2pt white;
       }
       .card-box {
         text-align: center;

@@ -4,7 +4,7 @@ import { GameState, User } from "../common/types";
 export async function createConnection(
   setState: (state: GameState) => void
 ): Promise<SocketIOClient.Socket> {
-  const socket = io("");
+  const socket = io("/", { transports: ["polling"] });
 
   socket.on("gameUpdate", (state: GameState) => {
     setState(state);

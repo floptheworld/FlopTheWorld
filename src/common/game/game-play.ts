@@ -173,6 +173,7 @@ export class GamePlay implements GamePlayType {
         this.board.push(this.deck!.pop()!);
         break;
       default:
+        this.players.map((player) => (player.isTurn = false));
         this.isGameOver = true;
         break;
     }

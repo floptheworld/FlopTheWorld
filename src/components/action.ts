@@ -6,6 +6,7 @@ import {
   LitElement,
   property,
   TemplateResult,
+  PropertyValues,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { GameState, PlayerState } from "../common/types";
@@ -16,6 +17,7 @@ import {
   leaveGame,
   callClock,
 } from "../data/connection";
+import { turnActions } from "../common/const";
 
 interface BetTarget extends EventTarget {
   multiplier: number;
@@ -33,7 +35,8 @@ interface ActionTarget extends EventTarget {
 export class Action extends LitElement {
   @property() public game!: GameState;
   @property() public socket!: SocketIOClient.Socket;
-  @property() private player?: PlayerState;
+  @property() private bet?: string;
+  private player?: PlayerState;
 
   protected render(): TemplateResult {
     if (!this.game) {
@@ -44,30 +47,32 @@ export class Action extends LitElement {
       (player) => player.playerID === this.game.currentPlayerID
     );
 
+    this.bet = this.bet || "";
+
     if (!this.player) {
       return html``;
     }
 
-    // if (this.player.bet === "" && this.player.isTurn && !this.game.isGameOver) {
-    //   this.player.bet = (this.game.currentBet !== 0
-    //     ? this.game.currentBet + this.game.bigBlind
-    //     : this.game.bigBlind + this.game.littleBlind
-    //   ).toFixed(2);
-    // }
+    if (this.bet === "" && this.player.isTurn && !this.game.isGameOver) {
+      this.bet = (this.game.currentBet !== 0
+        ? this.game.currentBet + this.game.bigBlind
+        : this.game.bigBlind + this.game.littleBlind
+      ).toFixed(2);
+    }
 
-    const playerBetNum = roundToPrecision(parseFloat(this.player.bet), 0.01);
+    const playerBetNum = roundToPrecision(parseFloat(this.bet), 0.01);
     const playerStackRounded = roundToPrecision(this.player.stackAmount, 0.01);
 
     const raiseDisabled =
       (playerBetNum < this.game.currentBet + this.game.bigBlind ||
         playerBetNum > playerStackRounded ||
-        this.player.bet === "") &&
+        this.bet === "") &&
       playerBetNum !== playerStackRounded;
 
     const betDisabled =
       (playerBetNum < this.game.bigBlind ||
         playerBetNum > playerStackRounded ||
-        this.player.bet === "") &&
+        this.bet === "") &&
       playerBetNum !== playerStackRounded;
 
     return html`
@@ -131,10 +136,10 @@ export class Action extends LitElement {
         <div>
           <input
             @keyup=${this._setBetFromText}
-            .value=${this.player.bet}
+            .value=${this.bet}
             class="bet-text input"
             type="number"
-            step="0.1"
+            step="${this.game.bigBlind.toFixed(2)}"
             min="0"
           />
         </div>
@@ -245,6 +250,14 @@ export class Action extends LitElement {
             `}
       </div>
     `;
+  }
+
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
+    if (!changedProps.has("game")) {
+      return this.bet !== "";
+    }
+
+    return true;
   }
 
   static get styles(): CSSResult {
@@ -366,12 +379,15 @@ export class Action extends LitElement {
       return;
     }
 
-    this.player.bet = roundToPrecision(
-      (e.target! as BetTarget).multiplier *
-        (this.game.pot + this.game.currentPot),
+    let pot: number = 0;
+    this.game.pots.map((p) => (pot += p));
+
+    this.bet = roundToPrecision(
+      (e.target! as BetTarget).multiplier * (pot + this.game.currentPot),
       0.01
-    ).toString();
-    this.requestUpdate();
+    )
+      .toFixed(2)
+      .toString();
   }
 
   private _setBetFromText(e: KeyboardEvent) {
@@ -379,8 +395,7 @@ export class Action extends LitElement {
       return;
     }
 
-    this.player.bet = (e.target! as TextBetTarget).value.toString();
-    this.requestUpdate();
+    this.bet = (e.target! as TextBetTarget).value.toString();
   }
 
   private _callPlayerAction(e: MouseEvent): void {
@@ -391,16 +406,20 @@ export class Action extends LitElement {
     const action: string = (e.target! as ActionTarget).action;
 
     if (
-      parseFloat(this.player.bet) > this.player.stackAmount &&
+      parseFloat(this.bet!) > this.player.stackAmount &&
       (action === "raise" || action === "bet")
     ) {
       return;
     }
 
     const amount: string =
-      action !== "rebuy" ? this.player.bet : this._rebuyInput.value;
+      action !== "rebuy" ? this.bet! : this._rebuyInput.value;
 
     sendPlayerAction(this.socket, this.game.gameID, action, amount);
+
+    if (turnActions.has(action)) {
+      this.bet = "";
+    }
 
     if (action === "rebuy") {
       alert(

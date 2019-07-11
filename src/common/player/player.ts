@@ -48,16 +48,18 @@ export class Player implements PlayerType {
 
   public setBigBlind(blind: number): void {
     this.isBigBlind = true;
-    this.bet = blind.toFixed(2);
-    this.stackAmount -= blind;
-    this.invested += blind;
+    const amount = this.stackAmount < blind ? this.stackAmount : blind;
+    this.bet = amount.toFixed(2);
+    this.stackAmount -= amount;
+    this.invested += amount;
   }
 
   public setLittleBlind(blind: number): void {
     this.isLittleBlind = true;
-    this.bet = blind.toFixed(2);
-    this.stackAmount -= blind;
-    this.invested += blind;
+    const amount = this.stackAmount < blind ? this.stackAmount : blind;
+    this.bet = amount.toFixed(2);
+    this.stackAmount -= amount;
+    this.invested += amount;
   }
 
   public cleanPlayer(): void {

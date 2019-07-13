@@ -19,6 +19,8 @@ export class Player implements PlayerType {
   public isLastAggressor: boolean = false;
   public showCards: boolean = false;
   public pendingBuyIn: number = 0;
+  public resultCards: string[] = [];
+  public resultDesc: string = "";
 
   get isActive(): boolean {
     return this.cards.length === 2 && this.status !== "fold";
@@ -64,6 +66,7 @@ export class Player implements PlayerType {
 
   public cleanPlayer(): void {
     this.cards = [];
+    this.resultCards = [];
     this.isTurn = false;
     this.isBigBlind = false;
     this.isLittleBlind = false;
@@ -71,5 +74,6 @@ export class Player implements PlayerType {
     this.showCards = false;
     this.invested = 0;
     this.result = 0;
+    this.resultDesc = "";
   }
 }

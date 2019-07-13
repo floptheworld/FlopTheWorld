@@ -17,6 +17,8 @@ export interface PlayerState {
   pendingBuyIn: number;
   isLastAggressor: boolean;
   showCards: boolean;
+  resultCards: string[];
+  resultDesc: string;
   readonly isActive: boolean;
   readonly isCheck: boolean;
   readonly numBet: number;
@@ -47,6 +49,8 @@ export interface GameState {
   isGameOver: boolean;
   isOpen: boolean;
   timer?: number;
+  handLog: string[];
+  handCount: number;
   readonly sittingInPlayers: PlayerType[];
 }
 

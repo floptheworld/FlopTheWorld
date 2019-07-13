@@ -37,6 +37,7 @@ export class Action extends LitElement {
   @property() public socket!: SocketIOClient.Socket;
   @property() private bet?: string;
   private player?: PlayerState;
+  private scrolled: boolean = false;
 
   protected render(): TemplateResult {
     if (!this.game) {
@@ -76,6 +77,15 @@ export class Action extends LitElement {
       playerBetNum !== playerStackRounded;
 
     return html`
+      <div class="action-box md-box scroll-box" @scroll=${this._boxScrolled}>
+        ${this.game.handLog.map(
+          (handText) =>
+            html`
+              <p>${handText}</p>
+              <hr />
+            `
+        )}
+      </div>
       <div class="action-box">
         <div class="main-actions">
           ${!this.player.isTurn || this.game.isGameOver || !this.game.isStarted
@@ -260,6 +270,20 @@ export class Action extends LitElement {
     return true;
   }
 
+  protected updated(changedProps: PropertyValues): void {
+    if (!changedProps.has("game")) {
+      return;
+    }
+
+    const scrollBox = this.shadowRoot!.querySelector(
+      ".scroll-box"
+    ) as HTMLElement;
+
+    scrollBox.scrollTop = !this.scrolled
+      ? scrollBox.scrollHeight
+      : scrollBox.scrollTop;
+  }
+
   static get styles(): CSSResult {
     return css`
       :host {
@@ -273,12 +297,44 @@ export class Action extends LitElement {
         padding: 10px;
         margin-top: 20px;
         margin-right: 20px;
+        height: 145px;
       }
       .sm-box {
         width: 175px;
         display: flex;
         flex-direction: column;
         justify-content: space-evenly;
+      }
+      .md-box {
+        width: 250px;
+        display: flex;
+        flex-direction: column;
+      }
+      .scroll-box {
+        overflow: auto;
+        color: #949ea8;
+      }
+      .scroll-box::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+      .scroll-box::-webkit-scrollbar-track {
+        border: 1px solid rgb(68, 71, 92);
+        border-radius: 10px;
+      }
+      .scroll-box::-webkit-scrollbar-thumb {
+        background: rgb(68, 71, 92);
+        border-radius: 10px;
+      }
+      .scroll-box::-webkit-scrollbar-thumb:hover {
+        background: rgb(42, 44, 60);
+      }
+      .scroll-box p {
+        margin: 0;
+        margin-bottom: 5px;
+      }
+      .scroll-box hr {
+        width: 100%;
       }
       .button:hover,
       .button-small:hover {
@@ -438,5 +494,14 @@ export class Action extends LitElement {
 
   private _callClock(): void {
     callClock(this.socket, this.game.gameID);
+  }
+
+  private _boxScrolled(e: Event): void {
+    const scrollBox: HTMLElement = e.target as HTMLElement;
+
+    this.scrolled =
+      scrollBox.scrollTop + scrollBox.clientHeight !== scrollBox.scrollHeight
+        ? true
+        : false;
   }
 }

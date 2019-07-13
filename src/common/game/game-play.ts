@@ -10,6 +10,7 @@ export class GamePlay implements GamePlayType {
   public board: string[] = [];
   public pots: number[] = [];
   public deck: string[] = [];
+  public handLog: string[] = [];
   public currentPlayerID: string = "";
   public winDesc: string = "";
   public cardBack: string;
@@ -25,6 +26,7 @@ export class GamePlay implements GamePlayType {
   public isOpen: boolean = false;
   public showWinningDescription: boolean = false;
   public timer?: number;
+  public handCount: number = 0;
 
   get dealerIndex(): number {
     return this.players.findIndex((player) => player.dealer === true);
@@ -63,6 +65,7 @@ export class GamePlay implements GamePlayType {
   }
 
   public start(): void {
+    this.updateHandLog();
     this.cleanTable();
     this.clearPlayers();
     this.updateBuyIn();
@@ -93,6 +96,7 @@ export class GamePlay implements GamePlayType {
 
     this.players[nextTurnIndex].isTurn = true;
 
+    this.handCount++;
     this.isStarted = true;
   }
 
@@ -183,6 +187,24 @@ export class GamePlay implements GamePlayType {
     this.activePlayers.map(
       (activePlayer) => (activePlayer.stackAmount += activePlayer.result)
     );
+  }
+
+  private updateHandLog(): void {
+    this.players
+      .filter((player) => player.result > 0)
+      .map((player) => {
+        this.handLog.push(
+          `Hand ${this.handCount}: ${player.name} wins $${player.result.toFixed(
+            2
+          )} ${
+            player.resultCards.length === 0
+              ? `before the showdown`
+              : ` with ${player.resultDesc} [${player.resultCards
+                  .map((card) => card)
+                  .join(", ")}]`
+          }`
+        );
+      });
   }
 
   private nextTurn(): void {

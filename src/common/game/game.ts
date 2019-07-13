@@ -33,6 +33,8 @@ export class Game extends GamePlay {
       isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
       timer: this.timer,
+      handLog: this.handLog,
+      handCount: this.handCount,
     };
   }
 
@@ -120,6 +122,7 @@ export class Game extends GamePlay {
     if (this.activePlayers.length === 1) {
       this.pots.map((pot) => (this.activePlayers[0].stackAmount += pot));
       this.activePlayers[0].stackAmount += this.currentPot;
+      this.activePlayers[0].result += this.currentPot;
       callback();
 
       setTimeout(() => {

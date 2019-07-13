@@ -32,7 +32,12 @@ export function solveHands(game: GamePlayType): void {
 
     // Solve the hands of all players who arent folded
     livePlayers.map((player) => {
-      solvedHands.push(Hand.solve(player.cards.concat(game.board)));
+      const solvedHand = Hand.solve(player.cards.concat(game.board));
+      solvedHands.push(solvedHand);
+      player.resultCards = solvedHand.cards.map(
+        (c: Card) => c.wildValue + c.suit.toUpperCase()
+      );
+      player.resultDesc = solvedHand.name;
     });
 
     // Find the Winning Hand/s - Could be Multiple if there is a tie

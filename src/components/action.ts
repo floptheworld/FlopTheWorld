@@ -78,7 +78,7 @@ export class Action extends LitElement {
 
     return html`
       <div class="action-box md-box scroll-box" @scroll=${this._boxScrolled}>
-        ${this.game.handLog.map(
+        ${this.game.gameLog.map(
           (handText) =>
             html`
               <p>${handText}</p>

@@ -149,6 +149,13 @@ export class GamePlay implements GamePlayType {
     }
 
     player.status = action;
+
+    this.gameLog.push(
+      `${player.name} ${player.status}s ${
+        player.bet === "" ? `` : `($${player.bet})`
+      }`
+    );
+
     this.nextTurn();
   }
 

@@ -49,7 +49,7 @@ export interface GameState {
   isGameOver: boolean;
   isOpen: boolean;
   timer?: number;
-  handLog: string[];
+  gameLog: string[];
   handCount: number;
   readonly sittingInPlayers: PlayerType[];
 }

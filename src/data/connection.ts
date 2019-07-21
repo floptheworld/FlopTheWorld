@@ -57,3 +57,11 @@ export function leaveGame(socket: SocketIOClient.Socket, gameID: string) {
 export function callClock(socket: SocketIOClient.Socket, gameID: string) {
   socket.emit("callClock", gameID);
 }
+
+export function sendMessage(
+  socket: SocketIOClient.Socket,
+  gameID: string,
+  message: string
+) {
+  socket.emit("message", gameID, localStorage.playerID, message);
+}

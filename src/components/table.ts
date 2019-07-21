@@ -104,6 +104,25 @@ export class Table extends LitElement {
         display: flex;
         justify-content: center;
         align-items: center;
+        border: 15px solid rgb(49, 49, 49);
+      }
+      #Table:before {
+        content: "";
+        border: 7px solid rgba(0, 0, 0, 0.1);
+        display: block;
+        width: 1015px;
+        height: 515px;
+        border-radius: 50%;
+        position: absolute;
+      }
+      #Table:after {
+        content: "";
+        border: 7px solid rgba(0, 0, 0, 0.1);
+        display: block;
+        width: 985px;
+        height: 485px;
+        border-radius: 50%;
+        position: absolute;
       }
       .login-box {
         background-color: #373737;

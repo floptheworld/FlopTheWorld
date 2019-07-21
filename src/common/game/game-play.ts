@@ -10,7 +10,7 @@ export class GamePlay implements GamePlayType {
   public board: string[] = [];
   public pots: number[] = [];
   public deck: string[] = [];
-  public handLog: string[] = [];
+  public gameLog: string[] = [];
   public currentPlayerID: string = "";
   public winDesc: string = "";
   public cardBack: string;
@@ -149,6 +149,13 @@ export class GamePlay implements GamePlayType {
     }
 
     player.status = action;
+
+    this.gameLog.push(
+      `${player.name} ${player.status}s ${
+        player.bet === "" ? `` : `($${player.bet})`
+      }`
+    );
+
     this.nextTurn();
   }
 
@@ -193,7 +200,7 @@ export class GamePlay implements GamePlayType {
     this.players
       .filter((player) => player.result > 0)
       .map((player) => {
-        this.handLog.push(
+        this.gameLog.push(
           `Hand ${this.handCount}: ${player.name} wins $${player.result.toFixed(
             2
           )} ${

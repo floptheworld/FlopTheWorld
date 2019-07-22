@@ -16,6 +16,7 @@ import {
   startGame,
   leaveGame,
   callClock,
+  sendMessage,
 } from "../data/connection";
 import { turnActions } from "../common/const";
 
@@ -77,14 +78,26 @@ export class Action extends LitElement {
       playerBetNum !== playerStackRounded;
 
     return html`
-      <div class="action-box md-box scroll-box" @scroll=${this._boxScrolled}>
-        ${this.game.handLog.map(
-          (handText) =>
-            html`
-              <p>${handText}</p>
-              <hr />
-            `
-        )}
+      <div class="action-box md-box flex-end">
+        <div class="scroll-box" @scroll=${this._boxScrolled}>
+          ${this.game.gameLog.map(
+            (handText) =>
+              html`
+                <p>${handText}</p>
+                <hr />
+              `
+          )}
+        </div>
+        <div class="chat-input-wrapper">
+          <input
+            type="text"
+            class="chat-input"
+            @keydown=${this._enterKeyPress}
+          />
+          <button class="chat-send" @click=${this._chatMessage}>
+            Send
+          </button>
+        </div>
       </div>
       <div class="action-box">
         <div class="main-actions">
@@ -313,6 +326,8 @@ export class Action extends LitElement {
       .scroll-box {
         overflow: auto;
         color: #949ea8;
+        width: 100%;
+        overflow-x: hidden;
       }
       .scroll-box::-webkit-scrollbar {
         width: 12px;
@@ -335,6 +350,39 @@ export class Action extends LitElement {
       }
       .scroll-box hr {
         width: 100%;
+      }
+      .chat-input {
+        background: #4a5568;
+        border: 1px solid #586679;
+        box-shadow: rgb(91, 91, 91) 0px 1px 3px inset;
+        border-radius: 4px;
+        box-sizing: border-box;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        flex: 2;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        color: white;
+      }
+      .chat-send {
+        box-shadow: none;
+        color: #fff;
+        margin-left: -1px;
+        background-color: #444;
+        border-radius: 4px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border: 1px solid transparent;
+      }
+      .chat-input-wrapper {
+        display: flex;
+        justify-content: start;
+        margin-top: 5px;
+      }
+      .flex-end {
+        justify-content: flex-end;
       }
       .button:hover,
       .button-small:hover {
@@ -430,6 +478,10 @@ export class Action extends LitElement {
     return this.shadowRoot!.querySelector(".rebuy-input") as HTMLInputElement;
   }
 
+  private get _chatInput(): HTMLInputElement {
+    return this.shadowRoot!.querySelector(".chat-input") as HTMLInputElement;
+  }
+
   private _setBet(e: MouseEvent): void {
     if (!this.player) {
       return;
@@ -503,5 +555,21 @@ export class Action extends LitElement {
       scrollBox.scrollTop + scrollBox.clientHeight !== scrollBox.scrollHeight
         ? true
         : false;
+  }
+
+  private _enterKeyPress(ev: KeyboardEvent): void {
+    if (ev.keyCode === 13) {
+      this._chatMessage();
+    }
+  }
+
+  private _chatMessage(): void {
+    if (this._chatInput.value === "") {
+      return;
+    }
+
+    sendMessage(this.socket, this.game.gameID, this._chatInput.value);
+
+    this._chatInput.value = "";
   }
 }

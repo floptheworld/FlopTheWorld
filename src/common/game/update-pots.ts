@@ -16,28 +16,32 @@ export function updatePots(game: GamePlayType) {
 
   while (investedPlayers.length > 0) {
     // Find the Minimum Invested Player and store that amount
-    minInvested = investedPlayers.reduce((prev, curr) =>
-      prev.invested < curr.invested ? prev : curr
-    ).invested;
+    minInvested = investedPlayers
+      .filter((player) => player.isActive === true)
+      .reduce((prev, curr) => (prev.invested < curr.invested ? prev : curr))
+      .invested;
 
     // Create a Side pot of the Min Invested Amount * How many players invest atleast that much
     if (game.pots[index] === undefined) {
       game.pots.push(0);
     }
 
-    game.pots[index] = roundToPrecision(
-      roundToPrecision(minInvested, 0.01) * investedPlayers.length,
-      0.01
-    );
+    game.pots[index] = 0;
 
     // Subtract the Min Invested from each players investment
-    investedPlayers.map(
-      (player) =>
-        (player.invested = roundToPrecision(
-          player.invested - minInvested,
-          0.01
-        ))
-    );
+    investedPlayers.map((player) => {
+      const amountInvested = roundToPrecision(
+        player.invested < minInvested ? player.invested : minInvested,
+        0.01
+      );
+
+      player.invested = roundToPrecision(
+        player.invested - amountInvested,
+        0.01
+      );
+
+      game.pots[index] += amountInvested;
+    });
 
     investedPlayers = investedPlayers.filter((player) => player.invested > 0);
     index++;

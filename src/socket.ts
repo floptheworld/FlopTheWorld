@@ -123,6 +123,15 @@ export function createSocket(server: Server) {
         game.timer!--;
       }, 1000);
     });
+
+    socket.on("message", (gameID: string, userID: string, message: string) => {
+      const game = getGame(gameID);
+      const player: PlayerType = game.findPlayerByID(userID)!;
+
+      game.gameLog.push(`${player.name}: ${message}`);
+
+      sendGameState(io, game);
+    });
   });
 }
 

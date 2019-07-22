@@ -33,7 +33,7 @@ export class Game extends GamePlay {
       isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
       timer: this.timer,
-      handLog: this.handLog,
+      gameLog: this.gameLog,
       handCount: this.handCount,
     };
   }

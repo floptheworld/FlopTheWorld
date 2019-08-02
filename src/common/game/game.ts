@@ -4,17 +4,19 @@ import { GamePlay } from "./game-play";
 export class Game extends GamePlay {
   constructor(
     gameID: string,
+    name: string,
     bigBlind: number,
     littleBlind: number,
     cardBack: string
   ) {
-    super(gameID, bigBlind, littleBlind, cardBack);
+    super(gameID, name, bigBlind, littleBlind, cardBack);
   }
 
   public getGameState(currentPlayerID: string): GameState {
     return {
       board: this.board,
       gameID: this.gameID,
+      name: this.name,
       players: this.isOpen
         ? this.players
         : this.getGameStatePlayers(currentPlayerID),

@@ -7,6 +7,7 @@ import { updatePots } from "./update-pots";
 
 export class GamePlay implements GamePlayType {
   public players: PlayerType[] = [];
+  public name: string = "";
   public board: string[] = [];
   public pots: number[] = [];
   public deck: string[] = [];
@@ -54,6 +55,7 @@ export class GamePlay implements GamePlayType {
 
   constructor(
     gameID: string,
+    name: string,
     bigBlind: number,
     littleBlind: number,
     cardBack: string
@@ -62,6 +64,7 @@ export class GamePlay implements GamePlayType {
     this.bigBlind = bigBlind;
     this.littleBlind = littleBlind;
     this.cardBack = cardBack;
+    this.name = name;
   }
 
   public start(): void {

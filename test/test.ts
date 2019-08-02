@@ -12,7 +12,7 @@ let currentGame: Game;
 
 describe("Creates a Game", () => {
   it("Should push new game to Game Array", () => {
-    games.push(new Game("asdf1234", 0.1, 0.05, "gray_back"));
+    games.push(new Game("asdf1234", "game1", 0.1, 0.05, "gray_back"));
 
     assert.strictEqual(games.length, 1);
   });
@@ -29,6 +29,9 @@ describe("Creates a Game", () => {
         userID: uuid(),
         clientID: i.toString(),
         userName: userNames[i],
+        email: "user2@example.com",
+        password: "password",
+        name: "",
       });
 
       currentGame.addPlayer(new Player(users[i].userID, users[i].userName));

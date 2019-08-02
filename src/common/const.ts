@@ -27,4 +27,19 @@ export const turnActions: Set<string> = new Set([
 ]);
 
 export const games: Game[] = [];
-export const users: User[] = [];
+export const users: User[] = [
+  {
+    userID: "7fa35b71-8733-441e-afcd-ed68defa68bf",
+    email: "test@test.com",
+    password: "password",
+    userName: "NKDZCK",
+    name: "Zack",
+  },
+  {
+    userID: "7fa35b71-8733-441e-afcd-ed68defa68be",
+    email: "user2@example.com",
+    password: "password",
+    userName: "user2",
+    name: "user2",
+  },
+];

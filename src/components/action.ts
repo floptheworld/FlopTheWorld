@@ -9,7 +9,7 @@ import {
   PropertyValues,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import { GameState, PlayerState } from "../common/types";
+import { GameState, PlayerState, User } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
 import {
   sendPlayerAction,
@@ -36,6 +36,7 @@ interface ActionTarget extends EventTarget {
 export class Action extends LitElement {
   @property() public game!: GameState;
   @property() public socket!: SocketIOClient.Socket;
+  @property() public user!: User;
   @property() private bet?: string;
   private player?: PlayerState;
   private scrolled: boolean = false;
@@ -304,7 +305,10 @@ export class Action extends LitElement {
         justify-content: center;
       }
       .action-box {
-        background-color: #373737;
+        background-color: #383d45;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+          0 3px 6px rgba(0, 0, 0, 0.23);
         border-radius: 5px;
         width: 400px;
         padding: 10px;
@@ -352,9 +356,8 @@ export class Action extends LitElement {
         width: 100%;
       }
       .chat-input {
-        background: #4a5568;
-        border: 1px solid #586679;
-        box-shadow: rgb(91, 91, 91) 0px 1px 3px inset;
+        background-color: #2b3138;
+        border: none;
         border-radius: 4px;
         box-sizing: border-box;
         padding-left: 10px;
@@ -370,7 +373,7 @@ export class Action extends LitElement {
         box-shadow: none;
         color: #fff;
         margin-left: -1px;
-        background-color: #444;
+        background-color: #0083e2;
         border-radius: 4px;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
@@ -412,7 +415,7 @@ export class Action extends LitElement {
       }
       .dark-blue-button {
         border: 1px solid #003f69;
-        background-color: #004c80;
+        background-color: #1c6de1;
       }
       .button-gray,
       .button[disabled] {
@@ -425,7 +428,7 @@ export class Action extends LitElement {
         border-radius: 5px;
         margin: 10px 0px;
         color: white;
-        background-color: #5f5f5f;
+        background-color: #2b3138;
         -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
         -moz-box-sizing: border-box; /* Firefox, other Gecko */
         box-sizing: border-box;
@@ -523,7 +526,13 @@ export class Action extends LitElement {
     const amount: string =
       action !== "rebuy" ? this.bet! : this._rebuyInput.value;
 
-    sendPlayerAction(this.socket, this.game.gameID, action, amount);
+    sendPlayerAction(
+      this.socket,
+      this.user.userID,
+      this.game.gameID,
+      action,
+      amount
+    );
 
     if (turnActions.has(action)) {
       this.bet = "";
@@ -541,7 +550,7 @@ export class Action extends LitElement {
   }
 
   private _leaveGame(): void {
-    leaveGame(this.socket, this.game.gameID);
+    leaveGame(this.socket, this.user.userID, this.game.gameID);
   }
 
   private _callClock(): void {
@@ -568,7 +577,12 @@ export class Action extends LitElement {
       return;
     }
 
-    sendMessage(this.socket, this.game.gameID, this._chatInput.value);
+    sendMessage(
+      this.socket,
+      this.user.userID,
+      this.game.gameID,
+      this._chatInput.value
+    );
 
     this._chatInput.value = "";
   }

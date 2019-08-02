@@ -27,7 +27,6 @@ describe("Creates a Game", () => {
     for (let i = 0; i < 3; i++) {
       users.push({
         userID: uuid(),
-        clientID: i.toString(),
         userName: userNames[i],
         email: "user2@example.com",
         password: "password",
@@ -37,7 +36,7 @@ describe("Creates a Game", () => {
       currentGame.addPlayer(new Player(users[i].userID, users[i].userName));
     }
 
-    assert.strictEqual(users.length, 3);
+    assert.strictEqual(users.length, 5);
     assert.strictEqual(currentGame.players.length, 3);
   });
 

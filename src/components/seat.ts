@@ -93,14 +93,15 @@ export class Seat extends LitElement {
         margin: 0px;
       }
       .player-box {
-        background-color: #373737;
+        background-color: #383d45;
         border-radius: 5px;
         margin-top: -50px;
         position: absolute;
         width: 150px;
         z-index: 3;
-        box-shadow: 0px 0px 10px #000;
-        -webkit-box-shadow: 0px 0px 10px #000;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+          0 3px 6px rgba(0, 0, 0, 0.23);
       }
       .player-bet {
         position: absolute;

@@ -33,6 +33,7 @@ export interface PlayerType extends PlayerState {
 
 export interface GameState {
   gameID: string;
+  name: string;
   players: PlayerState[];
   board: string[];
   round: number;
@@ -77,7 +78,10 @@ export interface GameType extends GamePlayType {
 export interface User {
   userID: string;
   userName: string;
-  clientID: string;
+  clientID?: string;
+  email: string;
+  password: string;
+  name: string;
 }
 
 export interface Card {

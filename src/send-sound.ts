@@ -1,22 +1,30 @@
-import { Game } from "./common/game/game";
-import { users } from "./common/const";
+import { GameType, UserType } from "./common/types";
+import { getConnection } from "typeorm";
+import { UserModel } from "./db/user-model";
 
 export function sendSound(
   io: SocketIO.Server,
-  game: Game,
+  game: GameType,
   sound: string,
   onlyTurnPlayer: boolean = false
 ): void {
   io.sockets.in(game.gameID).clients((err: Error, clients: string[]) => {
-    clients.map((client: string) => {
-      const clientUserID = users.find((user) => user.clientID === client)!
-        .userID;
+    clients.map(async (client: string) => {
+      const user: UserType | undefined = await getConnection()
+        .getRepository(UserModel)
+        .findOne({
+          clientID: client,
+        });
+
+      if (!user) {
+        return;
+      }
 
       if (
-        clientUserID ===
+        user.userID ===
         (onlyTurnPlayer
-          ? game.players[game.playerTurnIndex].playerID
-          : clientUserID)
+          ? game.players[game.playerTurnIndex].user.userID
+          : user.userID)
       ) {
         io.to(client).emit("sound", sound);
       }

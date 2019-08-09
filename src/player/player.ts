@@ -1,26 +1,31 @@
-import { PlayerType } from "../types";
-import { roundToPrecision } from "../round-to-precision";
+import uuid = require("uuid");
+
+import { PlayerType, UserType, GameType } from "../common/types";
+import { roundToPrecision } from "../common/round-to-precision";
 
 export class Player implements PlayerType {
-  public cards: string[] = [];
-  public name: string;
-  public playerID: string;
-  public stackAmount: number = 5.0;
-  public isTurn: boolean = false;
-  public dealer: boolean = false;
-  public isLittleBlind: boolean = false;
-  public isBigBlind: boolean = false;
+  public playerID!: string;
+  public user!: UserType;
+  public game!: GameType;
+  public pendingBuyIn!: number;
+  public stackAmount!: number;
+  public invested!: number;
+  public result!: number;
+  public isTurn!: boolean;
+  public isDealer!: boolean;
+  public showCards!: boolean;
+  public isBigBlind!: boolean;
+  public isSittingOut!: boolean;
+  public isSmallBlind!: boolean;
+  public pendingSitOut!: boolean;
+  public isLastAggressor!: boolean;
+  public resultDesc: string = "";
   public status: string = "";
   public bet: string = "";
-  public invested: number = 0;
-  public result: number = 0;
-  public pendingSitOut: boolean = false;
-  public isSittingOut: boolean = false;
-  public isLastAggressor: boolean = false;
-  public showCards: boolean = false;
-  public pendingBuyIn: number = 0;
+  public cards: string[] = [];
   public resultCards: string[] = [];
-  public resultDesc: string = "";
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 
   get isActive(): boolean {
     return this.cards.length === 2 && this.status !== "fold";
@@ -34,9 +39,9 @@ export class Player implements PlayerType {
     return roundToPrecision(parseFloat(this.bet), 0.01);
   }
 
-  constructor(uuid: string, name: string) {
-    this.name = name;
-    this.playerID = uuid;
+  constructor(stackAmount: number) {
+    this.playerID = uuid();
+    this.stackAmount = stackAmount;
   }
 
   public subtractBet(currentBet: number): void {
@@ -56,8 +61,8 @@ export class Player implements PlayerType {
     this.invested += amount;
   }
 
-  public setLittleBlind(blind: number): void {
-    this.isLittleBlind = true;
+  public setSmallBlind(blind: number): void {
+    this.isSmallBlind = true;
     const amount = this.stackAmount < blind ? this.stackAmount : blind;
     this.bet = amount.toFixed(2);
     this.stackAmount -= amount;
@@ -69,7 +74,7 @@ export class Player implements PlayerType {
     this.resultCards = [];
     this.isTurn = false;
     this.isBigBlind = false;
-    this.isLittleBlind = false;
+    this.isSmallBlind = false;
     this.isLastAggressor = false;
     this.showCards = false;
     this.invested = 0;

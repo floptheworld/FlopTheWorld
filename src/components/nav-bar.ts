@@ -7,11 +7,11 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { User } from "../common/types";
+import { UserType } from "../common/types";
 
 @customElement("nav-bar")
 export class NavBar extends LitElement {
-  @property() public user!: User;
+  @property() public user!: UserType;
 
   protected render(): TemplateResult {
     return html`

@@ -1,16 +1,20 @@
-import { Game } from "../common/game/game";
+import { Game } from "../game/game";
 import { getGame } from "../common/get-game";
-import { PlayerType } from "../common/types";
 import { turnActions } from "../common/const";
 import { sendGameState } from "../send-game-state";
 import { sendSound } from "../send-sound";
+import { getConnection } from "typeorm";
+import { PlayerModel } from "../db/player-model";
+import { sendMessage } from "../send-message";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on(
     "playerAction",
-    (gameID: string, userID: string, action: string, data: string) => {
+    async (gameID: string, userID: string, action: string, data: string) => {
       const game: Game = getGame(gameID);
-      const player: PlayerType = game.findPlayerByID(userID)!;
+      const player = await getConnection()
+        .getRepository(PlayerModel)
+        .findOne({ userID, gameID });
 
       // If its not the players turn and the action is a turn action
       if ((!player || !player.isTurn) && turnActions.has(action)) {
@@ -23,7 +27,15 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       }
 
       // Send the player action to be processed by the game object
-      game.playerAction(player, action, data, () => sendGameState(io, game));
+      game.playerAction(player!, action, data, () => sendGameState(io, game));
+
+      sendMessage(
+        io,
+        game.gameID,
+        `${player!.user.name} ${player!.status}s ${
+          player!.bet === "" ? `` : `($${player!.bet})`
+        }`
+      );
 
       // Send turn sound
       if (

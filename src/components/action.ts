@@ -9,7 +9,7 @@ import {
   PropertyValues,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import { GameState, PlayerState, User } from "../common/types";
+import { GameState, PlayerState, UserType } from "../common/types";
 import { roundToPrecision } from "../common/round-to-precision";
 import {
   sendPlayerAction,
@@ -17,7 +17,8 @@ import {
   leaveGame,
   callClock,
   sendMessage,
-} from "../data/connection";
+  subscribeToMessage,
+} from "../api/connection";
 import { turnActions } from "../common/const";
 
 interface BetTarget extends EventTarget {
@@ -36,8 +37,9 @@ interface ActionTarget extends EventTarget {
 export class Action extends LitElement {
   @property() public game!: GameState;
   @property() public socket!: SocketIOClient.Socket;
-  @property() public user!: User;
+  @property() public user!: UserType;
   @property() private bet?: string;
+  @property() private messages: string[] = [];
   private player?: PlayerState;
   private scrolled: boolean = false;
 
@@ -59,7 +61,7 @@ export class Action extends LitElement {
     if (this.bet === "" && this.player.isTurn && !this.game.isGameOver) {
       this.bet = (this.game.currentBet !== 0
         ? this.game.currentBet + this.game.bigBlind
-        : this.game.bigBlind + this.game.littleBlind
+        : this.game.bigBlind + this.game.smallBlind
       ).toFixed(2);
     }
 
@@ -81,7 +83,7 @@ export class Action extends LitElement {
     return html`
       <div class="action-box md-box flex-end">
         <div class="scroll-box" @scroll=${this._boxScrolled}>
-          ${this.game.gameLog.map(
+          ${this.messages.map(
             (handText) =>
               html`
                 <p>${handText}</p>
@@ -163,7 +165,7 @@ export class Action extends LitElement {
             .value=${this.bet}
             class="bet-text input"
             type="number"
-            step="${this.game.bigBlind.toFixed(2)}"
+            step="${this.game.bigBlind}"
             min="0"
           />
         </div>
@@ -284,6 +286,12 @@ export class Action extends LitElement {
     return true;
   }
 
+  protected firstUpdated(): void {
+    subscribeToMessage(this.socket, (message: string) => {
+      this.messages.push(message);
+    });
+  }
+
   protected updated(changedProps: PropertyValues): void {
     if (!changedProps.has("game")) {
       return;
@@ -292,6 +300,10 @@ export class Action extends LitElement {
     const scrollBox = this.shadowRoot!.querySelector(
       ".scroll-box"
     ) as HTMLElement;
+
+    if (!scrollBox) {
+      return;
+    }
 
     scrollBox.scrollTop = !this.scrolled
       ? scrollBox.scrollHeight
@@ -490,11 +502,9 @@ export class Action extends LitElement {
       return;
     }
 
-    let pot: number = 0;
-    this.game.pots.map((p) => (pot += p));
-
     this.bet = roundToPrecision(
-      (e.target! as BetTarget).multiplier * (pot + this.game.currentPot),
+      (e.target! as BetTarget).multiplier *
+        (this.game.pot + this.game.currentPot),
       0.01
     )
       .toFixed(2)

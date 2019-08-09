@@ -7,9 +7,14 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { getGames, createConnection, getUser } from "../data/connection";
-import { User } from "../common/types";
-import { Game } from "../common/game/game";
+import {
+  getGames,
+  createConnection,
+  getUser,
+  subscribeToMessage,
+} from "../api/connection";
+import { UserType } from "../common/types";
+import { Game } from "../game/game";
 import "./nav-bar";
 import "./create-game-modal";
 
@@ -19,7 +24,7 @@ interface JoinTarget extends EventTarget {
 
 @customElement("lobby-element")
 export class Lobby extends LitElement {
-  @property() public user?: User;
+  @property() public user?: UserType;
   @property() private socket?: SocketIOClient.Socket;
   @property() private games?: Game[];
   @property() private modalVisable: boolean = false;
@@ -57,32 +62,36 @@ export class Lobby extends LitElement {
             </div>
           </div>
           <hr />
-          <div class="games">
-            <div class="game-name title">Name</div>
-            <div class="game-players title">Players</div>
-            <div class="game-blinds title">Blinds</div>
-            <div class="game-join title"></div>
-            ${this.games!.map(
-              (game) =>
-                html`
-                  <div class="game-name">${game.name}</div>
-                  <div class="game-players">${game.players.length}</div>
-                  <div class="game-blinds">
-                    ${game.littleBlind} / ${game.bigBlind}
-                  </div>
-                  <div class="game-join">
-                    <button
-                      type="button"
-                      class="button button-extra-small join-button"
-                      .gameID=${game.gameID}
-                      @click=${this._navigateGame}
-                    >
-                      Join
-                    </button>
-                  </div>
-                `
-            )}
-          </div>
+          ${!this.games
+            ? ""
+            : html`
+                <div class="games">
+                  <div class="game-name title">Name</div>
+                  <div class="game-players title">Players</div>
+                  <div class="game-blinds title">Blinds</div>
+                  <div class="game-join title"></div>
+                  ${this.games!.map(
+                    (game) =>
+                      html`
+                        <div class="game-name">${game.name}</div>
+                        <div class="game-players">${game.players.length}</div>
+                        <div class="game-blinds">
+                          ${game.smallBlind} / ${game.bigBlind}
+                        </div>
+                        <div class="game-join">
+                          <button
+                            type="button"
+                            class="button button-extra-small join-button"
+                            .gameID=${game.gameID}
+                            @click=${this._navigateGame}
+                          >
+                            Join
+                          </button>
+                        </div>
+                      `
+                  )}
+                </div>
+              `}
         </div>
       </div>
     `;
@@ -209,7 +218,7 @@ export class Lobby extends LitElement {
     }
 
     this.socket = await createConnection(this.user.userID);
-    this._getGames();
+    await this._getGames();
   }
 
   private async _getGames(): Promise<void> {

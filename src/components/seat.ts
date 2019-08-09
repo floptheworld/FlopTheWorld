@@ -54,14 +54,14 @@ export class Seat extends LitElement {
           ?data-current-player-turn=${this.player.playerID ===
             this.currentPlayerID && this.player.isTurn}
         >
-          ${!this.player.dealer
+          ${!this.player.isDealer
             ? ""
             : html`
                 <span class="dealer-button">
                   D
                 </span>
               `}
-          <p class="player-name">${this.player.name}</p>
+          <p class="player-name">${this.player.user.name}</p>
           <p class="player-stack">
             ${this.player.isSittingOut
               ? html`

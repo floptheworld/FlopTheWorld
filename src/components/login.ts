@@ -7,8 +7,8 @@ import {
   TemplateResult,
   property,
 } from "lit-element";
-import { login } from "../data/connection";
-import { User } from "../common/types";
+import { login } from "../api/connection";
+import { UserType } from "../common/types";
 
 @customElement("login-element")
 export class Login extends LitElement {
@@ -168,7 +168,7 @@ export class Login extends LitElement {
       this._playerUserNameInput.value,
       this._playerPasswordInput.value
     ).then((data) => {
-      if (!(data as User).userID) {
+      if (!(data as UserType).userID) {
         this.error = data as string;
         return;
       }

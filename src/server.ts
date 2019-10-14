@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import path from "path";
 import session from "express-session";
+import bcrypt from "bcrypt";
 
 import { createServer } from "http";
 import { getConnection, Like, Repository } from "typeorm";
@@ -23,6 +24,8 @@ const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 8080;
 
 const cacheTime = 86400000 * 30; // 30 day Cache
+
+const saltRounds = 10;
 
 (async () => {
   const server = createServer(app);
@@ -48,7 +51,7 @@ const cacheTime = 86400000 * 30; // 30 day Cache
           });
         }
 
-        if (password !== userFound.password) {
+        if (!bcrypt.compareSync(password, userFound.password)) {
           return done(null, false, {
             message: "Invalid Username or Password.\n",
           });
@@ -173,14 +176,13 @@ const cacheTime = 86400000 * 30; // 30 day Cache
       return res.send("That username is already taken");
     }
 
-    connection.save({ userID: uuid(), name, userName, email, password });
-
+    const hash = bcrypt.hashSync(password, saltRounds);
     req.user = await connection.save({
       userID: uuid(),
       name,
       userName,
       email,
-      password,
+      password: hash,
     });
 
     passport.authenticate("local", (perr, user, info) => {

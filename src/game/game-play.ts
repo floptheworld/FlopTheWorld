@@ -141,18 +141,18 @@ export class GamePlay implements GamePlayType {
         }
         return;
       case "toggleSitOut":
-        player.pendingSitOut = !player.pendingSitOut;
         if (!this.isStarted) {
-          this.updateSitting();
+          player.pendingSitOut = false;
+          player.isSittingOut = !player.isSittingOut;
+          return;
         }
+        player.pendingSitOut = !player.pendingSitOut;
         return;
       default:
         break;
     }
 
     player.status = action;
-
-    this.nextTurn();
   }
 
   public updateRound(): void {
@@ -192,7 +192,7 @@ export class GamePlay implements GamePlayType {
     );
   }
 
-  private nextTurn(): void {
+  public nextTurn(): void {
     if (this.activePlayers.length === 1) {
       this.isGameOver = true;
       return;

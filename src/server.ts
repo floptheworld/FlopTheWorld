@@ -21,6 +21,7 @@ import { connectDB, getGameRepository } from "./db/db";
 
 const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 8080;
+
 const cacheTime = 86400000 * 30; // 30 day Cache
 
 (async () => {

@@ -1,5 +1,7 @@
 import { PlayerType, GameState } from "../common/types";
 import { GamePlay } from "./game-play";
+import { getPlayerRepository } from "../db/db";
+import { turnActions } from "../common/const";
 
 export class Game extends GamePlay {
   public getGameState(currentPlayerID: string): GameState {
@@ -57,12 +59,12 @@ export class Game extends GamePlay {
     return this.players.find((player) => player.playerID === userID);
   }
 
-  public playerAction(
+  public async playerAction(
     player: PlayerType,
     action: string,
     data: string,
     callback: () => void
-  ): void {
+  ): Promise<void> {
     const dataNum = parseFloat(data);
 
     if (data !== "" && isNaN(dataNum)) {
@@ -70,6 +72,10 @@ export class Game extends GamePlay {
     }
 
     this.actionPlayed(player, action, dataNum);
+
+    if (turnActions.has(action)) {
+      this.nextTurn();
+    }
 
     if (this.isOpen) {
       this.OpenGame(() => callback());

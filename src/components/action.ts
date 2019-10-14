@@ -35,9 +35,9 @@ interface ActionTarget extends EventTarget {
 
 @customElement("action-element")
 export class Action extends LitElement {
-  @property() public game!: GameState;
-  @property() public socket!: SocketIOClient.Socket;
-  @property() public user!: UserType;
+  @property({ type: Object }) public game!: GameState;
+  @property({ type: Object }) public socket!: SocketIOClient.Socket;
+  @property({ type: Object }) public user!: UserType;
   @property() private bet?: string;
   @property() private messages: string[] = [];
   private player?: PlayerState;
@@ -288,7 +288,7 @@ export class Action extends LitElement {
 
   protected firstUpdated(): void {
     subscribeToMessage(this.socket, (message: string) => {
-      this.messages.push(message);
+      this.messages = [...this.messages, message];
     });
   }
 

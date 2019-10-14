@@ -1,6 +1,8 @@
 import { PrimaryColumn, Column, Entity, OneToMany } from "typeorm";
 import { Game } from "../game/game";
 import { PlayerModel } from "./player-model";
+import { PlayerType } from "../common/types";
+import { getGameRepository } from "./db";
 
 @Entity({ name: "game" })
 export class GameModel extends Game {
@@ -69,4 +71,33 @@ export class GameModel extends Game {
 
   @OneToMany(() => PlayerModel, (player) => player.game, { cascade: true })
   public players!: PlayerModel[];
+
+  public async start(): Promise<void> {
+    super.start();
+    await getGameRepository().save(this);
+  }
+
+  public async solveHands(): Promise<void> {
+    super.solveHands();
+    await getGameRepository().save(this);
+  }
+
+  public async actionPlayed(
+    player: PlayerType,
+    action: string,
+    data: number
+  ): Promise<void> {
+    super.actionPlayed(player, action, data);
+    await getGameRepository().save(this);
+  }
+
+  public async updateRound(): Promise<void> {
+    super.updateRound();
+    await getGameRepository().save(this);
+  }
+
+  public async updatePlayerStacks(): Promise<void> {
+    super.updatePlayerStacks();
+    await getGameRepository().save(this);
+  }
 }

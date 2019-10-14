@@ -1,12 +1,31 @@
-import { getGame } from "../common/get-game";
-import { PlayerType } from "../common/types";
+import { PlayerType, GameType } from "../common/types";
 import { sendMessage } from "../send-message";
+import { getGameRepository, getPlayerRepository } from "../db/db";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
-  socket.on("message", (gameID: string, userID: string, message: string) => {
-    const game = getGame(gameID);
-    const player: PlayerType = game.findPlayerByID(userID)!;
+  socket.on(
+    "message",
+    async (gameID: string, userID: string, message: string) => {
+      const game: GameType | undefined = await getGameRepository().findOne(
+        gameID
+      );
 
-    sendMessage(io, game.gameID, `${player.user.name}: ${message}`);
-  });
+      if (!game) {
+        return;
+      }
+
+      const player:
+        | PlayerType
+        | undefined = await getPlayerRepository().findOne(
+        { userID, gameID },
+        { relations: ["user"] }
+      );
+
+      if (!player) {
+        return;
+      }
+
+      sendMessage(io, game.gameID, `${player.user.name}: ${message}`);
+    }
+  );
 };

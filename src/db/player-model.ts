@@ -9,7 +9,7 @@ import {
 import { Player } from "../player/player";
 import { UserModel } from "./user-model";
 import { GameModel } from "./game-model";
-import { getGameRepository } from "./db";
+import { getPlayerRepository } from "./db";
 
 @Entity({ name: "player" })
 @Unique(["user", "game"])
@@ -90,21 +90,21 @@ export class PlayerModel extends Player {
 
   public subtractBet(currentBet: number): void {
     super.subtractBet(currentBet);
-    getGameRepository().save(this);
+    getPlayerRepository().save(this);
   }
 
   public setBigBlind(blind: number): void {
     super.setBigBlind(blind);
-    getGameRepository().save(this);
+    getPlayerRepository().save(this);
   }
 
   public setSmallBlind(blind: number): void {
     super.setSmallBlind(blind);
-    getGameRepository().save(this);
+    getPlayerRepository().save(this);
   }
 
   public cleanPlayer(): void {
     super.cleanPlayer();
-    getGameRepository().save(this);
+    getPlayerRepository().save(this);
   }
 }

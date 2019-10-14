@@ -24,7 +24,7 @@ interface JoinTarget extends EventTarget {
 
 @customElement("lobby-element")
 export class Lobby extends LitElement {
-  @property() public user?: UserType;
+  @property({ type: Object }) public user?: UserType;
   @property() private socket?: SocketIOClient.Socket;
   @property() private games?: Game[];
   @property() private modalVisable: boolean = false;

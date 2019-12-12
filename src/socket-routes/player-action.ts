@@ -1,16 +1,26 @@
-import { Game } from "../common/game/game";
-import { getGame } from "../common/get-game";
-import { PlayerType } from "../common/types";
 import { turnActions } from "../common/const";
 import { sendGameState } from "../send-game-state";
 import { sendSound } from "../send-sound";
+import { sendMessage } from "../send-message";
+import { getPlayerRepository, getGameRepository } from "../db/db";
+import { GameType, PlayerType } from "../common/types";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on(
     "playerAction",
-    (gameID: string, userID: string, action: string, data: string) => {
-      const game: Game = getGame(gameID);
-      const player: PlayerType = game.findPlayerByID(userID)!;
+    async (gameID: string, userID: string, action: string, data: string) => {
+      const game: GameType | undefined = await getGameRepository().findOne(
+        gameID,
+        { relations: ["players", "players.user"] }
+      );
+
+      if (!game) {
+        return;
+      }
+
+      const player: PlayerType | undefined = game.players.find(
+        (p) => p.user.userID === userID
+      );
 
       // If its not the players turn and the action is a turn action
       if ((!player || !player.isTurn) && turnActions.has(action)) {
@@ -23,7 +33,20 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       }
 
       // Send the player action to be processed by the game object
-      game.playerAction(player, action, data, () => sendGameState(io, game));
+      await game.playerAction(player!, action, data, async () => {
+        await getPlayerRepository().save(player!);
+        await sendGameState(io, gameID);
+      });
+
+      if (turnActions.has(action)) {
+        sendMessage(
+          io,
+          game.gameID,
+          `${player!.user.name} ${player!.status}s ${
+            player!.bet === "" ? `` : `($${player!.bet})`
+          }`
+        );
+      }
 
       // Send turn sound
       if (

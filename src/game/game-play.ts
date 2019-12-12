@@ -1,40 +1,41 @@
-import { PlayerType, GamePlayType } from "../types";
-import { shuffleDeck } from "../shuffle-deck";
-import { createDeck } from "../create-deck";
+import uuid = require("uuid");
+
+import { PlayerType, GamePlayType } from "../common/types";
+import { shuffleDeck } from "../common/shuffle-deck";
+import { createDeck } from "../common/create-deck";
 import { nextTurn } from "./next-turn";
 import { solveHands } from "./solve-hands";
 import { updatePots } from "./update-pots";
 
 export class GamePlay implements GamePlayType {
-  public players: PlayerType[] = [];
-  public name: string = "";
-  public board: string[] = [];
-  public pots: number[] = [];
-  public deck: string[] = [];
-  public gameLog: string[] = [];
-  public currentPlayerID: string = "";
-  public winDesc: string = "";
-  public cardBack: string;
   public gameID: string;
+  public name: string = "";
+  public round: number = 0;
   public currentBet: number = 0;
   public currentPot: number = 0;
-  public round: number = 0;
-  public pot: number = 0;
-  public littleBlind: number;
+  public pot: number = 0; // Add all Pots into here
+  public smallBlind: number;
   public bigBlind: number;
   public isGameOver: boolean = false;
   public isStarted: boolean = false;
   public isOpen: boolean = false;
+  public players!: PlayerType[];
+  public cardBack: string;
+  public currentPlayerID: string = ""; // Deprecate this
+  public winDesc: string = "";
   public showWinningDescription: boolean = false;
   public timer?: number;
   public handCount: number = 0;
+  public deck: string[] = [];
+  public board: string[] = [];
+  public pots: string[] = [];
 
   get dealerIndex(): number {
-    return this.players.findIndex((player) => player.dealer === true);
+    return this.players.findIndex((player) => player.isDealer === true);
   }
 
   get littleBlindIndex(): number {
-    return this.players.findIndex((player) => player.isLittleBlind === true);
+    return this.players.findIndex((player) => player.isSmallBlind === true);
   }
 
   get bigBlindIndex(): number {
@@ -54,21 +55,19 @@ export class GamePlay implements GamePlayType {
   }
 
   constructor(
-    gameID: string,
     name: string,
     bigBlind: number,
-    littleBlind: number,
+    smallBlind: number,
     cardBack: string
   ) {
-    this.gameID = gameID;
+    this.gameID = uuid();
     this.bigBlind = bigBlind;
-    this.littleBlind = littleBlind;
+    this.smallBlind = smallBlind;
     this.cardBack = cardBack;
     this.name = name;
   }
 
   public start(): void {
-    this.updateHandLog();
     this.cleanTable();
     this.clearPlayers();
     this.updateBuyIn();
@@ -142,24 +141,18 @@ export class GamePlay implements GamePlayType {
         }
         return;
       case "toggleSitOut":
-        player.pendingSitOut = !player.pendingSitOut;
         if (!this.isStarted) {
-          this.updateSitting();
+          player.pendingSitOut = false;
+          player.isSittingOut = !player.isSittingOut;
+          return;
         }
+        player.pendingSitOut = !player.pendingSitOut;
         return;
       default:
         break;
     }
 
     player.status = action;
-
-    this.gameLog.push(
-      `${player.name} ${player.status}s ${
-        player.bet === "" ? `` : `($${player.bet})`
-      }`
-    );
-
-    this.nextTurn();
   }
 
   public updateRound(): void {
@@ -199,25 +192,7 @@ export class GamePlay implements GamePlayType {
     );
   }
 
-  private updateHandLog(): void {
-    this.players
-      .filter((player) => player.result > 0)
-      .map((player) => {
-        this.gameLog.push(
-          `Hand ${this.handCount}: ${player.name} wins $${player.result.toFixed(
-            2
-          )} ${
-            player.resultCards.length === 0
-              ? `before the showdown`
-              : ` with ${player.resultDesc} [${player.resultCards
-                  .map((card) => card)
-                  .join(", ")}]`
-          }`
-        );
-      });
-  }
-
-  private nextTurn(): void {
+  public nextTurn(): void {
     if (this.activePlayers.length === 1) {
       this.isGameOver = true;
       return;
@@ -274,7 +249,7 @@ export class GamePlay implements GamePlayType {
 
   private updateDealer(): void {
     if (this.dealerIndex === -1) {
-      this.sittingInPlayers[0].dealer = true;
+      this.sittingInPlayers[0].isDealer = true;
       return;
     }
 
@@ -291,8 +266,8 @@ export class GamePlay implements GamePlayType {
       }
     }
 
-    this.players[this.dealerIndex].dealer = false;
-    this.players[nextDealerIndex].dealer = true;
+    this.players[this.dealerIndex].isDealer = false;
+    this.players[nextDealerIndex].isDealer = true;
   }
 
   private updateBlinds(): void {
@@ -309,7 +284,7 @@ export class GamePlay implements GamePlayType {
       }
     }
 
-    this.players[nextLittleBlindIndex].setLittleBlind(this.littleBlind);
+    this.players[nextLittleBlindIndex].setSmallBlind(this.smallBlind);
 
     let nextBigBlindIndex = this.littleBlindIndex + 1;
 
@@ -327,7 +302,7 @@ export class GamePlay implements GamePlayType {
     this.players[nextBigBlindIndex].setBigBlind(this.bigBlind);
 
     this.currentBet = this.bigBlind;
-    this.currentPot = this.bigBlind + this.littleBlind;
+    this.currentPot = this.bigBlind + this.smallBlind;
   }
 
   private updatePot(): void {

@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 import axios from "axios";
-import { GameState, User } from "../common/types";
+import { GameState, UserType } from "../common/types";
 
 export async function createConnection(
   userID: string
@@ -27,6 +27,15 @@ export async function connectToGame(
   socket.emit("subscribeToGame", localStorage.gameID, userID);
 
   return socket;
+}
+
+export async function subscribeToMessage(
+  socket: SocketIOClient.Socket,
+  addMessage: (message: string) => void
+) {
+  socket.on("message", (message: string) => {
+    addMessage(message);
+  });
 }
 
 export async function getGames(
@@ -77,7 +86,7 @@ export function sendMessage(
 export async function login(
   userName: string,
   password: string
-): Promise<User | string> {
+): Promise<UserType | string> {
   const res = await axios.post("./login", { userName, password });
   return res.data;
 }
@@ -88,7 +97,7 @@ export async function register(
   email: string,
   password: string,
   cpassword: string
-): Promise<User | string> {
+): Promise<UserType | string> {
   const res = await axios.post("./register", {
     name,
     userName,
@@ -99,7 +108,7 @@ export async function register(
   return res.data;
 }
 
-export async function getUser(): Promise<User> {
+export async function getUser(): Promise<UserType> {
   const res = await axios.get("/getUser");
   return res.data;
 }

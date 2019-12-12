@@ -7,8 +7,8 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { GameState, User } from "../common/types";
-import { connectToGame, createConnection, getUser } from "../data/connection";
+import { GameState, UserType } from "../common/types";
+import { connectToGame, createConnection, getUser } from "../api/connection";
 import "./action";
 import "./board";
 import "./card";
@@ -19,7 +19,7 @@ import "./nav-bar";
 export class Table extends LitElement {
   @property() public game?: GameState;
   @property() private socket?: SocketIOClient.Socket;
-  @property() private user?: User;
+  @property() private user?: UserType;
 
   public constructor() {
     super();
@@ -54,7 +54,7 @@ export class Table extends LitElement {
                         $${this.game.pots.map(
                           (pot) =>
                             html`
-                              ${pot.toFixed(2)}
+                              ${pot}
                             `
                         )}
                       </p>
@@ -220,7 +220,7 @@ export class Table extends LitElement {
     }
 
     this.socket = await createConnection(this.user.userID);
-    await await connectToGame(
+    await connectToGame(
       this.socket,
       this.user.userID,
       (game: GameState) => (this.game = game)

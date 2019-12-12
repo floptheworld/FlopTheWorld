@@ -1,8 +1,8 @@
-import { Game } from "../common/game/game";
-import { games } from "../common/const";
+import { getGameRepository } from "../db/db";
+import { GameType } from "../common/types";
 
 export default (socket: SocketIO.Socket) => {
-  socket.on("getGames", (sendGames: (games: Game[]) => void) => {
-    sendGames(games);
+  socket.on("getGames", async (sendGames: (games: GameType[]) => void) => {
+    sendGames(await getGameRepository().find({ relations: ["players"] }));
   });
 };

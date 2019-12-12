@@ -8,7 +8,7 @@ import {
   CSSResult,
 } from "lit-element";
 import "./modal";
-import { createGame } from "../data/connection";
+import { createGame } from "../api/connection";
 
 @customElement("create-game-modal")
 export class CreateGameModal extends LitElement {

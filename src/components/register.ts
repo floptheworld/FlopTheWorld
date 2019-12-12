@@ -7,8 +7,8 @@ import {
   TemplateResult,
   property,
 } from "lit-element";
-import { register } from "../data/connection";
-import { User } from "../common/types";
+import { register } from "../api/connection";
+import { UserType } from "../common/types";
 
 @customElement("register-element")
 export class Register extends LitElement {
@@ -64,7 +64,7 @@ export class Register extends LitElement {
               class="button register-button"
               @click=${this._register}
             >
-              Register!
+              Register
             </button>
           </div>
         </div>
@@ -192,7 +192,7 @@ export class Register extends LitElement {
       this._playerPasswordInput.value,
       this._playerCPasswordInput.value
     ).then((data) => {
-      if (!(data as User).userID) {
+      if (!(data as UserType).userID) {
         this.error = data as string;
         return;
       }

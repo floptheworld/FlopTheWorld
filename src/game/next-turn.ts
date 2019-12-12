@@ -1,5 +1,5 @@
-import { GamePlayType } from "../types";
-import { roundToPrecision } from "../round-to-precision";
+import { GamePlayType } from "../common/types";
+import { roundToPrecision } from "../common/round-to-precision";
 
 export function nextTurn(game: GamePlayType): void {
   let nextPlayerIndex: number = game.playerTurnIndex + 1;

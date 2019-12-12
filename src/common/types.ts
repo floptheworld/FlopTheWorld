@@ -1,12 +1,13 @@
 export interface PlayerState {
-  name: string;
-  cards: string[];
   playerID: string;
+  user: UserType;
+  game: GameType;
+  cards: string[];
   stackAmount: number;
   isTurn: boolean;
-  isLittleBlind: boolean;
+  isSmallBlind: boolean;
   isBigBlind: boolean;
-  dealer: boolean;
+  isDealer: boolean;
   status: string;
   bet: string;
   invested: number;
@@ -25,7 +26,7 @@ export interface PlayerState {
 }
 
 export interface PlayerType extends PlayerState {
-  setLittleBlind(num: number): void;
+  setSmallBlind(num: number): void;
   setBigBlind(num: number): void;
   subtractBet(num: number): void;
   cleanPlayer(): void;
@@ -39,18 +40,17 @@ export interface GameState {
   round: number;
   pot: number;
   bigBlind: number;
-  littleBlind: number;
+  smallBlind: number;
   currentBet: number;
   currentPot: number;
   currentPlayerID: string;
   cardBack: string;
   winDesc: string;
-  pots: number[];
+  pots: string[];
   isStarted: boolean;
   isGameOver: boolean;
   isOpen: boolean;
   timer?: number;
-  gameLog: string[];
   handCount: number;
   readonly sittingInPlayers: PlayerType[];
 }
@@ -70,12 +70,24 @@ export interface GamePlayType extends GameState {
 
 export interface GameType extends GamePlayType {
   getGameState(currentPlayerID: string): GameState;
-  addPlayer(player: PlayerType): void;
+  // addPlayer(player: PlayerType): void;
   findPlayerByID(userID: string): PlayerType | undefined;
-  playerAction(player: PlayerType, action: string, data: string): void;
+  playerAction(
+    player: PlayerType,
+    action: string,
+    data: string,
+    callback: () => void
+  ): void;
 }
 
-export interface User {
+export interface MemGame {
+  gameID: string;
+  board: string[];
+  deck: string[];
+  pots: string[];
+}
+
+export interface UserType {
   userID: string;
   userName: string;
   clientID?: string;

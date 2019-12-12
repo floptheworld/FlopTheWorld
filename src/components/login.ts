@@ -46,7 +46,7 @@ export class Login extends LitElement {
               class="button login-button"
               @click=${this._login}
             >
-              Login!
+              Login
             </button>
           </div>
         </div>

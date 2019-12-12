@@ -64,7 +64,7 @@ export class Register extends LitElement {
               class="button register-button"
               @click=${this._register}
             >
-              Register!
+              Register
             </button>
           </div>
         </div>

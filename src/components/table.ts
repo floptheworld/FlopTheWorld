@@ -7,17 +7,19 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { GameState } from "../common/types";
-import { createConnection, findOrCreatePlayer } from "../data/connection";
+import { GameState, UserType } from "../common/types";
+import { connectToGame, createConnection, getUser } from "../api/connection";
 import "./action";
 import "./board";
 import "./card";
 import "./seat";
+import "./nav-bar";
 
 @customElement("table-element")
 export class Table extends LitElement {
   @property() public game?: GameState;
   @property() private socket?: SocketIOClient.Socket;
+  @property() private user?: UserType;
 
   public constructor() {
     super();
@@ -29,25 +31,10 @@ export class Table extends LitElement {
     console.log(this.game); // TODO: Remove before production build
 
     return html`
-      ${!this.game
-        ? html`
-            <div class="login-box">
-              <p class="player-input-label">Choose a Nickname</p>
-              <input
-                @keydown=${this._enterKeyPress}
-                type="text"
-                class="player-input"
-              />
-              <button
-                type="button"
-                class="button green-button"
-                @click=${this._createPlayer}
-              >
-                Join Game!
-              </button>
-            </div>
-          `
+      ${!this.game || !this.user
+        ? html``
         : html`
+            <nav-bar .user=${this.user}></nav-bar>
             <div id="Table">
               ${this.game.players.map(
                 (player, index) =>
@@ -67,7 +54,7 @@ export class Table extends LitElement {
                         $${this.game.pots.map(
                           (pot) =>
                             html`
-                              ${pot.toFixed(2)}
+                              ${pot}
                             `
                         )}
                       </p>
@@ -84,6 +71,7 @@ export class Table extends LitElement {
             </div>
             <action-element
               .socket=${this.socket!}
+              .user=${this.user}
               .game=${this.game}
             ></action-element>
           `}
@@ -96,15 +84,16 @@ export class Table extends LitElement {
         width: 1000px;
         height: 500px;
         margin: auto;
-        background-color: #2a2c3c;
+        background-color: #24263b;
         border-radius: 50%;
         position: relative;
-        box-shadow: 0px 0px 20px #000;
-        -webkit-box-shadow: 0px 0px 20px #000;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+          0 3px 6px rgba(0, 0, 0, 0.23);
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 15px solid rgb(49, 49, 49);
+        border: 15px solid rgb(56, 61, 70);
       }
       #Table:before {
         content: "";
@@ -124,19 +113,6 @@ export class Table extends LitElement {
         border-radius: 50%;
         position: absolute;
       }
-      .login-box {
-        background-color: #373737;
-        border-radius: 5px;
-        width: 300px;
-        margin: auto;
-        padding: 20px;
-        margin-top: 10%;
-      }
-      .player-input-label {
-        font-weight: bold;
-        color: white;
-        margin: 0px;
-      }
       .green-button {
         border: 1px solid #003000;
         background-color: green;
@@ -151,19 +127,6 @@ export class Table extends LitElement {
         border-radius: 5px;
         padding: 10px;
         color: white;
-      }
-      .player-input {
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        display: block;
-        width: 100%;
-        margin: 10px 0px;
-        color: white;
-        background-color: #5f5f5f;
-        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-        -moz-box-sizing: border-box; /* Firefox, other Gecko */
-        box-sizing: border-box;
       }
       .table-pot {
         position: absolute;
@@ -250,22 +213,17 @@ export class Table extends LitElement {
   }
 
   private async _initialize(): Promise<void> {
-    this.socket = await createConnection(
+    await getUser().then((user) => (this.user = user));
+    if (!this.user) {
+      window.location.href = "/";
+      return;
+    }
+
+    this.socket = await createConnection(this.user.userID);
+    await connectToGame(
+      this.socket,
+      this.user.userID,
       (game: GameState) => (this.game = game)
     );
-  }
-
-  private get _playerNameInput(): HTMLInputElement {
-    return this.shadowRoot!.querySelector(".player-input") as HTMLInputElement;
-  }
-
-  private _enterKeyPress(ev: KeyboardEvent): void {
-    if (ev.keyCode === 13) {
-      this._createPlayer();
-    }
-  }
-
-  private _createPlayer(): void {
-    findOrCreatePlayer(this.socket!, this._playerNameInput.value);
   }
 }

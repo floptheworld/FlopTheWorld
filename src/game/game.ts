@@ -1,27 +1,21 @@
-import { PlayerType, GameState } from "../types";
+import { PlayerType, GameState } from "../common/types";
 import { GamePlay } from "./game-play";
+import { getPlayerRepository } from "../db/db";
+import { turnActions } from "../common/const";
 
 export class Game extends GamePlay {
-  constructor(
-    gameID: string,
-    bigBlind: number,
-    littleBlind: number,
-    cardBack: string
-  ) {
-    super(gameID, bigBlind, littleBlind, cardBack);
-  }
-
   public getGameState(currentPlayerID: string): GameState {
     return {
       board: this.board,
       gameID: this.gameID,
+      name: this.name,
       players: this.isOpen
         ? this.players
         : this.getGameStatePlayers(currentPlayerID),
       pot: this.pot,
       round: this.round,
       bigBlind: this.bigBlind,
-      littleBlind: this.littleBlind,
+      smallBlind: this.smallBlind,
       currentBet: this.currentBet,
       currentPot: this.currentPot,
       currentPlayerID,
@@ -33,7 +27,6 @@ export class Game extends GamePlay {
       isOpen: this.isOpen,
       sittingInPlayers: this.sittingInPlayers,
       timer: this.timer,
-      gameLog: this.gameLog,
       handCount: this.handCount,
     };
   }
@@ -55,10 +48,6 @@ export class Game extends GamePlay {
     return copyPlayers;
   }
 
-  public addPlayer(player: PlayerType): void {
-    this.players.push(player);
-  }
-
   public removePlayer(removePlayer: PlayerType): void {
     this.players.splice(
       this.players.findIndex((player) => player === removePlayer),
@@ -70,12 +59,12 @@ export class Game extends GamePlay {
     return this.players.find((player) => player.playerID === userID);
   }
 
-  public playerAction(
+  public async playerAction(
     player: PlayerType,
     action: string,
     data: string,
     callback: () => void
-  ): void {
+  ): Promise<void> {
     const dataNum = parseFloat(data);
 
     if (data !== "" && isNaN(dataNum)) {
@@ -83,6 +72,10 @@ export class Game extends GamePlay {
     }
 
     this.actionPlayed(player, action, dataNum);
+
+    if (turnActions.has(action)) {
+      this.nextTurn();
+    }
 
     if (this.isOpen) {
       this.OpenGame(() => callback());
@@ -120,7 +113,9 @@ export class Game extends GamePlay {
   public showdown(callback: () => void): void {
     // Everyone has folded but one player
     if (this.activePlayers.length === 1) {
-      this.pots.map((pot) => (this.activePlayers[0].stackAmount += pot));
+      this.pots.map(
+        (pot) => (this.activePlayers[0].stackAmount += parseFloat(pot))
+      );
       this.activePlayers[0].stackAmount += this.currentPot;
       this.activePlayers[0].result += this.currentPot;
       callback();

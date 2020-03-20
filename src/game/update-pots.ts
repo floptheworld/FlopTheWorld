@@ -1,5 +1,5 @@
-import { PlayerType, GamePlayType } from "../types";
-import { roundToPrecision } from "../round-to-precision";
+import { PlayerType, GamePlayType } from "../common/types";
+import { roundToPrecision } from "../common/round-to-precision";
 
 export function updatePots(game: GamePlayType) {
   let minInvested: number = 0;
@@ -13,6 +13,9 @@ export function updatePots(game: GamePlayType) {
   );
 
   let index: number = 0;
+  const pots: number[] = game.pots.map((p) =>
+    roundToPrecision(parseFloat(p), 0.01)
+  );
 
   while (investedPlayers.length > 0) {
     // Find the Minimum Invested Player and store that amount
@@ -23,10 +26,10 @@ export function updatePots(game: GamePlayType) {
 
     // Create a Side pot of the Min Invested Amount * How many players invest atleast that much
     if (game.pots[index] === undefined) {
-      game.pots.push(0);
+      pots.push(0);
     }
 
-    game.pots[index] = 0;
+    pots[index] = 0;
 
     // Subtract the Min Invested from each players investment
     investedPlayers.map((player) => {
@@ -40,12 +43,14 @@ export function updatePots(game: GamePlayType) {
         0.01
       );
 
-      game.pots[index] += amountInvested;
+      pots[index] += amountInvested;
     });
 
     investedPlayers = investedPlayers.filter((player) => player.invested > 0);
     index++;
   }
+
+  game.pots = pots.map((p) => p.toFixed(2));
 
   game.players.map((player, i) => (player.invested = investedTemp[i]));
 }

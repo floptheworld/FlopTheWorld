@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-var-requires
 const Hand = require("pokersolver").Hand;
-import { Card, PlayerType, Hand, GamePlayType } from "../types";
-import { roundToPrecision } from "../round-to-precision";
+import { Card, PlayerType, Hand, GamePlayType } from "../common/types";
+import { roundToPrecision } from "../common/round-to-precision";
 
 export function solveHands(game: GamePlayType): void {
   let solvedHands: Hand[] = [];

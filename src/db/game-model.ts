@@ -63,6 +63,9 @@ export class GameModel extends Game {
   @Column("simple-array")
   public deck!: string[];
 
+  @Column("simple-array")
+  public pots!: string[];
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   public readonly createdAt!: Date;
 

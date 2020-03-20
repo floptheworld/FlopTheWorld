@@ -80,13 +80,6 @@ export interface GameType extends GamePlayType {
   ): void;
 }
 
-export interface MemGame {
-  gameID: string;
-  board: string[];
-  deck: string[];
-  pots: string[];
-}
-
 export interface UserType {
   userID: string;
   userName: string;

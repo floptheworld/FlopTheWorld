@@ -1,6 +1,5 @@
 import { PlayerType, GameState } from "../common/types";
 import { GamePlay } from "./game-play";
-import { getPlayerRepository } from "../db/db";
 import { turnActions } from "../common/const";
 
 export class Game extends GamePlay {

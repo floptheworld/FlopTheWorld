@@ -2,6 +2,7 @@ import { sendGameState } from "../send-game-state";
 import { sendSound } from "../send-sound";
 import { GameType } from "../common/types";
 import { getGameRepository } from "../db/db";
+import { sendMessage } from "../send-message";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on("callClock", async (gameID: string) => {
@@ -37,7 +38,13 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
         clearInterval(interval);
 
         // Fold the player that ran out of time
-        game.playerAction(player, "fold", "", () => sendGameState(io, game));
+        game.playerAction(
+          player,
+          "fold",
+          "",
+          () => sendGameState(io, game),
+          (message) => sendMessage(io, game.gameID, message)
+        );
         return;
       }
 

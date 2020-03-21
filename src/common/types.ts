@@ -76,7 +76,8 @@ export interface GameType extends GamePlayType {
     player: PlayerType,
     action: string,
     data: string,
-    callback: () => void
+    sendGameUpdate: () => void,
+    sendMessage: (message: string) => void
   ): void;
 }
 

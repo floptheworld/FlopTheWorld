@@ -62,7 +62,8 @@ export class Game extends GamePlay {
     player: PlayerType,
     action: string,
     data: string,
-    callback: () => void
+    sendGameUpdate: () => void,
+    sendMessage: (message: string) => void
   ): Promise<void> {
     const dataNum = parseFloat(data);
 
@@ -70,25 +71,33 @@ export class Game extends GamePlay {
       return;
     }
 
+    // Execute Player Action Name
     this.actionPlayed(player, action, dataNum);
 
     if (turnActions.has(action)) {
+      sendMessage(
+        `${player!.user.name} ${player!.status}s ${
+          player!.bet === "" ? `` : `($${player!.bet})`
+        }`
+      );
+
       this.nextTurn();
     }
 
+    // Move this to a new function (Check Game status maybe?)
     if (this.isOpen) {
-      this.OpenGame(() => callback());
+      this.OpenGame(() => sendGameUpdate());
       return;
     }
 
     // Game has ended, show last cards and winning desc then wait 5 secs and start a new game
     if (this.isGameOver) {
-      callback();
-      this.showdown(() => callback());
+      sendGameUpdate();
+      this.showdown(() => sendGameUpdate());
       return;
     }
 
-    callback();
+    sendGameUpdate();
   }
 
   public OpenGame(callback: () => void): void {

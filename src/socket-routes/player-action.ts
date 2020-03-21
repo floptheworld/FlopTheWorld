@@ -33,29 +33,27 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       }
 
       // Send the player action to be processed by the game object
-      game.playerAction(player!, action, data, async () => {
-        getPlayerRepository().save(player!);
-        sendGameState(io, game);
+      game.playerAction(
+        player!,
+        action,
+        data,
+        () => {
+          getPlayerRepository().save(player!);
+          sendGameState(io, game);
 
-        if (turnActions.has(action)) {
-          sendMessage(
-            io,
-            game.gameID,
-            `${player!.user.name} ${player!.status}s ${
-              player!.bet === "" ? `` : `($${player!.bet})`
-            }`
-          );
+          // Send turn sound
+          if (
+            game.isStarted &&
+            game.playerTurnIndex !== -1 &&
+            turnActions.has(action)
+          ) {
+            sendSound(io, game, "Beep.wav", true);
+          }
+        },
+        (message: string) => {
+          sendMessage(io, game.gameID, message);
         }
-
-        // Send turn sound
-        if (
-          game.isStarted &&
-          game.playerTurnIndex !== -1 &&
-          turnActions.has(action)
-        ) {
-          sendSound(io, game, "Beep.wav", true);
-        }
-      });
+      );
     }
   );
 };

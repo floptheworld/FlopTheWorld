@@ -34,8 +34,8 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
 
       // Send the player action to be processed by the game object
       game.playerAction(player!, action, data, async () => {
-        await getPlayerRepository().save(player!);
-        await sendGameState(io, game);
+        getPlayerRepository().save(player!);
+        sendGameState(io, game);
 
         if (turnActions.has(action)) {
           sendMessage(

@@ -20,6 +20,3 @@ export async function sendGameState(
     });
   });
 }
-
-// TODO: Remove ClientID from User Record
-// Server side cache of clientID, PlayerID GameID

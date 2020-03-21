@@ -15,7 +15,7 @@ import uuid = require("uuid");
 import { createSocket } from "./socket";
 import { games } from "./common/const";
 import { Game } from "./game/game";
-import { UserType, GamePlayerUserClient } from "./common/types";
+import { UserType } from "./common/types";
 import { UserModel } from "./db/user-model";
 
 import { connectDB, getGameRepository } from "./db/db";
@@ -27,8 +27,6 @@ const port: number = ((process.env.PORT as any) as number) || 8080;
 const cacheTime = 86400000 * 30; // 30 day Cache
 
 const saltRounds = 10;
-
-export const gamePlayerUserClients: GamePlayerUserClient[] = [];
 
 (async () => {
   const server = createServer(app);
@@ -269,20 +267,7 @@ export async function updateGames() {
         if (index === -1) {
           games.push(game);
         } else {
-          Object.assign(games[index], {
-            name: game.name,
-            round: game.round,
-            pot: game.pot,
-            bigBlind: game.bigBlind,
-            smallBlind: game.smallBlind,
-            currentBet: game.currentBet,
-            currentPot: game.currentPot,
-            cardBack: game.cardBack,
-            isStarted: game.isStarted,
-            isGameOver: game.isGameOver,
-            isOpen: game.isOpen,
-            players: game.players,
-          });
+          games[index] = game;
         }
       })
     );

@@ -8,7 +8,7 @@ export function sendSound(
   onlyTurnPlayer: boolean = false
 ): void {
   io.sockets.in(game.gameID).clients((_err: Error, clients: string[]) => {
-    clients.map(async (client: string) => {
+    clients.map((client: string) => {
       const gamePlayerClient = findPlayerByGameClient(game.gameID, client);
 
       if (!gamePlayerClient) {

@@ -1,4 +1,4 @@
-import { gamePlayerUserClients } from "../server";
+import { gamePlayerUserClients } from "../common/const";
 import { getGameRepository } from "../db/db";
 import { GameType } from "./types";
 

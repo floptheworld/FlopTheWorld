@@ -1,6 +1,5 @@
 import { sendGameState } from "../send-game-state";
 import { getPlayerRepository, getGameRepository } from "../db/db";
-import { GameType } from "../common/types";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on("leaveGame", async (gameID: string, userID: string) => {
@@ -14,9 +13,14 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
           return;
         }
 
-        getPlayerRepository()
-          .delete({ userID, gameID })
-          .then(() => sendGameState(io, game)); // Update all other clients that the user has left
+        const playerIndex = game.players.findIndex(
+          (player) => player.gameID === gameID && player.userID === userID
+        );
+
+        game.players.splice(playerIndex, 1);
+        sendGameState(io, game);
+
+        getPlayerRepository().delete({ userID, gameID });
       });
   });
 };

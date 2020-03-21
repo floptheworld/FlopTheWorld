@@ -1,4 +1,5 @@
 import { GameModel } from "../db/game-model";
+import { GamePlayerUserClient } from "./types";
 
 export const suits: Set<string> = new Set(["H", "S", "C", "D"]);
 export const numbers: Set<string> = new Set([
@@ -26,3 +27,5 @@ export const turnActions: Set<string> = new Set([
 ]);
 
 export const games: GameModel[] = [];
+
+export const gamePlayerUserClients: GamePlayerUserClient[] = [];

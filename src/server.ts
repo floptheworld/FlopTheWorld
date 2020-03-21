@@ -15,10 +15,11 @@ import uuid = require("uuid");
 import { createSocket } from "./socket";
 import { games } from "./common/const";
 import { Game } from "./game/game";
-import { UserType } from "./common/types";
+import { UserType, GamePlayerUserClient } from "./common/types";
 import { UserModel } from "./db/user-model";
 
 import { connectDB, getGameRepository } from "./db/db";
+import { getGamePlayerUserClientsFromDB } from "./common/game-player-client";
 
 const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 8080;
@@ -27,10 +28,14 @@ const cacheTime = 86400000 * 30; // 30 day Cache
 
 const saltRounds = 10;
 
+export const gamePlayerUserClients: GamePlayerUserClient[] = [];
+
 (async () => {
   const server = createServer(app);
   createSocket(server);
   await connectDB();
+
+  getGamePlayerUserClientsFromDB();
 
   const fileStore = fs(session);
   const localStrategy = passport_local.Strategy;

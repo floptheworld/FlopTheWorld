@@ -101,3 +101,10 @@ export interface Hand {
   name: string;
   cardPool: Card[];
 }
+
+export interface GamePlayerUserClient {
+  gameID: string;
+  playerID: string;
+  userID: string;
+  clientID?: string;
+}

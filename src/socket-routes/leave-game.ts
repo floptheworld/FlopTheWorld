@@ -1,14 +1,22 @@
 import { sendGameState } from "../send-game-state";
-import { getPlayerRepository } from "../db/db";
+import { getPlayerRepository, getGameRepository } from "../db/db";
+import { GameType } from "../common/types";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on("leaveGame", async (gameID: string, userID: string) => {
-    await getPlayerRepository().delete({ userID, gameID });
-
     // Remove the socket from getting update in the Game Room
     socket.leave(gameID);
 
-    // Update all other clients that the user has left
-    sendGameState(io, gameID);
+    getGameRepository()
+      .findOne(gameID)
+      .then((game) => {
+        if (!game) {
+          return;
+        }
+
+        getPlayerRepository()
+          .delete({ userID, gameID })
+          .then(() => sendGameState(io, game)); // Update all other clients that the user has left
+      });
   });
 };

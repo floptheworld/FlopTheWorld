@@ -1,5 +1,5 @@
-import { GameType, UserType } from "./common/types";
-import { getUserRepository } from "./db/db";
+import { GameType } from "./common/types";
+import { findPlayerByGameClient } from "./common/game-player-client";
 
 export function sendSound(
   io: SocketIO.Server,
@@ -8,20 +8,18 @@ export function sendSound(
   onlyTurnPlayer: boolean = false
 ): void {
   io.sockets.in(game.gameID).clients((_err: Error, clients: string[]) => {
-    clients.map(async (client: string) => {
-      const user: UserType | undefined = await getUserRepository().findOne({
-        clientID: client,
-      });
+    clients.map((client: string) => {
+      const gamePlayerClient = findPlayerByGameClient(game.gameID, client);
 
-      if (!user) {
+      if (!gamePlayerClient) {
         return;
       }
 
       if (
-        user.userID ===
+        gamePlayerClient.userID ===
         (onlyTurnPlayer
           ? game.players[game.playerTurnIndex].user.userID
-          : user.userID)
+          : gamePlayerClient.userID)
       ) {
         io.to(client).emit("sound", sound);
       }

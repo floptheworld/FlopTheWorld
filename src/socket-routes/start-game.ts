@@ -16,7 +16,7 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       return;
     }
 
-    // Send a Game update
+    // Send a Message
     game.players
       .filter((player) => player.result > 0)
       .map((player) => {
@@ -38,12 +38,12 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
     // Start Game
     game.start();
 
-    await getGameRepository().save(game);
+    getGameRepository().save(game);
 
     // Update Game State for all clients
-    await sendGameState(io, gameID);
+    sendGameState(io, game);
 
     // Send sound to current client
-    await sendSound(io, game, "Beep.wav", true);
+    sendSound(io, game, "Beep.wav", true);
   });
 };

@@ -589,7 +589,7 @@ export class Action extends LitElement {
 
     sendMessage(
       this.socket,
-      this.user.userID,
+      this.user.name,
       this.game.gameID,
       this._chatInput.value
     );

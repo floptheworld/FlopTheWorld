@@ -67,7 +67,9 @@ export function leaveGame(
   gameID: string
 ) {
   socket.emit("leaveGame", gameID, userID);
-  document.location.href = "/";
+  setTimeout(() => {
+    document.location.href = "/";
+  }, 500);
 }
 
 export function callClock(socket: SocketIOClient.Socket, gameID: string) {
@@ -76,11 +78,11 @@ export function callClock(socket: SocketIOClient.Socket, gameID: string) {
 
 export function sendMessage(
   socket: SocketIOClient.Socket,
-  userID: string,
+  name: string,
   gameID: string,
   message: string
 ) {
-  socket.emit("message", gameID, userID, message);
+  socket.emit("message", gameID, name, message);
 }
 
 export async function login(

@@ -6,26 +6,33 @@ import {
   getGameRepository,
   getPlayerRepository,
 } from "../db/db";
+import { updateAddGPCByGamePlayer } from "../common/game-player-client";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on("subscribeToGame", async (gameID: string, userID: string) => {
     // tslint:disable-next-line:no-console
-    console.log(`client is subscribing the game: ${gameID} @ ${userID}`);
+    console.log(
+      `client is subscribing the game: ${gameID} @ ${userID} with Client ${socket.id}`
+    );
     const game: GameType | undefined = await getGameRepository().findOne(
       gameID,
       { relations: ["players", "players.user"] }
     );
 
+    if (!game) {
+      return;
+    }
+
     const user: UserType | undefined = await getUserRepository().findOne(
       userID
     );
 
-    if (!game || !user) {
+    if (!user) {
       return;
     }
 
     user.clientID = socket.id;
-    await getUserRepository().save(user);
+    getUserRepository().save(user);
 
     let player: PlayerType | undefined = await getPlayerRepository().findOne({
       game,
@@ -38,12 +45,15 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       player.game = game;
       player.user = user;
 
-      await getPlayerRepository().save(player);
+      getPlayerRepository().save(player);
+      game.players.push(player);
     }
+
+    updateAddGPCByGamePlayer(gameID, player.playerID, socket.id, userID);
 
     socket.join(gameID);
 
     // Update Game State for all clients
-    sendGameState(io, gameID);
+    sendGameState(io, game);
   });
 };

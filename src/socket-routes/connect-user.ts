@@ -12,6 +12,6 @@ export default (socket: SocketIO.Socket) => {
 
     user.clientID = socket.id;
 
-    await getUserRepository().save(user);
+    getUserRepository().save(user);
   });
 };

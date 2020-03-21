@@ -19,6 +19,7 @@ import { UserType } from "./common/types";
 import { UserModel } from "./db/user-model";
 
 import { connectDB, getGameRepository } from "./db/db";
+import { getGamePlayerUserClientsFromDB } from "./common/game-player-client";
 
 const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 8080;
@@ -31,6 +32,8 @@ const saltRounds = 10;
   const server = createServer(app);
   createSocket(server);
   await connectDB();
+
+  getGamePlayerUserClientsFromDB();
 
   const fileStore = fs(session);
   const localStrategy = passport_local.Strategy;
@@ -264,20 +267,7 @@ export async function updateGames() {
         if (index === -1) {
           games.push(game);
         } else {
-          Object.assign(games[index], {
-            name: game.name,
-            round: game.round,
-            pot: game.pot,
-            bigBlind: game.bigBlind,
-            smallBlind: game.smallBlind,
-            currentBet: game.currentBet,
-            currentPot: game.currentPot,
-            cardBack: game.cardBack,
-            isStarted: game.isStarted,
-            isGameOver: game.isGameOver,
-            isOpen: game.isOpen,
-            players: game.players,
-          });
+          games[index] = game;
         }
       })
     );

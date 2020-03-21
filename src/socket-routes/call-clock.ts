@@ -2,6 +2,7 @@ import { sendGameState } from "../send-game-state";
 import { sendSound } from "../send-sound";
 import { GameType } from "../common/types";
 import { getGameRepository } from "../db/db";
+import { sendMessage } from "../send-message";
 
 export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
   socket.on("callClock", async (gameID: string) => {
@@ -13,14 +14,15 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
     if (!game) {
       return;
     }
+
     game.timer = 15;
 
     // Send the first Game State for the timer
-    await sendGameState(io, gameID);
-    await sendSound(io, game, "clock.wav");
+    sendGameState(io, game);
+    sendSound(io, game, "clock.wav");
 
     // Set up the time interaval
-    const interval = setInterval(async () => {
+    const interval = setInterval(() => {
       // Timer was cleared due to player action
       if (game.timer === undefined) {
         clearInterval(interval);
@@ -36,12 +38,18 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
         clearInterval(interval);
 
         // Fold the player that ran out of time
-        game.playerAction(player, "fold", "", () => sendGameState(io, gameID));
+        game.playerAction(
+          player,
+          "fold",
+          "",
+          () => sendGameState(io, game),
+          (message) => sendMessage(io, game.gameID, message)
+        );
         return;
       }
 
       // Send Game state every second
-      await sendGameState(io, gameID);
+      sendGameState(io, game);
 
       game.timer!--;
     }, 1000);

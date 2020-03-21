@@ -76,7 +76,8 @@ export interface GameType extends GamePlayType {
     player: PlayerType,
     action: string,
     data: string,
-    callback: () => void
+    sendGameUpdate: () => void,
+    sendMessage: (message: string) => void
   ): void;
 }
 
@@ -100,4 +101,11 @@ export interface Hand {
   rank: number;
   name: string;
   cardPool: Card[];
+}
+
+export interface GamePlayerUserClient {
+  gameID: string;
+  playerID: string;
+  userID: string;
+  clientID?: string;
 }

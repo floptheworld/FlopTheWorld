@@ -33,7 +33,7 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
       }
 
       // Send the player action to be processed by the game object
-      game.playerAction(
+      game.processPlayerAction(
         player!,
         action,
         data,

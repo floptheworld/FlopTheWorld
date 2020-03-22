@@ -1,6 +1,6 @@
 import io from "socket.io-client";
-import axios from "axios";
 import { GameState, UserType } from "../common/types";
+import { postJSONData, getJSONData } from "../common/fetch-data";
 
 export async function createConnection(
   userID: string
@@ -89,8 +89,9 @@ export async function login(
   userName: string,
   password: string
 ): Promise<UserType | string> {
-  const res = await axios.post("./login", { userName, password });
-  return res.data;
+  const res = await postJSONData("./login", { userName, password });
+
+  return res;
 }
 
 export async function register(
@@ -100,19 +101,19 @@ export async function register(
   password: string,
   cpassword: string
 ): Promise<UserType | string> {
-  const res = await axios.post("./register", {
+  const res = await postJSONData("./register", {
     name,
     userName,
     email,
     password,
     cpassword,
   });
-  return res.data;
+  return res;
 }
 
 export async function getUser(): Promise<UserType> {
-  const res = await axios.get("/getUser");
-  return res.data;
+  const res = await getJSONData("/getUser");
+  return res;
 }
 
 export async function createGame(
@@ -120,10 +121,10 @@ export async function createGame(
   smallBlind: string,
   bigBlind: string
 ): Promise<{ error: string }> {
-  const res = await axios.post("./createGame", {
+  const res = await postJSONData("./createGame", {
     name,
     smallBlind,
     bigBlind,
   });
-  return res.data;
+  return res;
 }

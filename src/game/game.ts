@@ -58,21 +58,20 @@ export class Game extends GamePlay {
     return this.players.find((player) => player.playerID === userID);
   }
 
-  public async playerAction(
+  public processPlayerAction(
     player: PlayerType,
     action: string,
     data: string,
     sendGameUpdate: () => void,
     sendMessage: (message: string) => void
-  ): Promise<void> {
+  ): void {
     const dataNum = parseFloat(data);
 
     if (data !== "" && isNaN(dataNum)) {
       return;
     }
 
-    // Execute Player Action Name
-    this.actionPlayed(player, action, dataNum);
+    this.executePlayerAction(player, action, dataNum);
 
     if (turnActions.has(action)) {
       sendMessage(
@@ -86,6 +85,7 @@ export class Game extends GamePlay {
 
     // Move this to a new function (Check Game status maybe?)
     if (this.isOpen) {
+      sendMessage("Open Game Started");
       this.OpenGame(() => sendGameUpdate());
       return;
     }
@@ -100,9 +100,9 @@ export class Game extends GamePlay {
     sendGameUpdate();
   }
 
-  public OpenGame(callback: () => void): void {
+  public OpenGame(sendGameUpdate: () => void): void {
     this.updateRound();
-    callback();
+    sendGameUpdate();
 
     if (this.isGameOver) {
       this.solveHands();
@@ -110,27 +110,29 @@ export class Game extends GamePlay {
 
       setTimeout(() => {
         this.start();
-        callback();
+        sendGameUpdate();
       }, 5000);
       return;
     }
 
-    setTimeout(() => this.OpenGame(callback), 3000);
+    setTimeout(() => this.OpenGame(sendGameUpdate), 3000);
   }
 
-  public showdown(callback: () => void): void {
+  public showdown(sendGameUpdate: () => void): void {
     // Everyone has folded but one player
     if (this.activePlayers.length === 1) {
       this.pots.map(
         (pot) => (this.activePlayers[0].stackAmount += parseFloat(pot))
       );
+
       this.activePlayers[0].stackAmount += this.currentPot;
       this.activePlayers[0].result += this.currentPot;
-      callback();
+
+      sendGameUpdate();
 
       setTimeout(() => {
         this.start();
-        callback();
+        sendGameUpdate();
       }, 1500);
       return;
     }
@@ -150,7 +152,7 @@ export class Game extends GamePlay {
     setTimeout(
       () =>
         this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
-          callback()
+          sendGameUpdate()
         ),
       1500
     );
@@ -160,7 +162,7 @@ export class Game extends GamePlay {
     lastAggressorIndex: number,
     winnerFound: boolean,
     resultTemp: number[],
-    callback: () => void
+    sendGameUpdate: () => void
   ): void {
     // If there are no more players hands to show
     if (
@@ -173,11 +175,11 @@ export class Game extends GamePlay {
 
       this.updatePlayerStacks();
       this.showWinningDescription = true;
-      callback();
+      sendGameUpdate();
 
       setTimeout(() => {
         this.start();
-        callback();
+        sendGameUpdate();
       }, 5000);
 
       return;
@@ -189,7 +191,7 @@ export class Game extends GamePlay {
       lastAggressorIndex = 0;
 
       this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
-        callback()
+        sendGameUpdate()
       );
       return;
     }
@@ -198,7 +200,7 @@ export class Game extends GamePlay {
 
     if (winnerFound && player.result === 0) {
       this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
-        callback()
+        sendGameUpdate()
       );
       return;
     }
@@ -209,12 +211,12 @@ export class Game extends GamePlay {
     }
 
     player.showCards = true;
-    callback();
+    sendGameUpdate();
 
     setTimeout(
       () =>
         this.showdownHelper(lastAggressorIndex, winnerFound, resultTemp, () =>
-          callback()
+          sendGameUpdate()
         ),
       1500
     );

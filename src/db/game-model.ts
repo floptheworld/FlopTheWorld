@@ -85,12 +85,12 @@ export class GameModel extends Game {
     await getGameRepository().save(this);
   }
 
-  public async actionPlayed(
+  public async executePlayerAction(
     player: PlayerType,
     action: string,
     data: number
   ): Promise<void> {
-    super.actionPlayed(player, action, data);
+    super.executePlayerAction(player, action, data);
     await getGameRepository().save(this);
   }
 

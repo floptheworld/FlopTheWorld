@@ -20,6 +20,7 @@ import { UserModel } from "./db/user-model";
 
 import { connectDB, getGameRepository } from "./db/db";
 import { getGamePlayerUserClientsFromDB } from "./common/game-player-client";
+import { isAuthenticated } from "./is-authenticated";
 
 const app: express.Application = express();
 const port: number = ((process.env.PORT as any) as number) || 8080;
@@ -100,8 +101,12 @@ const saltRounds = 10;
     })
   );
 
-  app.get("/lobby", isAuthenticated, (req, res) => {
-    res.sendFile(path.resolve("./build/lobby.html"));
+  app.get("/", isAuthenticated, (req, res) => {
+    return res.sendFile(path.resolve("./build/lobby.html"));
+  });
+
+  app.get("/login", (req, res) => {
+    return res.sendFile(path.resolve("./build/login.html"));
   });
 
   app.post("/login", (req, res, next) => {
@@ -125,7 +130,7 @@ const saltRounds = 10;
   app.get("/logout", (req, res, next) => {
     req.logOut();
     if (!req.session) {
-      return res.redirect("/");
+      return res.redirect("/login");
     }
     req.session.destroy((err) => {
       if (err) {
@@ -133,7 +138,7 @@ const saltRounds = 10;
       }
 
       req.session = undefined;
-      res.redirect("/");
+      res.redirect("/login");
     });
   });
 
@@ -215,7 +220,7 @@ const saltRounds = 10;
   });
 
   app.post("/createGame", async (req, res) => {
-    if (!req.body.name || !req.body.name || !req.body.bigBlind) {
+    if (!req.body.name || !req.body.smallBlind || !req.body.bigBlind) {
       return res.send({ error: "Please fill out all fields" });
     }
 
@@ -231,16 +236,16 @@ const saltRounds = 10;
     return res.send({});
   });
 
+  app.get("/favicon.ico", (req, res) => {
+    return res.sendStatus(204);
+  });
+
   app.get("/*", (req, res) => {
-    if (req.isAuthenticated()) {
-      return res.redirect("/lobby");
+    if (!req.isAuthenticated()) {
+      return res.redirect("/login");
     }
 
-    if (req.url !== "/") {
-      return res.redirect("/");
-    }
-
-    res.sendFile(path.resolve("./build/login.html"));
+    return res.redirect("/");
   });
 
   server.listen(port, () => {
@@ -248,27 +253,3 @@ const saltRounds = 10;
     console.log(`Listening at http://localhost:${port}/`);
   });
 })();
-
-function isAuthenticated(req: any, res: any, next: any) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-
-  return res.redirect("/");
-}
-
-export async function updateGames() {
-  await getGameRepository()
-    .find({ relations: ["players", "players.user"] })
-    .then((gs) =>
-      gs.map((game) => {
-        const index = games.findIndex((g) => g.gameID === game.gameID);
-
-        if (index === -1) {
-          games.push(game);
-        } else {
-          games[index] = game;
-        }
-      })
-    );
-}

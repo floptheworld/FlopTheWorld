@@ -72,7 +72,7 @@ export interface GameType extends GamePlayType {
   getGameState(currentPlayerID: string): GameState;
   // addPlayer(player: PlayerType): void;
   findPlayerByID(userID: string): PlayerType | undefined;
-  playerAction(
+  processPlayerAction(
     player: PlayerType,
     action: string,
     data: string,

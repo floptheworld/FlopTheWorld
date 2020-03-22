@@ -61,10 +61,10 @@ export class GamePlay implements GamePlayType {
     cardBack: string
   ) {
     this.gameID = uuid();
+    this.name = name;
     this.bigBlind = bigBlind;
     this.smallBlind = smallBlind;
     this.cardBack = cardBack;
-    this.name = name;
   }
 
   public start(): void {
@@ -106,7 +106,11 @@ export class GamePlay implements GamePlayType {
     solveHands(this);
   }
 
-  public actionPlayed(player: PlayerType, action: string, data: number): void {
+  public executePlayerAction(
+    player: PlayerType,
+    action: string,
+    data: number
+  ): void {
     switch (action) {
       case "fold":
         player.cards = [];

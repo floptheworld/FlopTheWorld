@@ -38,12 +38,12 @@ export default (io: SocketIO.Server, socket: SocketIO.Socket) => {
         clearInterval(interval);
 
         // Fold the player that ran out of time
-        game.playerAction(
+        game.processPlayerAction(
           player,
           "fold",
           "",
           () => sendGameState(io, game),
-          (message) => sendMessage(io, game.gameID, message)
+          (message: string) => sendMessage(io, game.gameID, message)
         );
         return;
       }
